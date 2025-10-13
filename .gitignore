@@ -1,0 +1,10 @@
+
+
+#Ignore windsurf AI rules
+.windsurfrules
+*.env
+*node_modules
+/node_modules
+*pnpm-lock
+*.codacy
+/.codacy
