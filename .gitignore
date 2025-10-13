@@ -8,3 +8,8 @@
 *pnpm-lock
 *.codacy
 /.codacy
+*pnpm-lock.yaml
+/pnpm-lock.yaml
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

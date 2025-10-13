@@ -90,7 +90,7 @@ CI/CD / QA / Monitoring
 ```json
 {
   "manifest_version": 3,
-  "name": "PayWise",
+  "name": "PicSel",
   "version": "1.0.0",
   "description": "Best payment method recommendation",
   "permissions": ["storage", "scripting", "activeTab"],

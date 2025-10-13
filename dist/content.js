@@ -1,0 +1,1 @@
+import{c as n}from"./assets/logger-DEAfARFT.js";function c(t){return[/coupang\.com\/checkout/,/order\.pay\.naver\.com/,/checkout\.gmarket\.co\.kr/].some(o=>o.test(t))}function e(){c(window.location.href)&&n.info("Checkout page detected",{url:window.location.href})}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",e):e();

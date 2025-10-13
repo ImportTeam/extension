@@ -1,12 +1,12 @@
 # Production-grade Chrome Extension 설계 문서
 
-> **PayWise** - 최적 결제 수단 추천 확장 프로그램  
+> **PicSel** - 웹페이지 이미지 선택 및 관리 도구  
 > Manifest V3 기반 Production-ready 아키텍처 및 구현 가이드
 
 ## 📋 목차
 
 ### 🚀 시작하기
-- **[Copilot 개발 가이드](./copilot-guide.md)** ⭐ - GitHub Copilot으로 정확히 구현하는 방법
+- **[Copilot 개발 가이드](./copilot-guide.md)**  - GitHub Copilot으로 정확히 구현하는 방법
 - **[개발 워크플로우](./development-workflow.md)** - Sprint 시작부터 배포까지
 - **[Sprint 체크리스트](./sprint-checklist.md)** - 주차별 완료 항목
 
@@ -90,7 +90,7 @@ pnpm test:e2e
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    User's Checkout Page                  │
+│                     User's Webpage                       │
 └────────────────────┬────────────────────────────────────┘
                      │
         ┌────────────┴────────────┐
@@ -105,10 +105,9 @@ pnpm test:e2e
         ┌────────────▼────────────────────────┐
         │   Background Service Worker (MV3)   │
         ├─────────────────────────────────────┤
-        │ • Persistent Task Queue             │
-        │ • Queue Processor (alarms)          │
-        │ • Offscreen Manager                 │
-        │ • Rate/Discount Engine              │
+        │ • Image Selection Handler           │
+        │ • Download Manager                  │
+        │ • Image Cache & Storage             │
         │ • Logger & Metrics                  │
         └────────────┬────────────────────────┘
                      │
@@ -116,7 +115,7 @@ pnpm test:e2e
         │                         │
 ┌───────▼────────┐      ┌────────▼────────┐
 │ chrome.storage │      │   IndexedDB     │
-│   + local      │      │  (large cache)  │
+│   + local      │      │  (image cache)  │
 └────────────────┘      └─────────────────┘
 ```
 
@@ -130,7 +129,7 @@ pnpm test:e2e
 | **Styling** | TailwindCSS + Shadow DOM |
 | **Testing** | Vitest + Playwright |
 | **CI/CD** | GitHub Actions |
-| **Backend** | Optional (환율 proxy + Redis) |
+| **Backend** | Optional (이미지 처리 API + Storage) |
 
 ## 📦 디렉토리 구조
 
@@ -164,20 +163,20 @@ pnpm test:e2e
 ## 📈 개발 로드맵
 
 ### Phase 1: Core Infrastructure (Week 1-2)
-- [ ] Task Queue + 테스트
-- [ ] Queue Processor + Alarms
-- [ ] Offscreen Manager
-- [ ] Storage wrapper
+- [ ] Image Selection Handler + 테스트
+- [ ] Download Manager + Storage
+- [ ] Image Cache System
+- [ ] UI Overlay Framework
 
-### Phase 2: Parser & Content (Week 3-4)
-- [ ] Base Parser + 3개 사이트
-- [ ] Content Script + Shadow DOM
-- [ ] Overlay UI (React)
+### Phase 2: Image Processing (Week 3-4)
+- [ ] Image Parser + Metadata Extractor
+- [ ] Content Script + Selection UI
+- [ ] Popup Interface (React)
 
-### Phase 3: Background Logic (Week 5-6)
-- [ ] Rate Engine
-- [ ] Discount Calculator
-- [ ] API Adapter
+### Phase 3: Advanced Features (Week 5-6)
+- [ ] Batch Download
+- [ ] Image Optimization
+- [ ] Sharing Integration
 
 ### Phase 4: Testing & QA (Week 7-8)
 - [ ] Unit tests (80%+ coverage)

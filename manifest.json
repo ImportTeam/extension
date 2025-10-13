@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "picsel",
+  "version": "1.0.0",
+  "description": "PicSel - 웹페이지 이미지 선택 및 관리 도구",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "downloads"
+  ],
+  "optional_permissions": [
+    "alarms",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "dist/background-debug.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "dist/src/popup/index.html",
+    "default_title": "PicSel 설정"
+  },
+  "options_ui": {
+    "page": "dist/src/options/index.html",
+    "open_in_tab": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": ["dist/content.js"],
+      "run_at": "document_idle",
+      "type": "module"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
