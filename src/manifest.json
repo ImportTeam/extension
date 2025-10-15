@@ -2,30 +2,30 @@
   "manifest_version": 3,
   "name": "picsel",
   "version": "1.0.0",
-  "description": "PicSel - 웹페이지 이미지 선택 및 관리 도구",
+  "description": "PicSel - 결제수단을 최적화해보세요.",
   "permissions": [
     "storage",
     "scripting",
     "activeTab",
-    "downloads"
+    "downloads",
+    "alarms"
   ],
   "optional_permissions": [
-    "alarms",
     "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "dist/background.js",
+    "service_worker": "background.js",
     "type": "module"
   },
   "action": {
-    "default_popup": "dist/src/popup/index.html",
+    "default_popup": "src/popup/index.html",
     "default_title": "PicSel 설정"
   },
   "options_ui": {
-    "page": "dist/src/options/index.html",
+    "page": "src/options/index.html",
     "open_in_tab": false
   },
   "content_scripts": [
@@ -33,7 +33,7 @@
       "matches": [
         "<all_urls>"
       ],
-      "js": ["dist/content.js"],
+      "js": ["content.js"],
       "run_at": "document_idle",
       "type": "module"
     }
@@ -42,9 +42,9 @@
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "icons": {
-    "16": "dist/icons/icon-16.png",
-    "32": "dist/icons/icon-32.png",
-    "48": "dist/icons/icon-48.png",
-    "128": "dist/icons/icon-128.png"
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   }
 }

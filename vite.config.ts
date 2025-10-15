@@ -1,11 +1,41 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
+import { execSync } from 'child_process';
+
+// Custom plugin to generate icons after build
+function generateIcons() {
+  return {
+    name: 'generate-icons',
+    closeBundle() {
+      try {
+        // Copy manifest.json
+        execSync('cp src/manifest.json dist/', { stdio: 'inherit' });
+        
+        // Copy and resize icons
+        execSync('mkdir -p dist/icons', { stdio: 'inherit' });
+        execSync('sips -z 16 16 public/assets/icon/picsel.png -o dist/icons/icon-16.png', { stdio: 'inherit' });
+        execSync('sips -z 32 32 public/assets/icon/picsel.png -o dist/icons/icon-32.png', { stdio: 'inherit' });
+        execSync('sips -z 48 48 public/assets/icon/picsel.png -o dist/icons/icon-48.png', { stdio: 'inherit' });
+        execSync('sips -z 128 128 public/assets/icon/picsel.png -o dist/icons/icon-128.png', { stdio: 'inherit' });
+        
+        console.log('✅ Icons generated successfully');
+      } catch (error) {
+        console.error('❌ Failed to generate icons:', error);
+      }
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
-  plugins: [react()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    generateIcons(),
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

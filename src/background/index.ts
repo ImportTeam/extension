@@ -7,10 +7,12 @@ import { metrics } from '@/background/metrics';
 chrome.runtime.onInstalled.addListener((details) => {
   logger.info('Extension installed', { reason: details.reason });
 
-  // Setup recurring alarm
-  chrome.alarms.create('processQueue', {
-    periodInMinutes: 1
-  });
+  // Setup recurring alarm (with guard check)
+  if (chrome.alarms) {
+    chrome.alarms.create('processQueue', {
+      periodInMinutes: 1
+    });
+  }
 
   // Setup default settings
   chrome.storage.local.set({
@@ -53,15 +55,17 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 /**
  * Alarm handler
  */
-chrome.alarms.onAlarm.addListener(async (alarm) => {
-  logger.debug('Alarm triggered', { name: alarm.name });
+if (chrome.alarms) {
+  chrome.alarms.onAlarm.addListener(async (alarm) => {
+    logger.debug('Alarm triggered', { name: alarm.name });
 
-  if (alarm.name === 'processQueue') {
-    // TODO: Implement queue processing
-    logger.info('Queue processing triggered');
-    metrics.increment('alarm.processQueue');
-  }
-});
+    if (alarm.name === 'processQueue') {
+      // TODO: Implement queue processing
+      logger.info('Queue processing triggered');
+      metrics.increment('alarm.processQueue');
+    }
+  });
+}
 
 /**
  * Handlers
