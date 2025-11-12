@@ -1,5 +1,4 @@
-export { Dashboard } from './Dashboard';
-export { PaymentMethodsPage } from './PaymentMethodsPage';
-export { TransactionHistoryPage } from './TransactionHistoryPage';
-export { SettingsPage } from './SettingsPage';
-export { Navigation } from './Navigation';
+export { Button } from './Button';
+export { RecommendationCard } from './RecommendationCard';
+export { AlternativesList } from './AlternativesList';
+export { SettingsPanel } from './SettingsPanel';

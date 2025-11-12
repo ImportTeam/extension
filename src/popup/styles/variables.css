@@ -1,0 +1,199 @@
+/**
+ * CSS Variables
+ * 
+ * All design tokens in one place
+ * Colors: OKLCH color space
+ * Spacing: 4px base unit
+ * Typography: 12px ~ 24px range
+ */
+
+:root {
+  /* ========== COLORS: PRIMARY ========== */
+  --color-primary: oklch(0.62 0.14 39.04);
+  --color-primary-light: oklch(0.73 0.14 39.04);
+  --color-primary-dark: oklch(0.51 0.14 39.04);
+
+  /* ========== COLORS: SEMANTIC ========== */
+  /* Success (Green) - for savings, positive actions */
+  --color-success: oklch(0.704 0.142 167.084);
+  --color-success-light: oklch(0.82 0.142 167.084);
+  --color-success-dark: oklch(0.58 0.142 167.084);
+
+  /* Error (Red) - for alerts, errors */
+  --color-error: oklch(0.577 0.245 27.325);
+  --color-error-light: oklch(0.72 0.245 27.325);
+  --color-error-dark: oklch(0.43 0.245 27.325);
+
+  /* Warning (Amber) - for cautions */
+  --color-warning: oklch(0.84 0.16 84);
+  --color-warning-light: oklch(0.93 0.16 84);
+  --color-warning-dark: oklch(0.71 0.16 84);
+
+  /* Info (Blue) - for information */
+  --color-info: oklch(0.64 0.15 255);
+  --color-info-light: oklch(0.78 0.15 255);
+  --color-info-dark: oklch(0.50 0.15 255);
+
+  /* ========== COLORS: GRAYSCALE ========== */
+  /* Pure gray: oklch(L 0 0) - no chroma, no hue */
+  --color-gray-900: oklch(0.218 0 0);  /* Almost black - primary text */
+  --color-gray-800: oklch(0.309 0 0);  /* Dark gray */
+  --color-gray-700: oklch(0.400 0 0);  /* Medium-dark */
+  --color-gray-600: oklch(0.490 0 0);  /* Medium */
+  --color-gray-500: oklch(0.6 0 0);    /* Mid gray - disabled text */
+  --color-gray-400: oklch(0.693 0 0);  /* Light-medium */
+  --color-gray-300: oklch(0.785 0 0);  /* Light - borders */
+  --color-gray-200: oklch(0.845 0 0);  /* Very light */
+  --color-gray-100: oklch(0.928 0 0);  /* Almost white */
+  --color-gray-50: oklch(0.961 0 0);   /* Near white */
+  --color-white: oklch(1 0 0);         /* Pure white */
+
+  /* ========== COLORS: SYSTEM ========== */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.218 0 0);
+  --color-muted: oklch(0.6 0 0);
+  --color-muted-foreground: oklch(0.845 0 0);
+  --color-border: oklch(0.845 0 0);
+  --color-input: oklch(1 0 0);
+  --color-ring: oklch(0.62 0.14 39.04);  /* For focus states */
+
+  /* ========== TYPOGRAPHY ========== */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Monaco', 'Courier New', monospace;
+
+  /* Font sizes */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 24px;
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ========== SPACING ========== */
+  /* Base unit: 4px */
+  --spacing-0: 0;
+  --spacing-1: 4px;     /* xs */
+  --spacing-2: 8px;     /* sm */
+  --spacing-3: 12px;    /* md */
+  --spacing-4: 16px;    /* lg */
+  --spacing-5: 20px;    /* xl */
+  --spacing-6: 24px;    /* 2xl */
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+
+  /* Shortcuts */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+
+  /* ========== SIZING ========== */
+  --size-full: 100%;
+  --size-screen: 100vw;
+  --size-min: min-content;
+  --size-max: max-content;
+  --size-fit: fit-content;
+
+  /* ========== SHADOWS ========== */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* ========== BORDER RADIUS ========== */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ========== BORDERS ========== */
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+
+  /* ========== TRANSITIONS & ANIMATIONS ========== */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+
+  /* ========== Z-INDEX ========== */
+  --z-hide: -1;
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ========== DARK MODE OVERRIDES ========== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Colors - adjust lightness only */
+    --color-primary: oklch(0.70 0.14 39.04);
+    --color-primary-light: oklch(0.80 0.14 39.04);
+    --color-primary-dark: oklch(0.60 0.14 39.04);
+
+    --color-success: oklch(0.72 0.142 167.084);
+    --color-success-light: oklch(0.85 0.142 167.084);
+    --color-success-dark: oklch(0.60 0.142 167.084);
+
+    --color-error: oklch(0.66 0.245 27.325);
+    --color-error-light: oklch(0.78 0.245 27.325);
+    --color-error-dark: oklch(0.54 0.245 27.325);
+
+    --color-warning: oklch(0.86 0.16 84);
+    --color-warning-light: oklch(0.94 0.16 84);
+    --color-warning-dark: oklch(0.74 0.16 84);
+
+    --color-info: oklch(0.70 0.15 255);
+    --color-info-light: oklch(0.82 0.15 255);
+    --color-info-dark: oklch(0.58 0.15 255);
+
+    /* Grayscale - inverted */
+    --color-gray-900: oklch(0.985 0 0);
+    --color-gray-800: oklch(0.928 0 0);
+    --color-gray-700: oklch(0.845 0 0);
+    --color-gray-600: oklch(0.755 0 0);
+    --color-gray-500: oklch(0.666 0 0);
+    --color-gray-400: oklch(0.577 0 0);
+    --color-gray-300: oklch(0.488 0 0);
+    --color-gray-200: oklch(0.399 0 0);
+    --color-gray-100: oklch(0.309 0 0);
+    --color-gray-50: oklch(0.218 0 0);
+    --color-white: oklch(0.145 0 0);
+
+    /* System colors */
+    --color-background: oklch(0.145 0 0);
+    --color-foreground: oklch(0.985 0 0);
+    --color-muted: oklch(0.666 0 0);
+    --color-muted-foreground: oklch(0.399 0 0);
+    --color-border: oklch(0.309 0 0);
+    --color-input: oklch(0.218 0 0);
+    --color-ring: oklch(0.70 0.14 39.04);
+  }
+}

@@ -1,50 +1,63 @@
 {
   "manifest_version": 3,
-  "name": "picsel",
+  "name": "PicSel",
   "version": "1.0.0",
-  "description": "PicSel - 웹페이지 이미지 선택 및 관리 도구",
+  "description": "결제를 좀 더 효율적으로 해보세요.",
+
   "permissions": [
     "storage",
     "scripting",
     "activeTab",
-    "downloads"
-  ],
-  "optional_permissions": [
-    "alarms",
-    "notifications"
+    "offscreen"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
+
   "background": {
-    "service_worker": "dist/background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
-  "action": {
-    "default_popup": "dist/src/popup/index.html",
-    "default_title": "PicSel 설정"
-  },
-  "options_ui": {
-    "page": "dist/src/options/index.html",
-    "open_in_tab": false
-  },
+
   "content_scripts": [
     {
       "matches": [
         "<all_urls>"
       ],
-      "js": ["dist/content.js"],
-      "run_at": "document_idle",
-      "type": "module"
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true
     }
   ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
+
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "PicSel",
+    "default_icons": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
+
+  "options_page": "src/options/index.html",
+
   "icons": {
-    "16": "dist/icons/icon-16.png",
-    "32": "dist/icons/icon-32.png",
-    "48": "dist/icons/icon-48.png",
-    "128": "dist/icons/icon-128.png"
-  }
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*",
+        "src/subpopup/index.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
 }

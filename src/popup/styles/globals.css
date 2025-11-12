@@ -1,0 +1,29 @@
+/**
+ * PicSel - Global Styles
+ * Entry point for all CSS
+ * 
+ * Import order:
+ * 1. Tailwind CSS (base, components, utilities)
+ * 2. CSS Variables (colors, spacing, typography)
+ * 3. Reset & Base styles
+ * 4. Typography system
+ * 5. Component styles
+ * 6. Dark mode overrides
+ */
+
+/* Tailwind CSS v4 - required for @tailwindcss/vite plugin */
+@import "tailwindcss";
+
+@import './variables.css';
+@import './reset.css';
+@import './typography.css';
+@import './components.css';
+@import './dark-mode.css';
+
+/* Chrome Popup Constraint */
+body {
+  margin: 0;
+  padding: 0;
+  width: 420px;
+  background-color: #ffffff;
+}
