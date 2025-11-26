@@ -6,9 +6,9 @@ import {
   useIsIdle,
   useIsRecommended,
 } from '../shared/store/recommendationStore';
-import { IdleView } from './components/IdleView';
-import { RecommendedView } from './components/RecommendedView';
-import { FooterButtons } from './components/FooterButtons';
+import { IdleView } from '../content/ui/components/IdleView';
+import { RecommendedView } from '../content/ui/components/RecommendedView';
+import { FooterButtons } from '../content/ui/components/FooterButtons';
 import colors from './styles/colors';
 
 export const Popup: React.FC = () => {

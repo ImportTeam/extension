@@ -1,5 +1,5 @@
 import React from 'react';
-import colors from '../styles/colors';
+import colors from '../../../popup/styles/colors';
 
 export const FooterButtons: React.FC = () => {
 

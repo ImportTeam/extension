@@ -1,5 +1,5 @@
 import React from 'react';
-import colors from '../styles/colors';
+import colors from '../../../popup/styles/colors';
 
 const IDLE_STYLES = {
   container: {

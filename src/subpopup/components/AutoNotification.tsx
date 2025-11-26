@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useProductData, useImageSlider, useWindowResize } from '../../shared/hooks';
-import { autoNotificationStyles as styles } from '../../popup/styles/popup/autoNotificationStyles';
+import { autoNotificationStyles as styles } from '../../popup/styles/subpopup/autoNotificationStyles';
 
 export const AutoNotification: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);

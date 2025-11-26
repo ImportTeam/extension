@@ -2,7 +2,7 @@ import React from 'react';
 import {
   useSelectedTab,
   useRecommendationActions,
-} from '../../shared/store/recommendationStore';
+} from '../../../shared/store/recommendationStore';
 import { RecommendationCard } from './RecommendationCard';
 import { SettingsPanel } from './SettingsPanel';
 
