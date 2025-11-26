@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import colors from '../../popup/styles/colors';
 
+import type { ParsedProductInfo } from '../../shared/types';
+
 interface CardBenefit {
   cardName: string;
   rate?: number;
@@ -8,7 +10,7 @@ interface CardBenefit {
 }
 
 export const AutoNotification: React.FC = () => {
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<ParsedProductInfo | null>(null);
   const [topBenefits, setTopBenefits] = useState<CardBenefit[]>([]);
   const [imageSlides, setImageSlides] = useState<string[]>([]);
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
@@ -31,10 +33,10 @@ export const AutoNotification: React.FC = () => {
         // 헤더 높이 측정
         const headerEl = document.querySelector('[style*="flexShrink"]');
         const headerHeight = headerEl ? headerEl.clientHeight : 52;
-        
+
         // 전체 필요 높이 = header + content + 여유공간
         const totalHeight = Math.min(headerHeight + contentHeight + 24, 900);
-        
+
         console.log('[AutoNotification] Calculated total height:', {
           headerHeight,
           contentHeight,
@@ -63,7 +65,7 @@ export const AutoNotification: React.FC = () => {
       // 이미지 로드 후 재계산
       const images = contentRef.current.querySelectorAll('img');
       let loadedCount = 0;
-      
+
       const onImageLoad = () => {
         loadedCount++;
         if (loadedCount === images.length) {
@@ -111,7 +113,7 @@ export const AutoNotification: React.FC = () => {
 
         if (Array.isArray(p.cardBenefits)) {
           const sorted = [...p.cardBenefits]
-            .sort((a: any, b: any) => (b.rate || 0) - (a.rate || 0))
+            .sort((a: CardBenefit, b: CardBenefit) => (b.rate || 0) - (a.rate || 0))
             .slice(0, 3);
           setTopBenefits(sorted);
         }
@@ -121,7 +123,7 @@ export const AutoNotification: React.FC = () => {
           slides.push(p.imageUrl);
         }
         if (Array.isArray(p.images) && p.images.length > 0) {
-          slides.push(...p.images.filter((img: any) => typeof img === 'string'));
+          slides.push(...p.images.filter((img: unknown) => typeof img === 'string'));
         }
 
         setImageSlides(slides);
@@ -299,7 +301,7 @@ export const AutoNotification: React.FC = () => {
           <div style={styles.variantsSection}>
             <h4 style={styles.sectionTitle}>📦 다른 구성</h4>
             <div style={styles.variantsScroll}>
-              {product.variants.map((variant: any, idx: number) => (
+              {product.variants.map((variant: { name: string; price?: number; discount?: string }, idx: number) => (
                 <div key={idx} style={styles.variantCard}>
                   <span style={styles.variantName}>{variant.name}</span>
                   <span style={styles.variantPrice}>

@@ -2,17 +2,18 @@
  * Amazon Parser (SRP: Amazon 사이트만 담당)
  */
 
-import { BaseParser, ParsedData } from './baseParser';
+import { BaseParser } from './baseParser';
+import { ParsedProductInfo } from '../../shared/types';
 
 export class AmazonParser extends BaseParser {
   readonly siteName = 'Amazon';
 
   readonly selectors = {
     amount: [
-      '.a-price-whole',                   // 주가격
-      '[data-a-color="price"]',           // 가격 속성
-      '.a-price',                         // 일반 가격
-      '[class*="price"]',                 // 가격 포함된 모든 클래스
+      '.a-price-whole',
+      '[data-a-color="price"]',
+      '.a-price',
+      '[class*="price"]',
     ],
   };
 
@@ -23,15 +24,15 @@ export class AmazonParser extends BaseParser {
     return /amazon\.(com|co\.uk|de|fr|it|es|ca|jp|cn|in|ae|sg|com\.br|com\.mx)/.test(url);
   }
 
-  parse(doc: Document): ParsedData | null {
+  parse(doc: Document): ParsedProductInfo | null {
     try {
       console.log('[AmazonParser] 🔍 Parsing Amazon page...');
 
       let amountText = this.getTextBySelectors(doc, this.selectors.amount);
-      
+
       if (!amountText) {
         console.log('[AmazonParser] Trying full DOM search...');
-        amountText = this.searchPriceInDOM(doc);
+        amountText = this.searchPriceInDOM(doc, /\$[\d,]+\.?\d*/);
       }
 
       if (!amountText) {
@@ -46,40 +47,21 @@ export class AmazonParser extends BaseParser {
       }
 
       const currency = this.extractCurrency(amountText);
+      const { title, imageUrl } = this.extractCommonInfo(doc);
 
       console.log(`[AmazonParser] ✅ Found: ${amount} ${currency}`);
 
       return {
+        price: amount,
         amount,
         currency,
-        confidence: 0.9,
-        metadata: { source: 'amazon-dom' },
+        title: title || undefined,
+        imageUrl: imageUrl || undefined,
+        discounts: [],
       };
     } catch (error) {
       console.error('[AmazonParser] ❌ Parse error:', error);
       return null;
     }
-  }
-
-  private searchPriceInDOM(doc: Document): string | null {
-    const walker = doc.createTreeWalker(
-      doc.body,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
-
-    let node;
-    const pricePattern = /\$[\d,]+\.?\d*/;
-
-    while ((node = walker.nextNode())) {
-      const text = node.textContent || '';
-      const match = text.match(pricePattern);
-      if (match) {
-        console.log(`[AmazonParser] Found price in text: "${match[0]}"`);
-        return match[0];
-      }
-    }
-
-    return null;
   }
 }

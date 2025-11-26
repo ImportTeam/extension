@@ -28,8 +28,8 @@ export interface RecommendationState {
   // 데이터
   recommendation: PaymentMethod | null;
   alternatives: PaymentMethod[];
-  discounts: Array<{rate: number; type: string}> | null; // 상품 할인 정보
-  cardBenefits: Array<{card: string; benefit: string}> | null; // 카드 혜택
+  discounts: Array<{ rate: number; type: string }> | null; // 상품 할인 정보
+  cardBenefits: Array<{ card: string; benefit: string }> | null; // 카드 혜택
 
   // 메타데이터
   timestamp: number; // 마지막 업데이트 시간
@@ -39,8 +39,8 @@ export interface RecommendationState {
   setLoading(loading: boolean): void;
   setRecommendation(method: PaymentMethod | null): void;
   setAlternatives(methods: PaymentMethod[]): void;
-  setDiscounts(discounts: Array<{rate: number; type: string}> | null): void;
-  setCardBenefits(benefits: Array<{card: string; benefit: string}> | null): void;
+  setDiscounts(discounts: Array<{ rate: number; type: string }> | null): void;
+  setCardBenefits(benefits: Array<{ card: string; benefit: string }> | null): void;
   toggleExpanded(): void;
   setShowPaymentMethod(show: boolean): void;
   setSelectedTab(tab: 'recommendation' | 'alternatives' | 'settings'): void;
@@ -87,7 +87,7 @@ export interface ProductInfo {
  */
 export interface RecommendationRequest extends ChromeMessage {
   type: 'GET_RECOMMENDATION' | 'PRODUCT_INFO_PARSED' | 'RECORD_METRICS' | 'FETCH_CARD_BENEFIT_IFRAME';
-  data?: CheckoutInfo | ProductInfo | any;
+  data?: CheckoutInfo | ProductInfo | unknown;
 }
 
 /**
@@ -98,7 +98,7 @@ export interface RecommendationResponse extends ChromeMessage {
   data?: {
     recommendation?: PaymentMethod;
     alternatives?: PaymentMethod[];
-    benefits?: any[];
+    benefits?: unknown[];
   };
 }
 
@@ -195,6 +195,25 @@ export interface ParsedProductInfo {
   }>;
   installmentInfo?: string; // 할부 정보
   currency?: string; // "KRW"
+
+  // Added fields for UI
+  title?: string;
+  imageUrl?: string;
+  images?: string[];
+  variants?: Array<{
+    name: string;
+    price?: number;
+    discount?: string;
+  }>;
+  shippingInfo?: string;
+  giftCardDiscount?: {
+    description: string;
+  };
+  cashback?: {
+    description: string;
+  };
+  amount?: number; // Alias for price
+  discountPrice?: number; // Alias for price
 }
 
 /**

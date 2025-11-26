@@ -5,7 +5,8 @@
  * 페이지의 텍스트 콘텐츠에서 정규식으로 가격 추출
  */
 
-import { BaseParser, ParsedData } from './baseParser';
+import { BaseParser } from './baseParser';
+import { ParsedProductInfo } from '../../shared/types';
 
 export class FallbackParser extends BaseParser {
   readonly siteName = 'Fallback';
@@ -14,7 +15,7 @@ export class FallbackParser extends BaseParser {
     amount: [], // 사용 안 함
   };
 
-  parse(doc: Document): ParsedData | null {
+  parse(doc: Document): ParsedProductInfo | null {
     try {
       console.log('[FallbackParser] 🔍 Fallback parsing (text heuristic)...');
 
@@ -34,13 +35,17 @@ export class FallbackParser extends BaseParser {
         return null;
       }
 
+      const { title, imageUrl } = this.extractCommonInfo(doc);
+
       console.log(`[FallbackParser] ✅ Found: ${amount} KRW (via text heuristic)`);
 
       return {
+        price: amount,
         amount,
         currency: 'KRW',
-        confidence: 0.5, // 낮은 신뢰도
-        metadata: { source: 'fallback-heuristic' },
+        title: title || undefined,
+        imageUrl: imageUrl || undefined,
+        discounts: [],
       };
     } catch (error) {
       console.error('[FallbackParser] ❌ Parse error:', error);

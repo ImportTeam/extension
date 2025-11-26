@@ -10,11 +10,22 @@
 
 console.log('[Background] 🟢 Service Worker initialized');
 
+interface ProductData {
+  amount: number;
+  currency: string;
+  title?: string;
+  url?: string;
+  timestamp?: number;
+  cardBenefits?: unknown[];
+  cashback?: boolean;
+  [key: string]: unknown;
+}
+
 chrome.runtime.onMessage.addListener(
   (
-    message: any,
+    message: { type: string;[key: string]: unknown },
     sender: chrome.runtime.MessageSender,
-    sendResponse: (response: any) => void
+    sendResponse: (response: unknown) => void
   ) => {
     console.log('[Background] 📨 Message received', {
       type: message.type,
@@ -24,9 +35,11 @@ chrome.runtime.onMessage.addListener(
 
     try {
       if (message.type === 'SAVE_PRODUCT_DATA') {
-        const { data, url, timestamp } = message;
-
-        console.log('[Background] 💾 Saving product data:', {
+        const { data, url, timestamp } = message as unknown as {
+        data: ProductData;
+        url: string;
+        timestamp: number;
+      };   console.log('[Background] 💾 Saving product data:', {
           amount: data.amount,
           currency: data.currency,
           title: data.title?.substring(0, 50) + '...',
@@ -121,7 +134,7 @@ chrome.runtime.onMessage.addListener(
       }
 
       if (message.type === 'UPDATE_PRODUCT_DATA') {
-        const { data, timestamp, source } = message;
+        const { data, timestamp, source } = message as unknown as { data: ProductData; timestamp: number; source: string };
 
         console.log('[Background] 🔄 Updating product data (dynamic content):', {
           amount: data.amount,
@@ -134,7 +147,7 @@ chrome.runtime.onMessage.addListener(
         // 기존 데이터 조회
         chrome.storage.local.get(['currentProduct'], (result) => {
           const existingData = result.currentProduct;
-          
+
           // 기존 데이터와 새로운 데이터 병합
           const mergedData = {
             ...existingData,

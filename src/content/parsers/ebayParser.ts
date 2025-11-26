@@ -2,17 +2,18 @@
  * eBay Parser (SRP: eBay 사이트만 담당)
  */
 
-import { BaseParser, ParsedData } from './baseParser';
+import { BaseParser } from './baseParser';
+import { ParsedProductInfo } from '../../shared/types';
 
 export class EbayParser extends BaseParser {
   readonly siteName = 'eBay';
 
   readonly selectors = {
     amount: [
-      '.vi-VR-cvipPrice',                 // eBay 가격
-      '[id*="vi_ird_finalPrice"]',        // Final price ID
-      '.vi-acc-del-range',                // 범위 가격
-      '[class*="price"]',                 // 가격 포함된 모든 클래스
+      '.vi-VR-cvipPrice',
+      '[id*="vi_ird_finalPrice"]',
+      '.vi-acc-del-range',
+      '[class*="price"]',
     ],
   };
 
@@ -23,15 +24,15 @@ export class EbayParser extends BaseParser {
     return /ebay\.(com|co\.uk|de|fr|it|es|ca)/.test(url);
   }
 
-  parse(doc: Document): ParsedData | null {
+  parse(doc: Document): ParsedProductInfo | null {
     try {
       console.log('[EbayParser] 🔍 Parsing eBay page...');
 
       let amountText = this.getTextBySelectors(doc, this.selectors.amount);
-      
+
       if (!amountText) {
         console.log('[EbayParser] Trying full DOM search...');
-        amountText = this.searchPriceInDOM(doc);
+        amountText = this.searchPriceInDOM(doc, /\$[\d,]+\.?\d*/);
       }
 
       if (!amountText) {
@@ -46,40 +47,21 @@ export class EbayParser extends BaseParser {
       }
 
       const currency = this.extractCurrency(amountText);
+      const { title, imageUrl } = this.extractCommonInfo(doc);
 
       console.log(`[EbayParser] ✅ Found: ${amount} ${currency}`);
 
       return {
+        price: amount,
         amount,
         currency,
-        confidence: 0.85,
-        metadata: { source: 'ebay-dom' },
+        title: title || undefined,
+        imageUrl: imageUrl || undefined,
+        discounts: [],
       };
     } catch (error) {
       console.error('[EbayParser] ❌ Parse error:', error);
       return null;
     }
-  }
-
-  private searchPriceInDOM(doc: Document): string | null {
-    const walker = doc.createTreeWalker(
-      doc.body,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
-
-    let node;
-    const pricePattern = /\$[\d,]+\.?\d*/;
-
-    while ((node = walker.nextNode())) {
-      const text = node.textContent || '';
-      const match = text.match(pricePattern);
-      if (match) {
-        console.log(`[EbayParser] Found price in text: "${match[0]}"`);
-        return match[0];
-      }
-    }
-
-    return null;
   }
 }

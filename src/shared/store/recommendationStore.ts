@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, type PersistStorage } from 'zustand/middleware';
 import type { RecommendationState, PaymentMethod } from '../types';
 
 /**
@@ -39,8 +39,17 @@ const chromeStorageAdapter = {
  * - Rehydration: Handles offline state gracefully
  * - Selectors: Component subscriptions for performance
  */
+interface PersistedRecommendationState {
+  recommendation: PaymentMethod | null;
+  alternatives: PaymentMethod[];
+  discounts: Array<{ rate: number; type: string }> | null;
+  cardBenefits: Array<{ card: string; benefit: string }> | null;
+  siteId: string | undefined;
+  timestamp: number;
+}
+
 export const useRecommendationStore = create<RecommendationState>()(
-  persist(
+  persist<RecommendationState, [], [], PersistedRecommendationState>(
     (set) => ({
       // Initial state
       isLoading: false,
@@ -72,11 +81,11 @@ export const useRecommendationStore = create<RecommendationState>()(
         set({ alternatives: methods });
       },
 
-      setDiscounts: (discounts: Array<{rate: number; type: string}> | null) => {
+      setDiscounts: (discounts: Array<{ rate: number; type: string }> | null) => {
         set({ discounts });
       },
 
-      setCardBenefits: (benefits: Array<{card: string; benefit: string}> | null) => {
+      setCardBenefits: (benefits: Array<{ card: string; benefit: string }> | null) => {
         set({ cardBenefits: benefits });
       },
 
@@ -116,14 +125,15 @@ export const useRecommendationStore = create<RecommendationState>()(
     }),
     {
       name: 'picsel-recommendation',
-      storage: chromeStorageAdapter as any,
+      storage: chromeStorageAdapter as unknown as PersistStorage<PersistedRecommendationState>,
       // Only persist critical data, not UI state
-      partialize: (state) => ({
+      partialize: (state): PersistedRecommendationState => ({
         recommendation: state.recommendation,
         alternatives: state.alternatives,
         discounts: state.discounts,
         cardBenefits: state.cardBenefits,
         siteId: state.siteId,
+        timestamp: state.timestamp,
       }),
       // Rehydration strategy
       onRehydrateStorage: () => (state) => {

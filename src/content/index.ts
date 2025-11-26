@@ -8,13 +8,8 @@
  * 4. Auto Popup 트리거
  */
 
-import {
-  CoupangParser,
-  AmazonParser,
-  EbayParser,
-  FallbackParser,
-  type ParsedData,
-} from './parsers';
+import { CoupangParser, AmazonParser, EbayParser, FallbackParser } from './parsers';
+import { ParsedProductInfo } from '../shared/types';
 import {
   mountToggleBar,
   updateToggleBar,
@@ -86,7 +81,7 @@ function selectParser(site: string) {
   }
 }
 
-function extractPaymentInfo(): ParsedData | null {
+function extractPaymentInfo(): ParsedProductInfo | null {
   const { site, isCheckout } = detectCheckoutPage();
 
   if (!isCheckout) {
@@ -109,7 +104,7 @@ function extractPaymentInfo(): ParsedData | null {
   return fallbackParser.parse(document);
 }
 
-function sendToBackground(paymentInfo: ParsedData) {
+function sendToBackground(paymentInfo: ParsedProductInfo) {
   chrome.runtime.sendMessage(
     {
       type: 'SAVE_PRODUCT_DATA',
@@ -117,7 +112,7 @@ function sendToBackground(paymentInfo: ParsedData) {
       url: window.location.href,
       timestamp: Date.now(),
     },
-    (response: any) => {
+    (response: { success: boolean; savedData?: { amount: number; currency: string }; error?: string; message?: string }) => {
       if (response?.success) {
         console.log('[ContentScript] ✅ Data saved', {
           responseSuccess: response.success,
@@ -126,7 +121,7 @@ function sendToBackground(paymentInfo: ParsedData) {
         });
 
         // UI 토글 최신 데이터 반영
-  updateToggleBar(paymentInfo as ToggleProductData);
+        updateToggleBar(paymentInfo as ToggleProductData);
       } else {
         console.error('[ContentScript] ❌ Background error:', {
           error: response?.error,
@@ -183,15 +178,15 @@ function setupDynamicContentObserver() {
 
     if (hasNewIframe) {
       console.log('[ContentScript] 🔄 New iframe detected, re-parsing dynamic content...');
-      
+
       // 500ms 대기 (iframe 콘텐츠 로드 완료 대기)
       setTimeout(() => {
         const paymentInfo = extractPaymentInfo();
-        
+
         if (paymentInfo) {
           console.log('[ContentScript] ✅ Dynamic content re-parsed:', paymentInfo);
           updateToggleBar(paymentInfo as ToggleProductData);
-          
+
           // Background에 업데이트 메시지 전송
           chrome.runtime.sendMessage(
             {
@@ -200,7 +195,7 @@ function setupDynamicContentObserver() {
               timestamp: Date.now(),
               source: 'dynamic-iframe',
             },
-            (response: any) => {
+            (response: { success: boolean }) => {
               if (response?.success) {
                 console.log('[ContentScript] ✅ Dynamic data updated in storage');
               }

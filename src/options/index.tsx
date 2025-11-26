@@ -7,7 +7,7 @@ import '../popup/styles/globals.css';
  * TODO: Implement settings UI in future
  */
 
-const Options: React.FC = () => {
+export const Options: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground p-6">
       <h1 className="text-2xl font-bold mb-4 text-primary">PicSel 설정</h1>
@@ -18,10 +18,11 @@ const Options: React.FC = () => {
   );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
-
-root.render(
-  <React.StrictMode>
-    <Options />
-  </React.StrictMode>
-);
+const root = document.getElementById('root');
+if (root) {
+  ReactDOM.createRoot(root).render(
+    <React.StrictMode>
+      <Options />
+    </React.StrictMode>
+  );
+}

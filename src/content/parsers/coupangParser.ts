@@ -9,34 +9,8 @@
  * 5. 배송정보 등
  */
 
-import { BaseParser, ParsedData } from './baseParser';
-
-export interface CoupangExtractedData extends ParsedData {
-  title?: string | null;
-  imageUrl?: string | null;
-  images?: string[];
-  variants?: Array<{
-    name: string;
-    price: number;
-    discount?: string;
-  }>;
-  originalPrice?: number | null;
-  discountPrice?: number | null;
-  cardBenefits?: Array<{
-    cardName: string;
-    benefit: string;
-    rate?: number;
-  }>;
-  giftCardDiscount?: {
-    rate: number;
-    description: string;
-  } | null;
-  cashback?: {
-    amount: number;
-    description: string;
-  } | null;
-  shippingInfo?: string | null;
-}
+import { BaseParser } from './baseParser';
+import { ParsedProductInfo } from '../../shared/types';
 
 export class CoupangParser extends BaseParser {
   readonly siteName = 'Coupang';
@@ -60,7 +34,7 @@ export class CoupangParser extends BaseParser {
   /**
    * 모든 상품 데이터 추출 (단순 가격 추출 아님)
    */
-  parse(doc: Document): CoupangExtractedData | null {
+  parse(doc: Document): ParsedProductInfo | null {
     try {
       console.log('[CoupangParser] 🔍 Parsing Coupang page...');
 
@@ -82,7 +56,7 @@ export class CoupangParser extends BaseParser {
 
       // 2. 가격 (판매가 + 와우할인가)
       const { amount, originalPrice, discountPrice } = this.extractPrices(doc);
-      
+
       if (!amount) {
         console.debug('[CoupangParser] ❌ No price found');
         return null;
@@ -91,7 +65,11 @@ export class CoupangParser extends BaseParser {
       console.log(`[CoupangParser] Price: ${amount} (original: ${originalPrice}, discount: ${discountPrice})`);
 
       // 3. 카드혜택
-      const cardBenefits = this.extractCardBenefits(doc);
+      const cardBenefits = this.extractCardBenefits(doc).map(b => ({
+        card: b.cardName,
+        benefit: b.benefit,
+        discount: b.rate
+      }));
       console.log(`[CoupangParser] Card benefits: ${cardBenefits.length} found`);
 
       // 4. 기프트카드 할인
@@ -117,20 +95,22 @@ export class CoupangParser extends BaseParser {
       }
 
       return {
+        price: amount,
         amount,
         currency: 'KRW',
-        confidence: 0.95,
-        metadata: { source: 'coupang-dom' },
-        title,
-        imageUrl,
+        // confidence: 0.95, // ParsedProductInfo doesn't have confidence? It was in ParsedData.
+        // metadata: { source: 'coupang-dom' }, // ParsedProductInfo doesn't have metadata?
+        title: title || undefined,
+        imageUrl: imageUrl || undefined,
         images,
         variants,
-        originalPrice,
-        discountPrice,
+        originalPrice: originalPrice || undefined,
+        discountPrice: discountPrice || undefined, // ParsedProductInfo has discountPrice? Yes I added it.
         cardBenefits,
-        giftCardDiscount,
-        cashback,
-        shippingInfo,
+        giftCardDiscount: giftCardDiscount || undefined,
+        cashback: cashback || undefined,
+        shippingInfo: shippingInfo || undefined,
+        discounts: [], // Required by ParsedProductInfo
       };
     } catch (error) {
       console.error('[CoupangParser] ❌ Parse error:', error);
@@ -187,7 +167,7 @@ export class CoupangParser extends BaseParser {
 
     // 방법 2: 실패시 DOM 탐색
     if (!amount) {
-      const result = this.searchPriceInDOM(doc);
+      const result = this.findPriceInDOM(doc);
       amount = result;
     }
 
@@ -231,10 +211,10 @@ export class CoupangParser extends BaseParser {
     // 2. 카드사 이미지 추출 (여러 카드사 지원)
     const cardIcons = benefitBadge.querySelectorAll('img.benefit-ico');
     const cardNames: string[] = [];
-    
+
     cardIcons.forEach((icon) => {
       const src = icon.getAttribute('src');
-      
+
       if (src) {
         // src URL에서 카드사명 추출 (예: shinhan@2x.png → 신한)
         const cardName = this.extractCardNameFromUrl(src);
@@ -251,9 +231,9 @@ export class CoupangParser extends BaseParser {
     if (benefitText) {
       // "최대 1% 즉시할인" 형태
       const rate = this.extractPercentage(benefitText);
-      
+
       // 모든 카드사를 하나의 혜택으로 통합
-      const displayCards = cardNames.length > 0 
+      const displayCards = cardNames.length > 0
         ? `${cardNames.slice(0, 3).join(', ')}${cardNames.length > 3 ? ' 외' : ''}`
         : '쿠팡 파트너 카드';
 
@@ -318,19 +298,13 @@ export class CoupangParser extends BaseParser {
   /**
    * DOM 전체 탐색 (TreeWalker로 "원" 포함 텍스트 찾기)
    */
-  private searchPriceInDOM(doc: Document): number | null {
-    const walker = doc.createTreeWalker(
-      doc.body,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
-
-    let node;
+  private findPriceInDOM(doc: Document): number | null {
     const pricePattern = /(\d{1,3}(?:,\d{3})*)\s*원/;
+    // BaseParser의 searchPriceInDOM 사용
+    const matchedText = this.searchPriceInDOM(doc, pricePattern);
 
-    while ((node = walker.nextNode())) {
-      const text = node.textContent || '';
-      const match = text.match(pricePattern);
+    if (matchedText) {
+      const match = matchedText.match(pricePattern);
       if (match) {
         console.log(`[CoupangParser] Found price via TreeWalker: "${match[1]}원"`);
         return this.extractNumber(match[1]);
@@ -388,13 +362,13 @@ export class CoupangParser extends BaseParser {
   private extractCashback(doc: Document): { amount: number; description: string } | null {
     // 1. "쿠팡캐시" 관련 섹션 찾기
     const cashbackSections = doc.querySelectorAll('[class*="cashback"], [class*="적립"]');
-    
+
     for (const section of cashbackSections) {
       const text = section.textContent || '';
-      
+
       // "최대 16,086원" 형태의 금액 추출
       const amountMatch = text.match(/(\d{1,3}(?:,\d{3})*)\s*원/);
-      
+
       if (amountMatch && text.includes('쿠팡캐시')) {
         const amount = this.extractNumber(amountMatch[1]);
         if (amount) {
@@ -409,7 +383,7 @@ export class CoupangParser extends BaseParser {
     // 2. 텍스트 기반 검색
     const allText = doc.body.innerText;
     const cashbackMatch = allText.match(/(?:최대\s+)?(\d{1,3}(?:,\d{3})*)\s*원\s*.*?쿠팡캐시\s*적립/);
-    
+
     if (cashbackMatch) {
       const amount = this.extractNumber(cashbackMatch[1]);
       if (amount) {
@@ -433,7 +407,7 @@ export class CoupangParser extends BaseParser {
     try {
       // 1. img.twc-w-full.twc-max-h-[546px] 직접 선택
       const mainImage = doc.querySelector('img.twc-w-full.twc-max-h-\\[546px\\]') as HTMLImageElement;
-      
+
       if (mainImage?.src) {
         let src = mainImage.src;
         if (src.startsWith('//')) src = 'https:' + src;
@@ -444,25 +418,25 @@ export class CoupangParser extends BaseParser {
 
       // 2. 썸네일 갤러리의 첫 번째 이미지 (Fallback)
       const thumbnailContainer = doc.querySelector('div.twc-w-\\[70px\\]');
-      
+
       if (thumbnailContainer) {
         const firstThumbnail = thumbnailContainer.querySelector('ul > li:first-child img');
-        
+
         if (firstThumbnail) {
           let src = (firstThumbnail as HTMLImageElement).src;
-          
+
           if (src) {
             if (src.startsWith('//')) {
               src = 'https:' + src;
             }
-            
+
             // 48x48ex → 800x800ex로 변환
             if (src.includes('thumbnails/remote/')) {
               src = src.replace(/thumbnails\/remote\/\d+x\d+ex/, 'thumbnails/remote/800x800ex');
             }
-            
+
             src = src.split('?')[0];
-            
+
             console.log('[CoupangParser] Main product image from gallery:', src.substring(0, 100));
             return src;
           }
@@ -485,25 +459,25 @@ export class CoupangParser extends BaseParser {
       // 전략: 썸네일 갤러리에서 모든 슬라이드 이미지 추출
       // 쿠팡은 보통 div.twc-w-[70px] 안에 작은 썸네일들을 나열하고
       // 각 썸네일은 같은 이미지의 48x48 버전 또는 70x70 버전임
-      
+
       const thumbnailContainer = doc.querySelector('div.twc-w-\\[70px\\]');
-      
+
       if (thumbnailContainer) {
         // 모든 썸네일 리스트 아이템에서 이미지 추출
         const allThumbnails = thumbnailContainer.querySelectorAll('ul > li img');
         console.log('[CoupangParser] Thumbnail gallery found with', allThumbnails.length, 'items');
-        
+
         for (const el of allThumbnails) {
           const imgEl = el as HTMLImageElement;
           let src = imgEl.src;
-          
+
           if (!src) continue;
           if (seen.has(src)) continue;
 
           if (src.startsWith('//')) {
             src = 'https:' + src;
           }
-          
+
           // 쿠팡 썸네일: thumbnails/remote/48x48ex 또는 70x70ex 형태
           // 이를 큰 버전 800x800ex로 변환하여 슬라이드용으로 사용
           if (src.includes('thumbnails/remote/')) {
@@ -512,7 +486,7 @@ export class CoupangParser extends BaseParser {
           }
 
           src = src.split('?')[0]; // 쿼리 파라미터 제거
-          
+
           if (seen.has(src)) continue;
 
           images.push(src);
@@ -557,7 +531,7 @@ export class CoupangParser extends BaseParser {
           // 각 li 내에서 옵션명과 가격 추출
           // 첫 번째 div (옵션명): "512GB", "1TB", "WIN11 Home" 등
           // 두 번째 div (가격): "339,620원" 등
-          
+
           const divs = li.querySelectorAll('div');
           if (divs.length < 2) continue;
 

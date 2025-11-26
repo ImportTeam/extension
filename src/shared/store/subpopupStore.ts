@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, type PersistStorage } from 'zustand/middleware';
 import type { SubPopupState, CustomPaymentMethod } from '../types';
 
 /**
@@ -33,8 +33,12 @@ const chromeStorageAdapter = {
  * SubPopup Store
  * 사용자 정의 결제 수단 관리
  */
+interface PersistedSubPopupState {
+  customMethods: CustomPaymentMethod[];
+}
+
 export const useSubPopupStore = create<SubPopupState>()(
-  persist(
+  persist<SubPopupState, [], [], PersistedSubPopupState>(
     (set) => ({
       // Initial state
       isOpen: false,
@@ -67,10 +71,10 @@ export const useSubPopupStore = create<SubPopupState>()(
           customMethods: state.customMethods.map((method) =>
             method.id === id
               ? {
-                  ...method,
-                  ...updates,
-                  updatedAt: Date.now(),
-                }
+                ...method,
+                ...updates,
+                updatedAt: Date.now(),
+              }
               : method
           ),
         }));
@@ -98,8 +102,8 @@ export const useSubPopupStore = create<SubPopupState>()(
     }),
     {
       name: 'subpopup-store',
-      storage: chromeStorageAdapter as any,
-      partialize: (state) => ({
+      storage: chromeStorageAdapter as unknown as PersistStorage<PersistedSubPopupState>,
+      partialize: (state): PersistedSubPopupState => ({
         customMethods: state.customMethods,
       }),
     }

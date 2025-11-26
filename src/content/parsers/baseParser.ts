@@ -5,12 +5,7 @@
  * 각 파서는 하나의 사이트만 담당
  */
 
-export interface ParsedData {
-  amount: number;
-  currency: string;
-  confidence: number; // 0-1
-  metadata?: Record<string, any>;
-}
+import { ParsedProductInfo } from '../../shared/types';
 
 export abstract class BaseParser {
   /**
@@ -23,12 +18,14 @@ export abstract class BaseParser {
    */
   abstract readonly selectors: {
     amount: string[];
+    title?: string[];
+    image?: string[];
   };
 
   /**
    * 메인 파싱 메서드
    */
-  abstract parse(doc: Document): ParsedData | null;
+  abstract parse(doc: Document): ParsedProductInfo | null;
 
   /**
    * 공통 유틸: 텍스트에서 숫자 추출
@@ -84,5 +81,56 @@ export abstract class BaseParser {
    */
   protected isValidPrice(price: number): boolean {
     return price > 100 && price < 100_000_000;
+  }
+
+  /**
+   * DOM 전체 탐색 (TreeWalker로 가격 패턴 찾기)
+   * 공통 로직으로 이동
+   */
+  protected searchPriceInDOM(doc: Document, pattern: RegExp): string | null {
+    const walker = doc.createTreeWalker(
+      doc.body,
+      NodeFilter.SHOW_TEXT,
+      null
+    );
+
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.textContent || '';
+      const match = text.match(pattern);
+      if (match) {
+        console.log(`[${this.siteName}] Found price via TreeWalker: "${match[0]}"`);
+        return match[0];
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * 메타 태그에서 정보 추출 (OpenGraph 등)
+   */
+  protected extractMetaContent(doc: Document, property: string): string | null {
+    const meta = doc.querySelector(`meta[property="${property}"], meta[name="${property}"]`);
+    return meta?.getAttribute('content') || null;
+  }
+
+  /**
+   * 기본 정보 추출 (Title, Image) - 메타 태그 기반 Fallback
+   */
+  protected extractCommonInfo(doc: Document): { title?: string; imageUrl?: string } {
+    const title =
+      this.extractMetaContent(doc, 'og:title') ||
+      this.extractMetaContent(doc, 'twitter:title') ||
+      doc.title;
+
+    const imageUrl =
+      this.extractMetaContent(doc, 'og:image') ||
+      this.extractMetaContent(doc, 'twitter:image');
+
+    return {
+      title: title || undefined,
+      imageUrl: imageUrl || undefined
+    };
   }
 }
