@@ -5,8 +5,8 @@
  * 페이지의 텍스트 콘텐츠에서 정규식으로 가격 추출
  */
 
-import { BaseParser } from './baseParser';
-import { ParsedProductInfo } from '../../shared/types';
+import { BaseParser } from '../base/index';
+import { ParsedProductInfo } from '../../../shared/types';
 
 export class FallbackParser extends BaseParser {
   readonly siteName = 'Fallback';

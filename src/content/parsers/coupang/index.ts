@@ -9,8 +9,8 @@
  * 5. 배송정보 등
  */
 
-import { BaseParser } from './baseParser';
-import { ParsedProductInfo } from '../../shared/types';
+import { BaseParser } from '../base/index';
+import { ParsedProductInfo } from '../../../shared/types';
 
 export class CoupangParser extends BaseParser {
   readonly siteName = 'Coupang';

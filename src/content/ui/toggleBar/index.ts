@@ -1,10 +1,10 @@
-import type { ParsedData } from '../parsers';
+import type { ParsedProductInfo } from '../../../shared/types';
 
 type Optional<T> = {
 	[K in keyof T]?: T[K] | null;
 };
 
-export type ToggleProductData = (ParsedData & Record<string, unknown>) &
+export type ToggleProductData = (ParsedProductInfo & Record<string, unknown>) &
 	Optional<{
 		title: string;
 		imageUrl: string;
@@ -534,8 +534,8 @@ const updateBadge = (data: ToggleProductData | null): void => {
 
 	const rates = Array.isArray(data.cardBenefits)
 		? data.cardBenefits
-				.map((benefit) => (typeof benefit?.rate === 'number' ? benefit.rate : 0))
-				.filter((rate) => rate > 0)
+				.map((benefit: { rate?: number }) => (typeof benefit?.rate === 'number' ? benefit.rate : 0))
+				.filter((rate: number) => rate > 0)
 		: [];
 
 	if (rates.length > 0) {
@@ -660,7 +660,7 @@ const renderContent = (): void => {
 		const list = document.createElement('div');
 		list.className = 'picsel-benefit-list';
 
-		benefits.forEach((benefit) => {
+		benefits.forEach((benefit: { cardName?: string; benefit?: string }) => {
 			const item = document.createElement('div');
 			item.className = 'picsel-benefit-item';
 
@@ -727,7 +727,7 @@ const renderContent = (): void => {
 		const list = document.createElement('div');
 		list.className = 'picsel-variants';
 
-		variants.forEach((variant) => {
+		variants.forEach((variant: { name: string; price?: number; discount?: string }) => {
 			const item = document.createElement('div');
 			item.className = 'picsel-variant-item';
 

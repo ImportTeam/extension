@@ -5,7 +5,7 @@
  * 각 파서는 하나의 사이트만 담당
  */
 
-import { ParsedProductInfo } from '../../shared/types';
+import { ParsedProductInfo } from '../../../shared/types';
 
 export abstract class BaseParser {
   /**
@@ -13,7 +13,7 @@ export abstract class BaseParser {
    */
   abstract readonly siteName: string;
 
-  /**
+  /**s
    * CSS 선택자 (사이트별로 다름)
    */
   abstract readonly selectors: {

@@ -1,55 +1,55 @@
 /**
- * eBay Parser (SRP: eBay 사이트만 담당)
+ * Amazon Parser (SRP: Amazon 사이트만 담당)
  */
 
-import { BaseParser } from './baseParser';
-import { ParsedProductInfo } from '../../shared/types';
+import { BaseParser } from '../base/index';
+import { ParsedProductInfo } from '../../../shared/types';
 
-export class EbayParser extends BaseParser {
-  readonly siteName = 'eBay';
+export class AmazonParser extends BaseParser {
+  readonly siteName = 'Amazon';
 
   readonly selectors = {
     amount: [
-      '.vi-VR-cvipPrice',
-      '[id*="vi_ird_finalPrice"]',
-      '.vi-acc-del-range',
+      '.a-price-whole',
+      '[data-a-color="price"]',
+      '.a-price',
       '[class*="price"]',
     ],
   };
 
   /**
-   * eBay 페이지 감지
+   * Amazon 페이지 감지
    */
   static isCheckoutPage(url: string): boolean {
-    return /ebay\.(com|co\.uk|de|fr|it|es|ca)/.test(url);
+    return /amazon\.(com|co\.uk|de|fr|it|es|ca|jp|cn|in|ae|sg|com\.br|com\.mx)/.test(url);
   }
 
   parse(doc: Document): ParsedProductInfo | null {
     try {
-      console.log('[EbayParser] 🔍 Parsing eBay page...');
+      console.log('[AmazonParser] 🔍 Parsing Amazon page...');
 
       let amountText = this.getTextBySelectors(doc, this.selectors.amount);
 
       if (!amountText) {
-        console.log('[EbayParser] Trying full DOM search...');
+        console.log('[AmazonParser] Trying full DOM search...');
         amountText = this.searchPriceInDOM(doc, /\$[\d,]+\.?\d*/);
       }
 
       if (!amountText) {
-        console.debug('[EbayParser] ❌ Amount not found');
+        console.debug('[AmazonParser] ❌ Amount not found');
         return null;
       }
 
       const amount = this.extractNumber(amountText);
       if (!amount || !this.isValidPrice(amount)) {
-        console.debug('[EbayParser] ❌ Invalid amount:', amount);
+        console.debug('[AmazonParser] ❌ Invalid amount:', amount);
         return null;
       }
 
       const currency = this.extractCurrency(amountText);
       const { title, imageUrl } = this.extractCommonInfo(doc);
 
-      console.log(`[EbayParser] ✅ Found: ${amount} ${currency}`);
+      console.log(`[AmazonParser] ✅ Found: ${amount} ${currency}`);
 
       return {
         price: amount,
@@ -60,7 +60,7 @@ export class EbayParser extends BaseParser {
         discounts: [],
       };
     } catch (error) {
-      console.error('[EbayParser] ❌ Parse error:', error);
+      console.error('[AmazonParser] ❌ Parse error:', error);
       return null;
     }
   }
