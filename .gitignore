@@ -13,5 +13,7 @@
 /pnpm-workspace.yaml
 *pnpm-workspace.yaml
 
+
+
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md

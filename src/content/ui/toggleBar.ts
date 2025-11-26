@@ -46,7 +46,7 @@ let contentEl: HTMLDivElement | null = null;
 let mounted = false;
 let cachedData: ToggleProductData | null = null;
 
-const formatCurrency = (value?: number | null, currency: string = 'KRW') => {
+const formatCurrency = (value?: number | null, currency: string = 'KRW'): string | null => {
 	if (typeof value !== 'number' || !Number.isFinite(value)) {
 		return null;
 	}
@@ -69,7 +69,7 @@ const formatCurrency = (value?: number | null, currency: string = 'KRW') => {
 	return new Intl.NumberFormat(locale, options).format(amount);
 };
 
-const computeDiscountRate = (original?: number | null, current?: number | null) => {
+const computeDiscountRate = (original?: number | null, current?: number | null): number | null => {
 	if (
 		typeof original !== 'number' ||
 		typeof current !== 'number' ||
@@ -82,7 +82,7 @@ const computeDiscountRate = (original?: number | null, current?: number | null) 
 	return Math.round(((original - current) / original) * 100);
 };
 
-const ensureMounted = () => {
+const ensureMounted = (): void => {
 	if (mounted) {
 		return;
 	}
@@ -504,7 +504,7 @@ const ensureMounted = () => {
 	mounted = true;
 };
 
-const setPanelOpen = (open: boolean) => {
+const setPanelOpen = (open: boolean): void => {
 	if (!panelEl || !toggleButton || !buttonLabelEl) {
 		return;
 	}
@@ -522,7 +522,7 @@ const setPanelOpen = (open: boolean) => {
 	}
 };
 
-const updateBadge = (data: ToggleProductData | null) => {
+const updateBadge = (data: ToggleProductData | null): void => {
 	if (!buttonBadgeEl) {
 		return;
 	}
@@ -556,7 +556,7 @@ const updateBadge = (data: ToggleProductData | null) => {
 	buttonBadgeEl.style.display = 'none';
 };
 
-const renderContent = () => {
+const renderContent = (): void => {
 	if (!contentEl) {
 		return;
 	}
@@ -760,14 +760,14 @@ const renderContent = () => {
 	updateBadge(data);
 };
 
-export const mountToggleBar = (data: ToggleProductData) => {
+export const mountToggleBar = (data: ToggleProductData): void => {
 	cachedData = { ...data };
 	ensureMounted();
 	renderContent();
 	setPanelOpen(false);
 };
 
-export const updateToggleBar = (data: ToggleProductData) => {
+export const updateToggleBar = (data: ToggleProductData): void => {
 	cachedData = { ...(cachedData ?? {}), ...data };
 	if (!mounted) {
 		mountToggleBar(cachedData);
@@ -775,4 +775,3 @@ export const updateToggleBar = (data: ToggleProductData) => {
 	}
 	renderContent();
 };
-

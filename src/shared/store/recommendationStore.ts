@@ -44,7 +44,7 @@ interface PersistedRecommendationState {
   alternatives: PaymentMethod[];
   discounts: Array<{ rate: number; type: string }> | null;
   cardBenefits: Array<{ card: string; benefit: string }> | null;
-  siteId: string | undefined;
+  siteId?: string;
   timestamp: number;
 }
 
@@ -65,11 +65,11 @@ export const useRecommendationStore = create<RecommendationState>()(
       siteId: undefined,
 
       // Actions
-      setLoading: (loading: boolean) => {
+      setLoading: (loading: boolean): void => {
         set({ isLoading: loading });
       },
 
-      setRecommendation: (method: PaymentMethod | null) => {
+      setRecommendation: (method: PaymentMethod | null): void => {
         set({
           recommendation: method,
           timestamp: Date.now(),
@@ -77,37 +77,37 @@ export const useRecommendationStore = create<RecommendationState>()(
         });
       },
 
-      setAlternatives: (methods: PaymentMethod[]) => {
+      setAlternatives: (methods: PaymentMethod[]): void => {
         set({ alternatives: methods });
       },
 
-      setDiscounts: (discounts: Array<{ rate: number; type: string }> | null) => {
+      setDiscounts: (discounts: Array<{ rate: number; type: string }> | null): void => {
         set({ discounts });
       },
 
-      setCardBenefits: (benefits: Array<{ card: string; benefit: string }> | null) => {
+      setCardBenefits: (benefits: Array<{ card: string; benefit: string }> | null): void => {
         set({ cardBenefits: benefits });
       },
 
-      toggleExpanded: () => {
+      toggleExpanded: (): void => {
         set((state) => ({
           isExpanded: !state.isExpanded,
         }));
       },
 
-      setSelectedTab: (tab: 'recommendation' | 'alternatives' | 'settings') => {
+      setSelectedTab: (tab: 'recommendation' | 'alternatives' | 'settings'): void => {
         set({ selectedTab: tab });
       },
 
-      setShowPaymentMethod: (show: boolean) => {
+      setShowPaymentMethod: (show: boolean): void => {
         set({ showPaymentMethod: show });
       },
 
-      setError: (error: string | null) => {
+      setError: (error: string | null): void => {
         set({ error });
       },
 
-      reset: () => {
+      reset: (): void => {
         set({
           isLoading: false,
           isExpanded: false,
@@ -136,7 +136,7 @@ export const useRecommendationStore = create<RecommendationState>()(
         timestamp: state.timestamp,
       }),
       // Rehydration strategy
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: (): ((state: PersistedRecommendationState | undefined) => void) => (state) => {
         // Handle offline/stale data gracefully
         if (state && state.timestamp) {
           const age = Date.now() - state.timestamp;
@@ -160,31 +160,31 @@ export const useRecommendationStore = create<RecommendationState>()(
  * Components should subscribe to specific selectors, not whole state
  */
 
-export const useRecommendation = () =>
+export const useRecommendation = (): PaymentMethod | null =>
   useRecommendationStore((state) => state.recommendation);
 
-export const useAlternatives = () =>
+export const useAlternatives = (): PaymentMethod[] =>
   useRecommendationStore((state) => state.alternatives);
 
-export const useIsLoading = () =>
+export const useIsLoading = (): boolean =>
   useRecommendationStore((state) => state.isLoading);
 
-export const useIsExpanded = () =>
+export const useIsExpanded = (): boolean =>
   useRecommendationStore((state) => state.isExpanded);
 
-export const useSelectedTab = () =>
+export const useSelectedTab = (): 'recommendation' | 'alternatives' | 'settings' =>
   useRecommendationStore((state) => state.selectedTab);
 
-export const useRecommendationError = () =>
+export const useRecommendationError = (): string | null =>
   useRecommendationStore((state) => state.error);
 
-export const useShowPaymentMethod = () =>
+export const useShowPaymentMethod = (): boolean =>
   useRecommendationStore((state) => state.showPaymentMethod);
 
-export const useDiscounts = () =>
+export const useDiscounts = (): Array<{ rate: number; type: string }> | null =>
   useRecommendationStore((state) => state.discounts);
 
-export const useCardBenefits = () =>
+export const useCardBenefits = (): Array<{ card: string; benefit: string }> | null =>
   useRecommendationStore((state) => state.cardBenefits);
 
 /**
@@ -192,12 +192,12 @@ export const useCardBenefits = () =>
  * These compute values from state
  */
 
-export const useTotalSavings = () => {
+export const useTotalSavings = (): number => {
   const recommendation = useRecommendation();
   return recommendation?.savingAmount ?? 0;
 };
 
-export const useRelativeSavings = () => {
+export const useRelativeSavings = (): number => {
   const recommendation = useRecommendation();
   const alternatives = useAlternatives();
 
@@ -213,7 +213,7 @@ export const useRelativeSavings = () => {
     : maxSavings - recommendation.savingAmount;
 };
 
-export const useFeeComparison = () => {
+export const useFeeComparison = (): { primary: number; base: number; difference: number } | null => {
   const recommendation = useRecommendation();
 
   if (!recommendation) return null;
@@ -229,13 +229,13 @@ export const useFeeComparison = () => {
  * UI State Selectors (determines which view to show)
  */
 
-export const useIsIdle = () => {
+export const useIsIdle = (): boolean => {
   const recommendation = useRecommendation();
   const isLoading = useIsLoading();
   return !recommendation && !isLoading;
 };
 
-export const useIsRecommended = () => {
+export const useIsRecommended = (): boolean => {
   const recommendation = useRecommendation();
   const isLoading = useIsLoading();
   return !!recommendation && !isLoading;
@@ -245,7 +245,7 @@ export const useIsRecommended = () => {
  * Action selectors (for better code organization)
  */
 
-export const useRecommendationActions = () =>
+export const useRecommendationActions = (): Pick<RecommendationState, 'setLoading' | 'setRecommendation' | 'setAlternatives' | 'setDiscounts' | 'setCardBenefits' | 'toggleExpanded' | 'setSelectedTab' | 'setShowPaymentMethod' | 'setError' | 'reset'> =>
   useRecommendationStore((state) => ({
     setLoading: state.setLoading,
     setRecommendation: state.setRecommendation,

@@ -84,7 +84,7 @@ export const chromeMessage = {
       message: T,
       sender: chrome.runtime.MessageSender,
       sendResponse: (response: unknown) => void
-    ) => {
+    ): void => {
       try {
         const result = callback(message, sender);
         if (result instanceof Promise) {

@@ -5,10 +5,10 @@ import { resolve } from 'path';
 import fs from 'fs';
 
 // Custom plugin to generate icons after build
-function generateIcons() {
+function generateIcons(): { name: string; closeBundle: () => void } {
   return {
     name: 'generate-icons',
-    closeBundle() {
+    closeBundle(): void {
       const distDir = resolve(__dirname, 'dist');
       const iconSrcDir = resolve(__dirname, 'public/assets/icon');
       const iconDestDir = resolve(distDir, 'icons');
@@ -71,7 +71,7 @@ export default defineConfig({
         subpopup: resolve(__dirname, 'src/subpopup/index.html'),
       },
       output: {
-        entryFileNames: (chunkInfo) => {
+        entryFileNames: (chunkInfo): string => {
           if (chunkInfo.name === 'background') return 'background.js';
           if (chunkInfo.name === 'content') return 'content.js';
           return 'assets/[name]-[hash].js';

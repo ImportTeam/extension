@@ -24,7 +24,7 @@ export const AutoNotification: React.FC = () => {
   useEffect(() => {
     if (!loading && contentRef.current) {
       // 초기 높이 계산
-      const calculateAndResizeWindow = () => {
+      const calculateAndResizeWindow = (): void => {
         if (!contentRef.current) return;
 
         const contentHeight = contentRef.current.scrollHeight;
@@ -66,7 +66,7 @@ export const AutoNotification: React.FC = () => {
       const images = contentRef.current.querySelectorAll('img');
       let loadedCount = 0;
 
-      const onImageLoad = () => {
+      const onImageLoad = (): void => {
         loadedCount++;
         if (loadedCount === images.length) {
           console.log('[AutoNotification] All images loaded, recalculating height');
@@ -97,7 +97,7 @@ export const AutoNotification: React.FC = () => {
     }
   }, [loading, product, topBenefits, imageSlides]);
 
-  const loadProductData = async () => {
+  const loadProductData = async (): Promise<void> => {
     try {
       const result = await chrome.storage.local.get(['currentProduct']);
       if (result.currentProduct) {
@@ -136,13 +136,13 @@ export const AutoNotification: React.FC = () => {
     }
   };
 
-  const handlePrevSlide = () => {
+  const handlePrevSlide = (): void => {
     if (imageSlides.length > 1) {
       setCurrentSlideIdx((idx) => (idx - 1 + imageSlides.length) % imageSlides.length);
     }
   };
 
-  const handleNextSlide = () => {
+  const handleNextSlide = (): void => {
     if (imageSlides.length > 1) {
       setCurrentSlideIdx((idx) => (idx + 1) % imageSlides.length);
     }

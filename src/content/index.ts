@@ -8,7 +8,7 @@
  * 4. Auto Popup 트리거
  */
 
-import { CoupangParser, AmazonParser, EbayParser, FallbackParser } from './parsers';
+import { CoupangParser, AmazonParser, EbayParser, FallbackParser, BaseParser } from './parsers';
 import { ParsedProductInfo } from '../shared/types';
 import {
   mountToggleBar,
@@ -52,7 +52,7 @@ console.log('[ContentScript] ✅ Content script initialized in main frame');
 //   };
 // }
 
-function detectCheckoutPage() {
+function detectCheckoutPage(): { site: string; isCheckout: boolean } {
   const url = window.location.href;
 
   if (CoupangParser.isCheckoutPage(url)) {
@@ -68,7 +68,7 @@ function detectCheckoutPage() {
   return { site: 'unknown', isCheckout: false };
 }
 
-function selectParser(site: string) {
+function selectParser(site: string): BaseParser | null {
   switch (site) {
     case 'coupang':
       return new CoupangParser();
@@ -104,7 +104,7 @@ function extractPaymentInfo(): ParsedProductInfo | null {
   return fallbackParser.parse(document);
 }
 
-function sendToBackground(paymentInfo: ParsedProductInfo) {
+function sendToBackground(paymentInfo: ParsedProductInfo): void {
   chrome.runtime.sendMessage(
     {
       type: 'SAVE_PRODUCT_DATA',
@@ -132,7 +132,7 @@ function sendToBackground(paymentInfo: ParsedProductInfo) {
   );
 }
 
-function init() {
+function init(): void {
   console.log('[ContentScript] Initializing...');
 
   // 이중 안전장치: init 실행 시에도 iframe 체크
@@ -160,7 +160,7 @@ function init() {
  * 목표: 사용자가 "혜택보기" 클릭 후 iframe 로드 시
  * 기프트카드, 쿠팡캐시 등 동적 데이터 파싱
  */
-function setupDynamicContentObserver() {
+function setupDynamicContentObserver(): void {
   // MutationObserver: iframe 추가 감지
   const observer = new MutationObserver((mutations) => {
     // iframe이 추가되었는지 확인

@@ -22,7 +22,7 @@ export const Popup: React.FC = () => {
   // Compact size for idle state (40% reduction)
   const popupHeight = isIdle ? '360px' : '600px';
 
-  const handleOpenSettings = () => {
+  const handleOpenSettings = (): void => {
     // Open SubPopup in a new window/dialog
     chrome.windows.create({
       url: chrome.runtime.getURL('src/subpopup/index.html'),

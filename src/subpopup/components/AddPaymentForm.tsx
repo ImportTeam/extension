@@ -25,7 +25,7 @@ export const AddPaymentForm: React.FC = () => {
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  ): void => {
     const { name, value, type } = e.target as HTMLInputElement;
 
     setFormData((prev) => ({
@@ -68,7 +68,7 @@ export const AddPaymentForm: React.FC = () => {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError(null);
     setSuccess(false);

@@ -31,8 +31,10 @@
       }
     ],
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-non-null-assertion": "warn",
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+    "eqeqeq": ["error", "always"],
     "prefer-const": "error",
     "no-var": "error"
   }

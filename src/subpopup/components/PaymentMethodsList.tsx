@@ -24,7 +24,7 @@ export const PaymentMethodsList: React.FC = () => {
     );
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string): void => {
     if (window.confirm('정말 이 결제 수단을 삭제하시겠어요?')) {
       deletePaymentMethod(id);
     }

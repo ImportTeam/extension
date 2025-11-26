@@ -54,14 +54,28 @@ export const Colors = {
     background: '#1f2937',
     backgroundSecondary: '#111827',
     
+    // Card & Button Backgrounds
+    cardBg: '#374151',
+    cardBgAlt: '#4b5563',
+    buttonDark: '#818cf8',
+    buttonLight: '#4b5563',
+    
+    // Semantic Backgrounds
+    successBg: '#065f46',
+    primaryBg: '#1e3a8a',
+    accentBg: '#78350f',
+    
     // Borders
     border: '#374151',
     borderLight: '#4b5563',
+    successBorder: '#059669',
+    primaryBorder: '#1d4ed8',
     
     // Text
     textPrimary: '#f3f4f6',
     textSecondary: '#d1d5db',
     textTertiary: '#9ca3af',
+    textOnGray: '#ffffff',
     labelColor: '#e5e7eb',
     
     // Semantic Colors
@@ -80,7 +94,7 @@ export const Colors = {
  * @param theme 'light' or 'dark'
  * @returns Color palette object
  */
-export const getColors = (theme: 'light' | 'dark' = 'light') => {
+export const getColors = (theme: 'light' | 'dark' = 'light'): typeof Colors.light => {
   return Colors[theme];
 };
 

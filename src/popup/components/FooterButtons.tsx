@@ -3,7 +3,7 @@ import colors from '../styles/colors';
 
 export const FooterButtons: React.FC = () => {
 
-  const handleShowModal = () => {
+  const handleShowModal = (): void => {
     // Open SubPopup in a new window
     chrome.windows.create({
       url: chrome.runtime.getURL('src/subpopup/index.html'),
@@ -13,7 +13,7 @@ export const FooterButtons: React.FC = () => {
     });
   };
 
-  const handleNavigateToPicsel = () => {
+  const handleNavigateToPicsel = (): void => {
     // Navigate to PicSel dashboard in a new browser tab
     chrome.tabs.create({
       url: 'https://picsel.io/dashboard',
