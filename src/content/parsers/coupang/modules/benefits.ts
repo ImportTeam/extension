@@ -1,19 +1,9 @@
 import { COUPANG_SELECTORS } from '../constants';
 import { extractNumber } from '../../utils';
+import { CARD_NAME_MAPPING } from '../../../../shared/types';
 
 const extractCardNameFromUrl = (url: string): string | null => {
-  const cardMapping: { [key: string]: string } = {
-    'shinhan': '신한카드',
-    'woori': '우리카드',
-    'bc': 'BC카드',
-    'lotte': '롯데카드',
-    'kb': 'KB국민카드',
-    'nh': 'NH농협카드',
-    'samsung': '삼성카드',
-    'hana-sk': '하나SK카드',
-  };
-
-  for (const [key, value] of Object.entries(cardMapping)) {
+  for (const [key, value] of Object.entries(CARD_NAME_MAPPING)) {
     if (url.includes(key)) {
       return value;
     }

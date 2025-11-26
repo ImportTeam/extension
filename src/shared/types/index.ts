@@ -20,3 +20,6 @@ export type { CheckoutInfo, ProductInfo } from './product';
 
 // Notification types
 export type { AutoNotificationData } from './notification';
+
+// Constants
+export { CARD_NAME_MAPPING } from './constants';

@@ -1,0 +1,14 @@
+/**
+ * Card name mappings
+ * Maps URL identifiers to Korean card names
+ */
+export const CARD_NAME_MAPPING: Record<string, string> = {
+  'shinhan': '신한카드',
+  'woori': '우리카드',
+  'bc': 'BC카드',
+  'lotte': '롯데카드',
+  'kb': 'KB국민카드',
+  'nh': 'NH농협카드',
+  'samsung': '삼성카드',
+  'hana-sk': '하나SK카드',
+};
