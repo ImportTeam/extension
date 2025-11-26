@@ -1,152 +1,21 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import colors from '../../popup/styles/colors';
-
-import type { ParsedProductInfo } from '../../shared/types';
-
-interface CardBenefit {
-  cardName: string;
-  rate?: number;
-  benefit?: string;
-}
+import { useProductData, useImageSlider, useWindowResize } from '../../shared/hooks';
 
 export const AutoNotification: React.FC = () => {
-  const [product, setProduct] = useState<ParsedProductInfo | null>(null);
-  const [topBenefits, setTopBenefits] = useState<CardBenefit[]>([]);
-  const [imageSlides, setImageSlides] = useState<string[]>([]);
-  const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
-  const [loading, setLoading] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    loadProductData();
-  }, []);
-
-  useEffect(() => {
-    if (!loading && contentRef.current) {
-      // 초기 높이 계산
-      const calculateAndResizeWindow = (): void => {
-        if (!contentRef.current) return;
-
-        const contentHeight = contentRef.current.scrollHeight;
-        console.log('[AutoNotification] Content scroll height:', contentHeight);
-
-        // 헤더 높이 측정
-        const headerEl = document.querySelector('[style*="flexShrink"]');
-        const headerHeight = headerEl ? headerEl.clientHeight : 52;
-
-        // 전체 필요 높이 = header + content + 여유공간
-        const totalHeight = Math.min(headerHeight + contentHeight + 24, 900);
-
-        console.log('[AutoNotification] Calculated total height:', {
-          headerHeight,
-          contentHeight,
-          totalHeight,
-        });
-
-        try {
-          window.resizeTo(420, totalHeight);
-          console.log('[AutoNotification] Window resized to:', { width: 420, height: totalHeight });
-        } catch (err) {
-          console.warn('[AutoNotification] Cannot resize window:', err);
-        }
-      };
-
-      // ResizeObserver 설정
-      const resizeObserver = new ResizeObserver(() => {
-        calculateAndResizeWindow();
-      });
-
-      // content 요소 관찰
-      resizeObserver.observe(contentRef.current);
-
-      // 초기 계산 (지연 없이)
-      calculateAndResizeWindow();
-
-      // 이미지 로드 후 재계산
-      const images = contentRef.current.querySelectorAll('img');
-      let loadedCount = 0;
-
-      const onImageLoad = (): void => {
-        loadedCount++;
-        if (loadedCount === images.length) {
-          console.log('[AutoNotification] All images loaded, recalculating height');
-          setTimeout(calculateAndResizeWindow, 100);
-        }
-      };
-
-      images.forEach((img) => {
-        if (img.complete) {
-          loadedCount++;
-        } else {
-          img.addEventListener('load', onImageLoad);
-          img.addEventListener('error', onImageLoad);
-        }
-      });
-
-      if (loadedCount === images.length) {
-        setTimeout(calculateAndResizeWindow, 100);
-      }
-
-      return (): void => {
-        resizeObserver.disconnect();
-        images.forEach((img) => {
-          img.removeEventListener('load', onImageLoad);
-          img.removeEventListener('error', onImageLoad);
-        });
-      };
-    }
-  }, [loading, product, topBenefits, imageSlides]);
-
-  const loadProductData = async (): Promise<void> => {
-    try {
-      const result = await chrome.storage.local.get(['currentProduct']);
-      if (result.currentProduct) {
-        const p = result.currentProduct;
-        console.log('[AutoNotification] Loaded product:', {
-          title: p.title?.substring(0, 50),
-          imageUrl: p.imageUrl?.substring(0, 80) || 'none',
-          imagesCount: p.images?.length || 0,
-          variantsCount: p.variants?.length || 0,
-          variants: p.variants,
-        });
-        setProduct(p);
-
-        if (Array.isArray(p.cardBenefits)) {
-          const sorted = [...p.cardBenefits]
-            .sort((a: CardBenefit, b: CardBenefit) => (b.rate || 0) - (a.rate || 0))
-            .slice(0, 3);
-          setTopBenefits(sorted);
-        }
-
-        const slides: string[] = [];
-        if (p.imageUrl) {
-          slides.push(p.imageUrl);
-        }
-        if (Array.isArray(p.images) && p.images.length > 0) {
-          slides.push(...p.images.filter((img: unknown) => typeof img === 'string'));
-        }
-
-        setImageSlides(slides);
-        console.log('[AutoNotification] Images loaded:', slides.length);
-      }
-    } catch (err) {
-      console.error('[AutoNotification] Error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePrevSlide = (): void => {
-    if (imageSlides.length > 1) {
-      setCurrentSlideIdx((idx) => (idx - 1 + imageSlides.length) % imageSlides.length);
-    }
-  };
-
-  const handleNextSlide = (): void => {
-    if (imageSlides.length > 1) {
-      setCurrentSlideIdx((idx) => (idx + 1) % imageSlides.length);
-    }
-  };
+  
+  // Load product data from Chrome storage
+  const { product, topBenefits, imageSlides, loading } = useProductData();
+  
+  // Image slider functionality
+  const { currentSlideIdx, handlePrevSlide, handleNextSlide } = useImageSlider(imageSlides.length);
+  
+  // Auto-resize window to fit content
+  useWindowResize({
+    enabled: !loading,
+    contentRef,
+  });
 
   if (loading) {
     return null;
