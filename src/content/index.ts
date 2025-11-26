@@ -15,6 +15,11 @@ import {
   FallbackParser,
   type ParsedData,
 } from './parsers';
+import {
+  mountToggleBar,
+  updateToggleBar,
+  type ToggleProductData,
+} from './ui/toggleBar';
 
 // 🛑 Iframe 가드: 메인 페이지에서만 실행
 if (window.self !== window.top) {
@@ -114,26 +119,14 @@ function sendToBackground(paymentInfo: ParsedData) {
     },
     (response: any) => {
       if (response?.success) {
-        console.log('[ContentScript] ✅ Data saved, triggering popup...', {
+        console.log('[ContentScript] ✅ Data saved', {
           responseSuccess: response.success,
           savedAmount: response.savedData?.amount,
           savedCurrency: response.savedData?.currency,
         });
-        
-        // 🎪 Auto Popup 트리거 (SubPopup을 새 윈도우로 열기)
-        console.log('[ContentScript] 🎪 Opening Auto Popup (SubPopup window)');
-        chrome.runtime.sendMessage(
-          {
-            type: 'OPEN_AUTO_POPUP',
-          },
-          (popupResponse: any) => {
-            if (popupResponse?.success) {
-              console.log('[ContentScript] ✅ Auto Popup window opened');
-            } else {
-              console.warn('[ContentScript] ⚠️ Failed to open Auto Popup:', popupResponse?.error);
-            }
-          }
-        );
+
+        // UI 토글 최신 데이터 반영
+  updateToggleBar(paymentInfo as ToggleProductData);
       } else {
         console.error('[ContentScript] ❌ Background error:', {
           error: response?.error,
@@ -161,6 +154,7 @@ function init() {
   }
 
   console.log('[ContentScript] Extracted data:', paymentInfo);
+  mountToggleBar(paymentInfo as ToggleProductData);
   console.log('[ContentScript] Sending to background...');
   sendToBackground(paymentInfo);
 }
@@ -196,6 +190,7 @@ function setupDynamicContentObserver() {
         
         if (paymentInfo) {
           console.log('[ContentScript] ✅ Dynamic content re-parsed:', paymentInfo);
+          updateToggleBar(paymentInfo as ToggleProductData);
           
           // Background에 업데이트 메시지 전송
           chrome.runtime.sendMessage(

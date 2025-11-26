@@ -2,27 +2,47 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
-import { execSync } from 'child_process';
+import fs from 'fs';
 
 // Custom plugin to generate icons after build
 function generateIcons() {
   return {
     name: 'generate-icons',
     closeBundle() {
+      const distDir = resolve(__dirname, 'dist');
+      const iconSrcDir = resolve(__dirname, 'public/assets/icon');
+      const iconDestDir = resolve(distDir, 'icons');
       try {
-        // Copy manifest.json from root
-        execSync('cp manifest.json dist/', { stdio: 'inherit' });
-        
-        // Copy and resize icons
-        execSync('mkdir -p dist/icons', { stdio: 'inherit' });
-        execSync('sips -z 16 16 public/assets/icon/picsel.png -o dist/icons/icon-16.png', { stdio: 'inherit' });
-        execSync('sips -z 32 32 public/assets/icon/picsel.png -o dist/icons/icon-32.png', { stdio: 'inherit' });
-        execSync('sips -z 48 48 public/assets/icon/picsel.png -o dist/icons/icon-48.png', { stdio: 'inherit' });
-        execSync('sips -z 128 128 public/assets/icon/picsel.png -o dist/icons/icon-128.png', { stdio: 'inherit' });
-        
-        console.log('✅ Icons and offscreen files generated successfully');
+        // Ensure dist exists (Vite should have created it already)
+        if (!fs.existsSync(distDir)) {
+          fs.mkdirSync(distDir, { recursive: true });
+        }
+
+        // Copy manifest.json (overwrite if exists)
+        const manifestSrc = resolve(__dirname, 'manifest.json');
+        const manifestDest = resolve(distDir, 'manifest.json');
+        if (fs.existsSync(manifestSrc)) {
+          fs.copyFileSync(manifestSrc, manifestDest);
+        } else {
+          console.warn('⚠️ manifest.json not found at project root.');
+        }
+
+        // Prepare icons directory
+        fs.mkdirSync(iconDestDir, { recursive: true });
+        const iconFiles = ['icon-16.png', 'icon-32.png', 'icon-48.png', 'icon-128.png'];
+        iconFiles.forEach(file => {
+          const src = resolve(iconSrcDir, file);
+          const dest = resolve(iconDestDir, file);
+          if (fs.existsSync(src)) {
+            fs.copyFileSync(src, dest);
+          } else {
+            console.warn(`⚠️ Missing icon source file: ${src}`);
+          }
+        });
+
+        console.log('✅ Icons & manifest copied successfully (cross-platform).');
       } catch (error) {
-        console.error('❌ Failed to generate icons:', error);
+        console.error('❌ Failed to copy icons/manifest:', error);
       }
     },
   };
