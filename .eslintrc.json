@@ -10,8 +10,15 @@
     "plugin:react-hooks/recommended"
   ],
   "ignorePatterns": [
+    "node_modules",
     "dist",
-    ".eslintrc.cjs"
+    "build",
+    ".git",
+    ".vscode",
+    "coverage",
+    "*.min.js",
+    ".eslintrc.cjs",
+    "vite.config.ts.timestamp-*"
   ],
   "parser": "@typescript-eslint/parser",
   "plugins": [

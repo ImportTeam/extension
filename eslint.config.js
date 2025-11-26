@@ -12,8 +12,15 @@ export default tseslint.config(
   {
     // ignorePatterns 대신 Flat Config의 'ignores' 사용
     ignores: [
-      "dist",
-      ".eslintrc.cjs" // 기존 설정 파일 무시
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.git/**",
+      "**/.vscode/**",
+      "**/coverage/**",
+      "**/*.min.js",
+      ".eslintrc.cjs",
+      "vite.config.ts.timestamp-*"
     ],
     
     // 환경 (env) 및 파서 설정

@@ -87,7 +87,7 @@ export const AutoNotification: React.FC = () => {
         setTimeout(calculateAndResizeWindow, 100);
       }
 
-      return () => {
+      return (): void => {
         resizeObserver.disconnect();
         images.forEach((img) => {
           img.removeEventListener('load', onImageLoad);
