@@ -22,3 +22,22 @@ export interface ProductInfo {
     benefit: string;
   }>;
 }
+
+/**
+ * 카드 혜택 정보
+ */
+export interface CardBenefit {
+  cardName: string;
+  rate?: number;
+  benefit?: string;
+}
+
+/**
+ * Background에서 사용하는 상품 데이터
+ */
+export interface ProductData {
+  title?: string;
+  price?: number;
+  url?: string;
+  imageUrl?: string;
+}

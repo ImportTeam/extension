@@ -57,3 +57,24 @@ export interface SubPopupState {
   setCustomMethods(methods: CustomPaymentMethod[]): void;
   reset(): void;
 }
+
+/**
+ * Persisted state for RecommendationStore
+ * Subset of RecommendationState that gets saved to storage
+ */
+export interface PersistedRecommendationState {
+  recommendation: PaymentMethod | null;
+  alternatives: PaymentMethod[];
+  discounts: Array<{ rate: number; type: string }> | null;
+  cardBenefits: Array<{ card: string; benefit: string }> | null;
+  siteId?: string;
+  timestamp: number;
+}
+
+/**
+ * Persisted state for SubPopupStore
+ * Subset of SubPopupState that gets saved to storage
+ */
+export interface PersistedSubPopupState {
+  customMethods: CustomPaymentMethod[];
+}

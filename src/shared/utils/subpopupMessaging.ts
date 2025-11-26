@@ -3,10 +3,8 @@
  * Iframe 간 postMessage 통신
  */
 
-export interface SubPopupMessage {
-  type: 'OPEN_SUBPOPUP' | 'CLOSE_SUBPOPUP' | 'SYNC_PAYMENT_METHODS' | 'UPDATE_PAYMENT_METHOD';
-  payload?: unknown;
-}
+import type { SubPopupMessage } from '../types/message';
+import { WINDOW_CONFIG } from '../types/constants';
 
 /**
  * MainPopup에서 SubPopup 열기
@@ -15,8 +13,8 @@ export const openSubPopup = (): void => {
   chrome.windows.create({
     url: chrome.runtime.getURL('src/subpopup/index.html'),
     type: 'popup',
-    width: 420,
-    height: 600,
+    width: WINDOW_CONFIG.SUBPOPUP.width,
+    height: WINDOW_CONFIG.SUBPOPUP.height,
   });
 };
 

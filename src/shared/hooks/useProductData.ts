@@ -1,11 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { ParsedProductInfo } from '../types';
-
-interface CardBenefit {
-  cardName: string;
-  rate?: number;
-  benefit?: string;
-}
+import type { ParsedProductInfo, CardBenefit } from '../types';
 
 interface UseProductDataReturn {
   product: ParsedProductInfo | null;

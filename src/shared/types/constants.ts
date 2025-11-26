@@ -12,3 +12,24 @@ export const CARD_NAME_MAPPING: Record<string, string> = {
   'samsung': '삼성카드',
   'hana-sk': '하나SK카드',
 };
+
+/**
+ * Window configuration constants
+ * Used across popup, subpopup, and notifications
+ */
+export const WINDOW_CONFIG = {
+  SUBPOPUP: {
+    width: 420,
+    height: 600,
+  },
+  AUTO_NOTIFICATION: {
+    width: 420,
+    maxHeight: 900,
+  },
+  POPUP: {
+    minWidth: 250,
+    maxWidth: 320,
+    idleHeight: 360,
+    expandedHeight: 600,
+  },
+} as const;

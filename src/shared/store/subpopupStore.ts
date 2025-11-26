@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist, type PersistStorage } from 'zustand/middleware';
-import type { SubPopupState, CustomPaymentMethod } from '../types';
+import type { 
+  CustomPaymentMethod,
+  SubPopupState,
+  PersistedSubPopupState
+} from '../types';
 
 /**
  * Chrome Storage Adapter for Zustand Persist Middleware
@@ -33,9 +37,7 @@ const chromeStorageAdapter = {
  * SubPopup Store
  * 사용자 정의 결제 수단 관리
  */
-interface PersistedSubPopupState {
-  customMethods: CustomPaymentMethod[];
-}
+
 
 export const useSubPopupStore = create<SubPopupState>()(
   persist<SubPopupState, [], [], PersistedSubPopupState>(
