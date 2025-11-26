@@ -5,16 +5,13 @@
 import { BaseParser } from '../base/index';
 import { ParsedProductInfo } from '../../../shared/types';
 
+import { EBAY_SELECTORS } from './constants';
+
 export class EbayParser extends BaseParser {
   readonly siteName = 'eBay';
 
   readonly selectors = {
-    amount: [
-      '.vi-VR-cvipPrice',
-      '[id*="vi_ird_finalPrice"]',
-      '.vi-acc-del-range',
-      '[class*="price"]',
-    ],
+    amount: EBAY_SELECTORS.amount,
   };
 
   /**

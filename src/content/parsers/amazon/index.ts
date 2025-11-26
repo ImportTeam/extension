@@ -5,16 +5,13 @@
 import { BaseParser } from '../base/index';
 import { ParsedProductInfo } from '../../../shared/types';
 
+import { AMAZON_SELECTORS } from './constants';
+
 export class AmazonParser extends BaseParser {
   readonly siteName = 'Amazon';
 
   readonly selectors = {
-    amount: [
-      '.a-price-whole',
-      '[data-a-color="price"]',
-      '.a-price',
-      '[class*="price"]',
-    ],
+    amount: AMAZON_SELECTORS.amount,
   };
 
   /**

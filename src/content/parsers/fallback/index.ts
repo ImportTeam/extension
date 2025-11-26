@@ -8,11 +8,13 @@
 import { BaseParser } from '../base/index';
 import { ParsedProductInfo } from '../../../shared/types';
 
+import { FALLBACK_SELECTORS } from './constants';
+
 export class FallbackParser extends BaseParser {
   readonly siteName = 'Fallback';
 
   readonly selectors = {
-    amount: [], // 사용 안 함
+    amount: FALLBACK_SELECTORS.amount,
   };
 
   parse(doc: Document): ParsedProductInfo | null {

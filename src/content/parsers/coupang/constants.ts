@@ -1,0 +1,20 @@
+export const COUPANG_SELECTORS = {
+  amount: [
+    '.price-amount.sales-price-amount',
+    '.price-amount.final-price-amount',
+    '.total-price',
+    '[data-testid="total-price"]',
+    '.price-amount',
+  ],
+  title: [
+    '.product-title',
+    'h1.product-name',
+    'h2[class*="title"]',
+    '[data-testid="product-title"]',
+  ],
+  mainImage: 'img.twc-w-full.twc-max-h-\\[546px\\]',
+  thumbnailContainer: 'div.twc-w-\\[70px\\]',
+  instantOption: '.instant-option',
+  benefitBadge: '.ccid-benefit-badge',
+  shipping: '[class*="shipping"]',
+};
