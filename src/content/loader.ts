@@ -5,7 +5,7 @@
  * This loader dynamically imports the actual content script (built as ESM).
  */
 
-(async () => {
+(async (): Promise<void> => {
   const src = chrome.runtime.getURL('content.js');
   try {
     await import(src);
