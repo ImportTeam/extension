@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Gear, X } from '@phosphor-icons/react';
+import { Settings, X } from 'lucide-react';
 import {
   useIsLoading,
   useRecommendationError,
@@ -23,7 +23,7 @@ export const Popup: React.FC = () => {
   // Note: SubPopup이 자동으로 띄워지므로 Popup에서는 최소한의 UI만 표시
 
   // Compact size for idle state
-  const popupHeight = isIdle ? `${WINDOW_CONFIG.POPUP.idleHeight}px` : `${WINDOW_CONFIG.POPUP.expandedHeight}px`;
+  const popupHeight = isIdle ? WINDOW_CONFIG.POPUP.idleHeight : WINDOW_CONFIG.POPUP.expandedHeight;
 
   const handleOpenSettings = (): void => {
     // Open SubPopup in a new window/dialog
@@ -36,7 +36,7 @@ export const Popup: React.FC = () => {
   };
 
   return (
-    <div style={{ ...styles.container, height: popupHeight }}>
+    <div style={{ ...styles.container, height: `${popupHeight}px`, flex: '0 0 auto' }}>
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.logoContainer}>
@@ -56,7 +56,7 @@ export const Popup: React.FC = () => {
             style={settingsHover ? { ...styles.iconButton, ...styles.iconButtonHover } : styles.iconButton}
             title="결제 수단 설정"
           >
-            <Gear weight="bold" size={20} />
+            <Settings size={20} strokeWidth={2.5} />
           </button>
           <button
             onClick={() => window.close()}
@@ -65,7 +65,7 @@ export const Popup: React.FC = () => {
             style={closeHover ? { ...styles.iconButton, ...styles.iconButtonHover } : styles.iconButton}
             title="닫기"
           >
-            <X weight="bold" size={20} />
+            <X size={20} strokeWidth={2.5} />
           </button>
         </div>
       </div>
@@ -86,6 +86,12 @@ export const Popup: React.FC = () => {
 
         {isIdle && <IdleView />}
         {isRecommended && <RecommendedView />}
+
+        {!isIdle && !isRecommended && !isLoading && !error && (
+          <div style={styles.loading}>
+            <p>초기화 중...</p>
+          </div>
+        )}
       </div>
 
       {/* Footer */}

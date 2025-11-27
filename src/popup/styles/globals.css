@@ -19,11 +19,3 @@
 @import './typography.css';
 @import './components.css';
 @import './dark-mode.css';
-
-/* Chrome Popup Constraint */
-body {
-  margin: 0;
-  padding: 0;
-  width: 420px;
-  background-color: #ffffff;
-}
