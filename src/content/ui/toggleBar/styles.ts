@@ -4,7 +4,8 @@ export const toggleBarStyles = `
 			position: fixed;
 			inset: auto 24px 24px auto;
 			z-index: 2147483647;
-			font-family: 'Pretendard', 'Noto Sans KR', 'Segoe UI', Arial, sans-serif;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+			color: #1f2937;
 		}
 
 		*, *::before, *::after {
@@ -16,9 +17,6 @@ export const toggleBarStyles = `
 			flex-direction: column;
 			align-items: flex-end;
 			gap: 12px;
-			color: #0f172a;
-			font-size: 14px;
-			font-weight: 500;
 		}
 
 		.picsel-toggle-button {
@@ -29,22 +27,22 @@ export const toggleBarStyles = `
 			border-radius: 999px;
 			border: none;
 			cursor: pointer;
-			background: linear-gradient(135deg, #2563eb, #38bdf8);
+			background: #4f46e5; /* Indigo-600 */
 			color: #ffffff;
-			box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
+			box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
 			font-weight: 600;
 			font-size: 15px;
-			transition: transform 0.2s ease, box-shadow 0.2s ease;
+			transition: all 0.2s ease;
 		}
 
 		.picsel-toggle-button:hover {
+			background: #4338ca; /* Indigo-700 */
 			transform: translateY(-1px);
-			box-shadow: 0 14px 32px rgba(37, 99, 235, 0.4);
+			box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.4);
 		}
 
 		.picsel-toggle-button:active {
 			transform: translateY(0);
-			box-shadow: 0 8px 18px rgba(37, 99, 235, 0.32);
 		}
 
 		.picsel-toggle-label {
@@ -56,21 +54,22 @@ export const toggleBarStyles = `
 			display: none;
 			align-items: center;
 			justify-content: center;
-			font-size: 13px;
-			font-weight: 600;
+			font-size: 12px;
+			font-weight: 700;
 			padding: 2px 8px;
 			border-radius: 999px;
-			background: rgba(255, 255, 255, 0.2);
-			border: 1px solid rgba(255, 255, 255, 0.3);
+			background: #eef2ff; /* Indigo-50 */
+			color: #4f46e5; /* Indigo-600 */
+			margin-left: 4px;
 		}
 
 		.picsel-panel {
 			width: 360px;
 			max-height: 78vh;
-			background: #ffffff;
+			background: #f3f4f6; /* Gray-100 */
 			border-radius: 16px;
-			box-shadow: 0 24px 48px rgba(15, 23, 42, 0.32);
-			border: 1px solid rgba(148, 163, 184, 0.18);
+			box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+			border: 1px solid #e5e7eb;
 			overflow: hidden;
 			display: none;
 			flex-direction: column;
@@ -84,64 +83,69 @@ export const toggleBarStyles = `
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			padding: 16px;
-			background: linear-gradient(135deg, #111827, #1f2937);
-			color: #f8fafc;
+			padding: 16px 20px;
+			background: #111827; /* Gray-900 */
+			color: #ffffff;
 		}
 
 		.picsel-panel-title {
-			font-size: 14px;
+			font-size: 15px;
 			font-weight: 600;
 		}
 
 		.picsel-close-button {
-			width: 28px;
-			height: 28px;
-			border-radius: 999px;
+			width: 24px;
+			height: 24px;
+			border-radius: 4px;
 			border: none;
-			background: rgba(255, 255, 255, 0.15);
-			color: #f8fafc;
-			font-size: 14px;
+			background: transparent;
+			color: #9ca3af; /* Gray-400 */
+			font-size: 18px;
 			cursor: pointer;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			transition: background 0.2s ease;
+			transition: color 0.2s ease;
+			padding: 0;
 		}
 
 		.picsel-close-button:hover {
-			background: rgba(255, 255, 255, 0.28);
+			color: #ffffff;
 		}
 
 		.picsel-panel-content {
-			padding: 20px;
+			padding: 16px;
 			display: flex;
 			flex-direction: column;
-			gap: 18px;
+			gap: 12px;
 			overflow-y: auto;
 		}
 
 		.picsel-empty-state {
 			font-size: 13px;
-			color: #475569;
+			color: #6b7280;
 			text-align: center;
+			padding: 20px;
 		}
 
+		/* Product Card */
 		.picsel-product {
 			display: flex;
-			gap: 16px;
+			gap: 12px;
+			background: #ffffff;
+			padding: 12px;
+			border-radius: 12px;
+			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 		}
 
 		.picsel-product-thumb {
-			width: 96px;
-			height: 96px;
-			border-radius: 12px;
+			width: 72px;
+			height: 72px;
+			border-radius: 8px;
 			overflow: hidden;
-			background: #e2e8f0;
+			background: #f3f4f6;
 			flex-shrink: 0;
-			display: flex;
-			align-items: center;
-			justify-content: center;
+			border: 1px solid #e5e7eb;
 		}
 
 		.picsel-product-thumb img {
@@ -154,45 +158,57 @@ export const toggleBarStyles = `
 			flex: 1;
 			display: flex;
 			flex-direction: column;
-			gap: 10px;
+			gap: 4px;
+			min-width: 0;
 		}
 
 		.picsel-product-title {
-			font-size: 15px;
+			font-size: 14px;
 			font-weight: 600;
 			color: #111827;
 			line-height: 1.4;
 			margin: 0;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
 		}
 
 		.picsel-price {
 			display: flex;
-			flex-direction: column;
+			align-items: baseline;
 			gap: 6px;
+			margin-top: 4px;
 		}
 
 		.picsel-original-price {
-			font-size: 13px;
-			color: #94a3b8;
+			font-size: 12px;
+			color: #9ca3af;
 			text-decoration: line-through;
 		}
 
 		.picsel-final-price {
-			font-size: 20px;
-			font-weight: 700;
-			color: #1f2937;
+			font-size: 16px;
+			font-weight: 800;
+			color: #111827;
 		}
 
 		.picsel-discount-tag {
-			width: fit-content;
-			padding: 2px 8px;
-			border-radius: 999px;
-			background: rgba(16, 185, 129, 0.16);
-			color: #0f766e;
-			font-size: 12px;
-			font-weight: 600;
+			padding: 2px 6px;
+			border-radius: 4px;
+			background: #eef2ff;
+			color: #4f46e5;
+			font-size: 11px;
+			font-weight: 700;
 		}
 
+		.picsel-shipping {
+			font-size: 11px;
+			color: #6b7280;
+			margin-top: 2px;
+		}
+
+		/* Sections */
 		.picsel-section {
 			display: flex;
 			flex-direction: column;
@@ -200,9 +216,10 @@ export const toggleBarStyles = `
 		}
 
 		.picsel-section-title {
-			font-size: 14px;
-			font-weight: 600;
-			color: #0f172a;
+			font-size: 13px;
+			font-weight: 700;
+			color: #111827;
+			margin: 0;
 		}
 
 		.picsel-benefit-list {
@@ -212,10 +229,11 @@ export const toggleBarStyles = `
 		}
 
 		.picsel-benefit-item {
-			padding: 12px 14px;
+			padding: 12px;
 			border-radius: 12px;
-			background: #f8fafc;
-			border: 1px solid rgba(148, 163, 184, 0.24);
+			background: #ffffff;
+			border: 1px solid #e5e7eb;
+			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 			display: flex;
 			flex-direction: column;
 			gap: 4px;
@@ -229,69 +247,77 @@ export const toggleBarStyles = `
 
 		.picsel-benefit-desc {
 			font-size: 12px;
-			color: #475569;
+			color: #6b7280;
 		}
 
 		.picsel-extra-list {
 			display: flex;
 			flex-direction: column;
-			gap: 6px;
+			gap: 8px;
 		}
 
 		.picsel-extra-item {
 			font-size: 13px;
-			color: #1d4ed8;
-			background: rgba(191, 219, 254, 0.4);
-			border: 1px solid rgba(147, 197, 253, 0.7);
-			padding: 8px 10px;
-			border-radius: 10px;
-		}
-
-		.picsel-shipping {
-			font-size: 12px;
-			color: #475569;
+			font-weight: 600;
+			color: #4f46e5;
+			background: #ffffff;
+			border: 2px solid #818cf8;
+			padding: 12px;
+			border-radius: 12px;
+			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 			display: flex;
-			gap: 6px;
 			align-items: center;
+			gap: 8px;
 		}
 
 		.picsel-variants {
 			display: flex;
-			flex-direction: column;
-			gap: 6px;
+			gap: 8px;
+			overflow-x: auto;
+			padding-bottom: 4px;
 		}
 
 		.picsel-variant-item {
 			display: flex;
-			justify-content: space-between;
-			padding: 10px 12px;
-			border-radius: 10px;
-			background: #f1f5f9;
-			font-size: 12px;
-			color: #0f172a;
-			border: 1px solid rgba(148, 163, 184, 0.24);
-			gap: 12px;
+			flex-direction: column;
+			padding: 8px 12px;
+			border-radius: 8px;
+			background: #ffffff;
+			font-size: 11px;
+			color: #1f2937;
+			border: 1px solid #e5e7eb;
+			gap: 2px;
+			min-width: 100px;
+			flex-shrink: 0;
 		}
 
 		.picsel-variant-name {
-			font-weight: 500;
+			font-weight: 600;
+			color: #6b7280;
 		}
 
 		.picsel-variant-price {
-			font-weight: 600;
+			font-weight: 700;
 			color: #1f2937;
+			font-size: 12px;
 		}
 
 		.picsel-variant-discount {
-			color: #0f766e;
+			color: #4f46e5;
+			font-weight: 700;
+			background: #eef2ff;
+			padding: 1px 4px;
+			border-radius: 2px;
+			align-self: flex-start;
 		}
 
 		::-webkit-scrollbar {
-			width: 6px;
+			width: 4px;
+			height: 4px;
 		}
 
 		::-webkit-scrollbar-thumb {
-			background: rgba(15, 23, 42, 0.2);
+			background: #d1d5db;
 			border-radius: 999px;
 		}
 

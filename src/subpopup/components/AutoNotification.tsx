@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import { useProductData, useImageSlider, useWindowResize } from '../../shared/hooks';
+import { useProductData, useWindowResize } from '../../shared/hooks';
 import { autoNotificationStyles as styles } from '../../popup/styles/subpopup/autoNotificationStyles';
-import { Package, CreditCard, Gift } from 'lucide-react';
+import { Gift } from 'lucide-react';
 
 export const AutoNotification: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
@@ -32,6 +32,14 @@ export const AutoNotification: React.FC = () => {
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.logoWrapper}>
+          <img
+            src={logoUrl}
+            alt="PicSel"
+            style={styles.logo}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+            }}
+          />
           <span style={styles.title}>PicSel 혜택 정보</span>
         </div>
         <button style={styles.closeBtn} onClick={() => window.close()}>
@@ -121,7 +129,11 @@ export const AutoNotification: React.FC = () => {
           style={styles.ctaButton}
           onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
           onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-          onClick={() => window.open(product.url, '_blank')}
+          onClick={() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const url = (product as any).url || window.location.href;
+            window.open(url, '_blank');
+          }}
         >
           결제시 쿠폰 적용
         </button>
