@@ -1,0 +1,86 @@
+import colors from '../colors';
+import { WINDOW_CONFIG } from '../../../shared/types/constants';
+
+export const popupStyles = {
+  container: {
+    width: '100%',
+    minWidth: `${WINDOW_CONFIG.POPUP.minWidth}px`,
+    maxWidth: `${WINDOW_CONFIG.POPUP.maxWidth}px`,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    backgroundColor: colors.background,
+    color: colors.textPrimary,
+    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    overflow: 'hidden',
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '16px 20px',
+    backgroundColor: colors.background,
+    flexShrink: 0,
+    zIndex: 10,
+  },
+  logoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  logo: {
+    height: '24px',
+    width: 'auto',
+    objectFit: 'contain' as const,
+  },
+  title: {
+    fontSize: '18px',
+    fontWeight: '800',
+    margin: '0',
+    color: colors.textPrimary,
+    letterSpacing: '-0.5px',
+  },
+  iconButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: colors.textTertiary,
+    borderRadius: '8px',
+    transition: 'all 0.2s ease',
+  },
+  iconButtonHover: {
+    backgroundColor: colors.backgroundSecondary,
+    color: colors.textPrimary,
+  },
+  content: {
+    flex: 1,
+    padding: '0 20px',
+    overflowY: 'auto' as const,
+    overflowX: 'hidden' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
+  },
+  loading: {
+    textAlign: 'center' as const,
+    padding: '40px 0',
+    color: colors.textSecondary,
+    fontSize: '14px',
+  },
+  error: {
+    padding: '16px',
+    backgroundColor: '#fef2f2',
+    borderRadius: '12px',
+    border: '1px solid #fee2e2',
+    margin: '16px 0',
+  },
+  errorText: {
+    color: '#b91c1c',
+    margin: '0',
+    fontSize: '13px',
+    lineHeight: '1.5',
+    fontWeight: '500',
+  },
+};

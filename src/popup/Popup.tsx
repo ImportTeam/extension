@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Gear, X } from '@phosphor-icons/react';
 import {
   useIsLoading,
@@ -9,115 +9,60 @@ import {
 import { IdleView } from '../content/ui/components/IdleView';
 import { RecommendedView } from '../content/ui/components/RecommendedView';
 import { FooterButtons } from '../content/ui/components/FooterButtons';
-import colors from './styles/colors';
+import { popupStyles as styles } from './styles/popup/popupStyles';
+import { WINDOW_CONFIG } from '../shared/types/constants';
 
 export const Popup: React.FC = () => {
   const isLoading = useIsLoading();
   const error = useRecommendationError();
   const isIdle = useIsIdle();
   const isRecommended = useIsRecommended();
+  const [settingsHover, setSettingsHover] = useState(false);
+  const [closeHover, setCloseHover] = useState(false);
 
   // Note: SubPopup이 자동으로 띄워지므로 Popup에서는 최소한의 UI만 표시
 
-  // Compact size for idle state (40% reduction)
-  const popupHeight = isIdle ? '360px' : '600px';
+  // Compact size for idle state
+  const popupHeight = isIdle ? `${WINDOW_CONFIG.POPUP.idleHeight}px` : `${WINDOW_CONFIG.POPUP.expandedHeight}px`;
 
   const handleOpenSettings = (): void => {
     // Open SubPopup in a new window/dialog
     chrome.windows.create({
       url: chrome.runtime.getURL('src/subpopup/index.html'),
       type: 'popup',
-      width: 420,
-      height: 600,
+      width: WINDOW_CONFIG.SUBPOPUP.width,
+      height: WINDOW_CONFIG.SUBPOPUP.height,
     });
   };
 
   return (
-    <div
-      style={{
-        width: 'clamp(250px, 100%, 320px)',
-        height: popupHeight,
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: colors.background,
-        color: colors.textPrimary,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      }}
-    >
+    <div style={{ ...styles.container, height: popupHeight }}>
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-          borderBottom: `1px solid ${colors.border}`,
-          backgroundColor: colors.background,
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
+      <div style={styles.header}>
+        <div style={styles.logoContainer}>
           <img
             src="/assets/icon/picsel.png"
             alt="PicSel"
-            style={{
-              height: '28px',
-              width: 'auto',
-              objectFit: 'contain',
-            }}
+            style={styles.logo}
           />
-          <h1
-            style={{
-              fontSize: '16px',
-              fontWeight: '800',
-              margin: '0',
-              color: colors.textPrimary,
-            }}
-          >
-            PicSel
-          </h1>
+          <h1 style={styles.title}>PicSel</h1>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-          }}
-        >
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={handleOpenSettings}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: colors.textTertiary,
-            }}
+            onMouseEnter={() => setSettingsHover(true)}
+            onMouseLeave={() => setSettingsHover(false)}
+            style={settingsHover ? { ...styles.iconButton, ...styles.iconButtonHover } : styles.iconButton}
             title="결제 수단 설정"
           >
             <Gear weight="bold" size={20} />
           </button>
           <button
             onClick={() => window.close()}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: colors.textTertiary,
-            }}
+            onMouseEnter={() => setCloseHover(true)}
+            onMouseLeave={() => setCloseHover(false)}
+            style={closeHover ? { ...styles.iconButton, ...styles.iconButtonHover } : styles.iconButton}
             title="닫기"
           >
             <X weight="bold" size={20} />
@@ -126,33 +71,16 @@ export const Popup: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div
-        style={{
-          flex: 1,
-          padding: '16px 16px',
-          overflowY: 'hidden',
-          overflowX: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <div style={styles.content}>
         {isLoading && (
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <p style={{ color: colors.textSecondary }}>로딩 중...</p>
+          <div style={styles.loading}>
+            <p>로딩 중...</p>
           </div>
         )}
 
         {error && !isLoading && (
-          <div
-            style={{
-              padding: '12px',
-              backgroundColor: '#fee2e2',
-              borderRadius: '6px',
-            }}
-          >
-            <p style={{ color: '#991b1b', margin: '0', fontSize: '12px' }}>
-              {error}
-            </p>
+          <div style={styles.error}>
+            <p style={styles.errorText}>{error}</p>
           </div>
         )}
 

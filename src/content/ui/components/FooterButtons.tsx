@@ -1,5 +1,5 @@
-import React from 'react';
-import colors from '../../../popup/styles/colors';
+import React, { useState } from 'react';
+import { footerStyles as styles } from '../../../popup/styles/popup/footerStyles';
 
 export const FooterButtons: React.FC = () => {
 
@@ -21,72 +21,16 @@ export const FooterButtons: React.FC = () => {
     });
   };
 
-  const primaryButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '44px',
-    border: 'none',
-    borderRadius: '12px',
-    backgroundColor: colors.buttonDark,
-    color: '#ffffff',
-    fontSize: '13px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
-  };
-
-  const primaryButtonHoverStyle: React.CSSProperties = {
-    ...primaryButtonStyle,
-    backgroundColor: '#1a1a1a',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
-    transform: 'translateY(-2px)',
-  };
-
-  const secondaryButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '44px',
-    border: `2px solid ${colors.buttonLight}`,
-    borderRadius: '12px',
-    backgroundColor: colors.background,
-    color: colors.textPrimary,
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  };
-
-  const secondaryButtonHoverStyle: React.CSSProperties = {
-    ...secondaryButtonStyle,
-    backgroundColor: colors.hover,
-    borderColor: '#b0b0b0',
-  };
-
-  const [paymentHover, setPaymentHover] = React.useState(false);
-  const [picselHover, setPicselHover] = React.useState(false);
+  const [paymentHover, setPaymentHover] = useState(false);
+  const [picselHover, setPicselHover] = useState(false);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        padding: '16px',
-        backgroundColor: colors.background,
-        borderTop: `1px solid ${colors.border}`,
-        flexShrink: 0,
-      }}
-    >
+    <div style={styles.container}>
       <button
         onClick={handleShowModal}
         onMouseEnter={() => setPaymentHover(true)}
         onMouseLeave={() => setPaymentHover(false)}
-        style={paymentHover ? primaryButtonHoverStyle : primaryButtonStyle}
+        style={paymentHover ? { ...styles.primaryButton, ...styles.primaryButtonHover } : styles.primaryButton}
       >
         팝업으로 띄우기
       </button>
@@ -95,7 +39,7 @@ export const FooterButtons: React.FC = () => {
         onClick={handleNavigateToPicsel}
         onMouseEnter={() => setPicselHover(true)}
         onMouseLeave={() => setPicselHover(false)}
-        style={picselHover ? secondaryButtonHoverStyle : secondaryButtonStyle}
+        style={picselHover ? { ...styles.secondaryButton, ...styles.secondaryButtonHover } : styles.secondaryButton}
       >
         내 PicSel로 가기
       </button>
