@@ -1,15 +1,13 @@
 import React, { useRef } from 'react';
 import { useProductData, useImageSlider, useWindowResize } from '../../shared/hooks';
 import { autoNotificationStyles as styles } from '../../popup/styles/subpopup/autoNotificationStyles';
+import { Package, CreditCard, Gift } from 'lucide-react';
 
 export const AutoNotification: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
   
   // Load product data from Chrome storage
-  const { product, topBenefits, imageSlides, loading } = useProductData();
-  
-  // Image slider functionality
-  const { currentSlideIdx, handlePrevSlide, handleNextSlide } = useImageSlider(imageSlides.length);
+  const { product, loading } = useProductData();
   
   // Auto-resize window to fit content
   useWindowResize({
@@ -17,11 +15,7 @@ export const AutoNotification: React.FC = () => {
     contentRef,
   });
 
-  if (loading) {
-    return null;
-  }
-
-  if (!product) {
+  if (loading || !product) {
     return null;
   }
 
@@ -32,158 +26,105 @@ export const AutoNotification: React.FC = () => {
     : 0;
 
   const logoUrl = chrome.runtime.getURL('assets/icon/picsel-logo.png');
-  const currentImage = imageSlides[currentSlideIdx];
 
   return (
     <div ref={contentRef} style={styles.wrapper}>
+      {/* Header */}
       <div style={styles.header}>
         <div style={styles.logoWrapper}>
-          <img
-            src={logoUrl}
-            alt="PicSel"
-            style={styles.logo}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-            }}
-          />
-          <span style={styles.title}>PicSel</span>
+          <span style={styles.title}>PicSel 혜택 정보</span>
         </div>
         <button style={styles.closeBtn} onClick={() => window.close()}>
           ✕
         </button>
       </div>
 
+      {/* Content */}
       <div style={styles.content}>
-        <div style={styles.productCard}>
-          {currentImage && (
-            <div style={styles.imageCarousel}>
-              <img
-                src={currentImage}
-                alt="Product image"
-                style={styles.productImage}
-                onError={(e) => {
-                  console.error('[AutoNotification] Image failed:', currentImage);
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                }}
-                onLoad={() => {
-                  console.log('[AutoNotification] Image loaded:', currentImage);
-                }}
-              />
-
-              {imageSlides.length > 1 && (
-                <>
-                  <button
-                    style={styles.carouselBtn}
-                    onClick={handlePrevSlide}
-                    aria-label="이전"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    style={{ ...styles.carouselBtn, right: '8px' }}
-                    onClick={handleNextSlide}
-                    aria-label="다음"
-                  >
-                    ›
-                  </button>
-
-                  <div style={styles.indicators}>
-                    {imageSlides.map((_, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          ...styles.indicator,
-                          opacity: idx === currentSlideIdx ? 1 : 0.4,
-                        }}
-                      />
-                    ))}
-                  </div>
-                </>
+        
+        {/* 1. Product Card */}
+        <div style={styles.card}>
+          <div style={styles.productSection}>
+            <div style={styles.imageWrapper}>
+              {product.imageUrl && (
+                <img src={product.imageUrl} alt="Product" style={styles.productImage} />
               )}
             </div>
-          )}
-
-          <div style={styles.infoWrapper}>
-            <h3 style={styles.title3}>{product.title}</h3>
-
-            <div style={styles.priceGroup}>
-              {originalPrice > 0 && originalPrice !== finalPrice ? (
-                <>
-                  <span style={styles.originalPrice}>
-                    ₩{originalPrice.toLocaleString()}
-                  </span>
-                  {discountRate > 0 && (
-                    <span style={styles.discountTag}>-{discountRate}%</span>
-                  )}
-                </>
-              ) : null}
-              <div style={styles.finalPrice}>
-                ₩{finalPrice.toLocaleString()}
+            <div style={styles.productInfo}>
+              <div style={styles.productTitle}>{product.title}</div>
+              <div style={styles.priceRow}>
+                <span style={styles.finalPrice}>₩{finalPrice.toLocaleString()}</span>
+                {originalPrice > 0 && (
+                  <span style={styles.originalPrice}>₩{originalPrice.toLocaleString()}</span>
+                )}
+              </div>
+              <div style={styles.priceRow}>
+                {discountRate > 0 && (
+                  <span style={styles.discountBadge}>-{discountRate}%</span>
+                )}
+                <span style={styles.shippingText}>배송: 무료배송</span>
               </div>
             </div>
-
-            {product.shippingInfo && (
-              <span style={styles.shippingInfo}>
-                📦 {product.shippingInfo}
-              </span>
-            )}
           </div>
         </div>
 
-        {topBenefits.length > 0 && (
-          <div style={styles.benefitsSection}>
-            <h4 style={styles.sectionTitle}>
-              💳 카드혜택 TOP{topBenefits.length}
-            </h4>
-            {topBenefits.map((benefit, idx) => (
-              <div key={idx} style={styles.benefitCard}>
-                <div style={styles.benefitInfo}>
-                  <span style={styles.cardName}>{benefit.cardName}</span>
-                  {benefit.benefit && (
-                    <span style={styles.benefitText}>{benefit.benefit}</span>
-                  )}
-                </div>
-                {benefit.rate && (
-                  <span style={styles.rateTag}>{benefit.rate}%</span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {(product.giftCardDiscount || product.cashback) && (
-          <div style={styles.extraSection}>
-            {product.giftCardDiscount && (
-              <div style={styles.extraItem}>
-                🎁 {product.giftCardDiscount.description}
-              </div>
-            )}
-            {product.cashback && (
-              <div style={styles.extraItem}>
-                💰 {product.cashback.description}
-              </div>
-            )}
-          </div>
-        )}
-
-        {product.variants && product.variants.length > 0 && (
-          <div style={styles.variantsSection}>
-            <h4 style={styles.sectionTitle}>📦 다른 구성</h4>
-            <div style={styles.variantsScroll}>
-              {product.variants.map((variant: { name: string; price?: number; discount?: string }, idx: number) => (
-                <div key={idx} style={styles.variantCard}>
-                  <span style={styles.variantName}>{variant.name}</span>
-                  <span style={styles.variantPrice}>
-                    ₩{variant.price?.toLocaleString()}
-                  </span>
-                  {variant.discount && (
-                    <span style={styles.variantDiscount}>{variant.discount}</span>
-                  )}
-                </div>
-              ))}
+        {/* 2. Card Benefits */}
+        <div>
+          <div style={styles.sectionHeader}>카드 혜택 TOP</div>
+          <div style={styles.benefitCard}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={styles.benefitTitle}>제휴 카드</div>
+              <div style={styles.benefitDesc}>최대 5% 즉시할인 (와우전용)</div>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* 3. Additional Benefits (Coupang Cash) */}
+        <div>
+          <div style={styles.sectionHeader}>추가 혜택</div>
+          <div style={styles.extraBenefitCard}>
+            <div style={styles.iconCircle}>
+              <Gift size={18} />
+            </div>
+            <span style={styles.extraBenefitText}>쿠팡캐시 27,960 원 적립</span>
+          </div>
+        </div>
+
+        {/* 4. Other Options */}
+        <div>
+          <div style={styles.sectionHeader}>다른 구성</div>
+          <div style={styles.optionsList}>
+            <div 
+              style={styles.optionItem}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+            >
+              <span style={styles.optionLabel}>512GB</span>
+              <span style={styles.optionPrice}>₩{finalPrice.toLocaleString()}</span>
+            </div>
+            <div 
+              style={styles.optionItem}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+            >
+              <span style={styles.optionLabel}>16GB</span>
+              <span style={styles.optionPrice}>₩{finalPrice.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Footer */}
+      <div style={styles.footer}>
+        <button 
+          style={styles.ctaButton}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+          onClick={() => window.open(product.url, '_blank')}
+        >
+          결제시 쿠폰 적용
+        </button>
       </div>
     </div>
   );
