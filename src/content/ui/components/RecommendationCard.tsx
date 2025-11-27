@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   useRecommendation,
   useIsExpanded,
@@ -16,7 +16,7 @@ import { AlternativesList } from './AlternativesList';
  * - Layer 2: Alternative methods (visible when expanded)
  */
 
-const renderDiscounts = (discounts: Array<{rate: number; type: string}> | null): JSX.Element | null => {
+const renderDiscounts = (discounts: Array<{rate: number; type: string}> | null): ReactElement | null => {
   if (!discounts || discounts.length === 0) return null;
   return (
     <div style={{ marginBottom: '12px', padding: '10px', backgroundColor: '#fef3c7', borderRadius: '6px' }}>
@@ -32,7 +32,7 @@ const renderDiscounts = (discounts: Array<{rate: number; type: string}> | null):
   );
 };
 
-const renderCardBenefits = (cardBenefits: Array<{card: string; benefit: string}> | null): JSX.Element | null => {
+const renderCardBenefits = (cardBenefits: Array<{card: string; benefit: string}> | null): ReactElement | null => {
   if (!cardBenefits || cardBenefits.length === 0) return null;
   return (
     <div style={{ marginBottom: '12px', padding: '10px', backgroundColor: '#fce7f3', borderRadius: '6px' }}>
@@ -48,7 +48,7 @@ const renderCardBenefits = (cardBenefits: Array<{card: string; benefit: string}>
   );
 };
 
-const renderActionButton = (): JSX.Element => (
+const renderActionButton = (): ReactElement => (
   <button
     style={{
       width: '100%',

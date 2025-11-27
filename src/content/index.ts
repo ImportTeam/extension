@@ -52,23 +52,29 @@ console.log('[ContentScript] ✅ Content script initialized in main frame');
 //   };
 // }
 
-function detectCheckoutPage(): { site: string; isCheckout: boolean } {
-  const url = window.location.href;
+// Type guard: Check if URL is Coupang checkout page
+function detectCheckoutPage(url: string): { site: string; isCheckout: boolean } | null {
+  console.log('[Content] 🔍 Detecting checkout page for URL:', url);
 
   if (CoupangParser.isCheckoutPage(url)) {
+    console.log('[Content] ✅ Detected Coupang checkout page');
     return { site: 'coupang', isCheckout: true };
   }
   if (AmazonParser.isCheckoutPage(url)) {
+    console.log('[Content] ✅ Detected Amazon checkout page');
     return { site: 'amazon', isCheckout: true };
   }
   if (EbayParser.isCheckoutPage(url)) {
+    console.log('[Content] ✅ Detected eBay checkout page');
     return { site: 'ebay', isCheckout: true };
   }
-
-  return { site: 'unknown', isCheckout: false };
+  console.log('[Content] ❌ No checkout page detected');
+  return null;
 }
 
-function selectParser(site: string): BaseParser | null {
+// Main parser delegation
+function getParser(site: string): BaseParser {
+  console.log(`[Content] 📦 Creating parser for site: ${site}`);
   switch (site) {
     case 'coupang':
       return new CoupangParser();
@@ -77,31 +83,47 @@ function selectParser(site: string): BaseParser | null {
     case 'ebay':
       return new EbayParser();
     default:
-      return null;
+      return new FallbackParser();
   }
 }
 
 function extractPaymentInfo(): ParsedProductInfo | null {
-  const { site, isCheckout } = detectCheckoutPage();
-
-  if (!isCheckout) {
-    console.log('[ContentScript] Not a checkout page');
+  const url = window.location.href;
+  console.log('[Content] 🚀 Starting payment info extraction for URL:', url);
+  
+  const checkoutInfo = detectCheckoutPage(url);
+  
+  if (!checkoutInfo) {
+    console.log('[Content] ❌ Not a checkout page, skipping extraction');
     return null;
   }
 
-  console.log(`[ContentScript] Checkout detected: ${site}`);
+  const { site, isCheckout } = checkoutInfo;
+  console.log(`[Content] ✅ Checkout detected: ${site}, isCheckout: ${isCheckout}`);
 
-  const siteParser = selectParser(site);
-  if (siteParser) {
-    const result = siteParser.parse(document);
-    if (result) {
-      return result;
-    }
+  const siteParser = getParser(site);
+  console.log(`[Content] 📝 Using parser: ${siteParser.siteName}`);
+  
+  if (!siteParser) {
+    console.error(`[Content] ❌ No parser found for site: ${site}`);
+    return null;
   }
 
-  console.log('[ContentScript] Trying fallback...');
-  const fallbackParser = new FallbackParser();
-  return fallbackParser.parse(document);
+  const result = siteParser.parse(document);
+  
+  if (result) {
+    console.log('[Content] ✅ Parse successful:', {
+      title: result.title?.substring(0, 50),
+      amount: result.amount,
+      hasCardBenefits: !!result.cardBenefits,
+    });
+  } else {
+    console.warn('[Content] ⚠️ Parse returned null, trying fallback...');
+    const fallbackParser = new FallbackParser();
+    return fallbackParser.parse(document);
+  }
+  
+  return result;
 }
 
 function sendToBackground(paymentInfo: ParsedProductInfo): void {

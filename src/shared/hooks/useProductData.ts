@@ -19,7 +19,8 @@ export const useProductData = (): UseProductDataReturn => {
       try {
         const result = await chrome.storage.local.get(['currentProduct']);
         if (result.currentProduct) {
-          const p = result.currentProduct;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const p = result.currentProduct as any;
           console.log('[useProductData] Loaded product:', {
             title: p.title?.substring(0, 50),
             imageUrl: p.imageUrl?.substring(0, 80) || 'none',

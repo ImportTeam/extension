@@ -19,7 +19,9 @@ export class CoupangParser extends BaseParser {
   };
 
   static isCheckoutPage(url: string): boolean {
-    return /coupang\.com\/vp\//.test(url) || /coupang\.com\/n\//.test(url) || /coupang\.com\/products\//.test(url);
+    const isCheckout = /coupang\.com\/vp\//.test(url) || /coupang\.com\/n\//.test(url) || /coupang\.com\/products\//.test(url);
+    console.log(`[CoupangParser] isCheckoutPage("${url}") = ${isCheckout}`);
+    return isCheckout;
   }
 
   parse(doc: Document): ParsedProductInfo | null {

@@ -1,0 +1,1 @@
+(async()=>{const o=chrome.runtime.getURL("content.js");try{await import(o),console.log("[Loader] ✅ Content script loaded via ESM")}catch(t){console.error("[Loader] ❌ Failed to load content script:",t)}})();

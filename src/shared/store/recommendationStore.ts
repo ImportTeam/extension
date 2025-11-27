@@ -10,7 +10,7 @@ const chromeStorageAdapter = {
   getItem: async (name: string): Promise<string | null> => {
     return new Promise((resolve) => {
       chrome.storage.local.get([name], (result) => {
-        resolve(result[name] ?? null);
+        resolve((result[name] as string) ?? null);
       });
     });
   },

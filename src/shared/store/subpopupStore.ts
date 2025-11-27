@@ -13,7 +13,7 @@ const chromeStorageAdapter = {
   getItem: async (name: string): Promise<string | null> => {
     return new Promise((resolve) => {
       chrome.storage.local.get([name], (result) => {
-        resolve(result[name] ?? null);
+        resolve((result[name] as string) ?? null);
       });
     });
   },
@@ -50,8 +50,8 @@ export const useSubPopupStore = create<SubPopupState>()(
       customMethods: [],
 
       // UI Actions
-      setIsOpen: (open: boolean): void => set({ isOpen: open }),
-      setActiveTab: (tab: 'add' | 'list'): void => set({ activeTab: tab }),
+      setIsOpen: (open: boolean): void => { set({ isOpen: open }); },
+      setActiveTab: (tab: 'add' | 'list'): void => { set({ activeTab: tab }); },
 
       // Data Actions
       addPaymentMethod: (method: Omit<CustomPaymentMethod, 'createdAt' | 'updatedAt' | 'isCustom'>): void => {

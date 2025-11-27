@@ -23,7 +23,7 @@
       "matches": [
         "<all_urls>"
       ],
-      "js": ["content.js"],
+      "js": ["loader.js"],
       "run_at": "document_end",
       "all_frames": true
     }
@@ -53,7 +53,8 @@
     {
       "resources": [
         "assets/*",
-        "src/subpopup/index.html"
+        "src/subpopup/index.html",
+        "content.js"
       ],
       "matches": [
         "<all_urls>"

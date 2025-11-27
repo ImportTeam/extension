@@ -89,10 +89,12 @@ chrome.runtime.onMessage.addListener(
       if (message.type === 'GET_PRODUCT_DATA') {
         console.log('[Background] 🔍 GET_PRODUCT_DATA request');
         chrome.storage.local.get(['currentProduct'], (result) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const currentProduct = result.currentProduct as any;
           console.log('[Background] 📦 Retrieved product data:', {
-            exists: !!result.currentProduct,
-            amount: result.currentProduct?.amount,
-            title: result.currentProduct?.title?.substring(0, 50) + '...',
+            exists: !!currentProduct,
+            amount: currentProduct?.amount,
+            title: currentProduct?.title?.substring(0, 50) + '...',
           });
           sendResponse({
             success: true,
@@ -146,7 +148,8 @@ chrome.runtime.onMessage.addListener(
 
         // 기존 데이터 조회
         chrome.storage.local.get(['currentProduct'], (result) => {
-          const existingData = result.currentProduct;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const existingData = (result.currentProduct || {}) as any;
 
           // 기존 데이터와 새로운 데이터 병합
           const mergedData = {

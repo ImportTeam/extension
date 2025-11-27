@@ -3,7 +3,7 @@ import { useProductData, useImageSlider, useWindowResize } from '../../shared/ho
 import { autoNotificationStyles as styles } from '../../popup/styles/subpopup/autoNotificationStyles';
 
 export const AutoNotification: React.FC = () => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
   
   // Load product data from Chrome storage
   const { product, topBenefits, imageSlides, loading } = useProductData();
