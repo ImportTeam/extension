@@ -382,7 +382,7 @@ const renderContent = (): void => {
 			if (variant.discount) {
 				const discountEl = document.createElement('div');
 				discountEl.className = 'picsel-variant-discount';
-				discountEl.textContent = variant.discount;
+				discountEl.textContent = `-${variant.discount}`; // Add minus sign if missing
 				item.appendChild(discountEl);
 			}
 
@@ -391,6 +391,25 @@ const renderContent = (): void => {
 
 		section.appendChild(list);
 		contentEl.appendChild(section);
+	}
+
+	// Footer Button
+	if (panelEl) {
+		const footerEl = document.createElement('div');
+		footerEl.className = 'picsel-panel-footer';
+		
+		const ctaButton = document.createElement('button');
+		ctaButton.className = 'picsel-cta-button';
+		ctaButton.textContent = '결제시 쿠폰 적용';
+		ctaButton.onclick = (): void => {
+			const url = data.url || window.location.href;
+			if (url) {
+				window.open(url, '_blank');
+			}
+		};
+
+		footerEl.appendChild(ctaButton);
+		panelEl.appendChild(footerEl);
 	}
 
 	updateBadge(data);

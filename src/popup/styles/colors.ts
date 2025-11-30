@@ -10,6 +10,11 @@
 export const Colors = {
   // Light Mode (Modern Fintech Theme)
   light: {
+    // Brand
+    brand: '#393E44',                // PicSel Brand Color (Dark Gray)
+    brandLight: '#4a5058',           // Brand hover/lighter variant
+    brandDark: '#2d3136',            // Brand active/darker variant
+    
     // Backgrounds
     background: '#ffffff',           // Clean white
     backgroundSecondary: '#f9fafb',  // Very light gray (Gray-50)
@@ -17,7 +22,7 @@ export const Colors = {
     // Card & Button Backgrounds
     cardBg: '#ffffff',               // White cards with shadow
     cardBgAlt: '#f3f4f6',            // Light gray (Gray-100)
-    buttonDark: '#4f46e5',           // Indigo-600 (Primary Brand Color)
+    buttonDark: '#393E44',           // PicSel Brand (Primary Button)
     buttonLight: '#ffffff',          // White secondary buttons
     
     // Semantic Backgrounds
@@ -36,10 +41,10 @@ export const Colors = {
     textSecondary: '#4b5563',        // Gray-600 (Secondary text)
     textTertiary: '#9ca3af',         // Gray-400 (Tertiary text)
     textOnGray: '#ffffff',           // White text (on dark backgrounds)
-    labelColor: '#6b7280',           // Gray-500
+    labelColor: '#111827',           // Gray-500
     
     // Semantic Colors
-    primary: '#4f46e5',              // Indigo-600
+    primary: '#111827',              // Indigo-600
     success: '#059669',              // Green-600
     accent: '#d97706',               // Amber-600
     error: '#dc2626',                // Red-600
@@ -47,16 +52,21 @@ export const Colors = {
     // States
     hover: '#f3f4f6',                // Gray-100 hover
     active: '#e5e7eb',               // Gray-200 active
-    buttonHover: '#4338ca',          // Indigo-700 (Primary button hover)
+    buttonHover: '#3B82F6',          // Indigo-700 (Primary button hover)
   },
   
   // Dark Mode (Future - Placeholder for now)
   dark: {
+    // Brand
+    brand: '#5a6169',                // PicSel Brand Color (Lighter for dark mode)
+    brandLight: '#6b7178',           // Brand hover/lighter variant
+    brandDark: '#4a5058',            // Brand active/darker variant
+    
     background: '#1f2937',
     backgroundSecondary: '#111827',
     cardBg: '#374151',
     cardBgAlt: '#4b5563',
-    buttonDark: '#818cf8',
+    buttonDark: '#5a6169',           // PicSel Brand for dark mode
     buttonLight: '#4b5563',
     successBg: '#065f46',
     primaryBg: '#1e3a8a',

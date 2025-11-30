@@ -5,7 +5,7 @@ export const IdleView: React.FC = () => {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <div style={styles.label}>
+        <div style={styles.label} className="idle-label">
           <span>이번달</span>
         </div>
         <div style={styles.amount}>

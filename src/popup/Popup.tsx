@@ -41,7 +41,7 @@ export const Popup: React.FC = () => {
       <div style={styles.header}>
         <div style={styles.logoContainer}>
           <img
-            src="/assets/icon/picsel.png"
+            src="/assets/icon/picsel-logo.png"
             alt="PicSel"
             style={styles.logo}
           />

@@ -27,21 +27,21 @@ export const FooterButtons: React.FC = () => {
   return (
     <div style={styles.container}>
       <button
-        onClick={handleShowModal}
-        onMouseEnter={() => setPaymentHover(true)}
-        onMouseLeave={() => setPaymentHover(false)}
-        style={paymentHover ? { ...styles.primaryButton, ...styles.primaryButtonHover } : styles.primaryButton}
-      >
-        팝업으로 띄우기
-      </button>
-
-      <button
         onClick={handleNavigateToPicsel}
         onMouseEnter={() => setPicselHover(true)}
         onMouseLeave={() => setPicselHover(false)}
-        style={picselHover ? { ...styles.secondaryButton, ...styles.secondaryButtonHover } : styles.secondaryButton}
+        style={picselHover ? { ...styles.primaryButton, ...styles.primaryButtonHover } : styles.primaryButton}
       >
-        내 PicSel로 가기
+        전체 리포트보기
+      </button>
+
+      <button
+        onClick={handleShowModal}
+        onMouseEnter={() => setPaymentHover(true)}
+        onMouseLeave={() => setPaymentHover(false)}
+        style={paymentHover ? { ...styles.secondaryButton, ...styles.secondaryButtonHover } : styles.secondaryButton}
+      >
+        내 결제수단보러 가기
       </button>
     </div>
   );

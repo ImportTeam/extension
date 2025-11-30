@@ -231,6 +231,15 @@ textarea {
   color: var(--color-gray-900);
 }
 
+/* IdleView label - uses CSS variables for consistency */
+.idle-label {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  font-weight: var(--font-bold);
+  margin-bottom: var(--spacing-2);
+  letter-spacing: 0.3px;
+}
+
 .form-group input,
 .form-group textarea,
 .form-group select {

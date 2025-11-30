@@ -272,43 +272,73 @@ export const toggleBarStyles = `
 
 		.picsel-variants {
 			display: flex;
+			flex-direction: column; /* Vertical stack */
 			gap: 8px;
-			overflow-x: auto;
-			padding-bottom: 4px;
 		}
 
 		.picsel-variant-item {
 			display: flex;
-			flex-direction: column;
-			padding: 8px 12px;
-			border-radius: 8px;
+			justify-content: space-between;
+			align-items: center;
+			padding: 12px 16px;
+			border-radius: 12px;
 			background: #ffffff;
-			font-size: 11px;
+			font-size: 13px;
 			color: #1f2937;
 			border: 1px solid #e5e7eb;
-			gap: 2px;
-			min-width: 100px;
-			flex-shrink: 0;
+			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+			cursor: pointer;
+			transition: background-color 0.2s;
+		}
+
+		.picsel-variant-item:hover {
+			background-color: #f9fafb;
 		}
 
 		.picsel-variant-name {
 			font-weight: 600;
-			color: #6b7280;
+			color: #374151;
 		}
 
 		.picsel-variant-price {
 			font-weight: 700;
 			color: #1f2937;
-			font-size: 12px;
+			font-size: 14px;
 		}
 
 		.picsel-variant-discount {
 			color: #4f46e5;
 			font-weight: 700;
 			background: #eef2ff;
-			padding: 1px 4px;
-			border-radius: 2px;
-			align-self: flex-start;
+			padding: 2px 6px;
+			border-radius: 4px;
+			font-size: 11px;
+			margin-left: auto; /* Push to right */
+		}
+
+		.picsel-panel-footer {
+			padding: 16px 20px;
+			background: #ffffff;
+			border-top: 1px solid #e5e7eb;
+			margin-top: auto; /* Push to bottom */
+		}
+
+		.picsel-cta-button {
+			width: 100%;
+			height: 48px;
+			background: #4f46e5;
+			color: #ffffff;
+			font-size: 16px;
+			font-weight: 700;
+			border: none;
+			border-radius: 12px;
+			cursor: pointer;
+			box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+			transition: background-color 0.2s;
+		}
+
+		.picsel-cta-button:hover {
+			background: #4338ca;
 		}
 
 		::-webkit-scrollbar {
