@@ -25,4 +25,15 @@ export const COUPANG_SELECTORS = {
   instantOption: '.instant-option',
   benefitBadge: '.ccid-benefit-badge',
   shipping: '[class*="shipping"]',
+  // 카드 혜택 상세 팝업 선택자
+  cardBenefitPopup: {
+    container: '#creditCardBenefitPopup, .card-benefit-popup',
+    content: '#creditCardBenefitContent, .card-benefit-popup__content',
+    iframe: '.card-benefit-popup__content-iframe',
+    // iframe 내부 선택자
+    cardItem: '.card-benefit-item, .benefit-card-item, [class*="card-benefit"]',
+    cardName: '.card-name, .benefit-card-name, [class*="card-name"]',
+    benefitRate: '.benefit-rate, .discount-rate, [class*="rate"]',
+    benefitDesc: '.benefit-desc, .card-benefit-desc, [class*="benefit-desc"]',
+  },
 };
