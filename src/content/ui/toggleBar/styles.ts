@@ -84,7 +84,7 @@ export const toggleBarStyles = `
 			align-items: center;
 			justify-content: space-between;
 			padding: 16px 20px;
-			background: #111827; /* Gray-900 */
+			background: #393E44; /* Brand Color */
 			color: #ffffff;
 		}
 

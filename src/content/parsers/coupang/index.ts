@@ -43,6 +43,11 @@ export class CoupangParser extends BaseParser {
       }
 
       if (!amount) {
+        // Try element scan fallback
+        amount = Price.findPriceByElementScan(doc);
+      }
+
+      if (!amount) {
         console.debug('[CoupangParser] ❌ No price found');
         return null;
       }

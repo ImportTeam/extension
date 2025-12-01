@@ -171,7 +171,7 @@ function init(): void {
   }
 
   console.log('[ContentScript] Extracted data:', paymentInfo);
-  mountToggleBar(paymentInfo as ToggleProductData);
+  mountToggleBar({ ...(paymentInfo as ToggleProductData), site });
   console.log('[ContentScript] Sending to background...');
   sendToBackground(paymentInfo);
 }
@@ -207,7 +207,7 @@ function setupDynamicContentObserver(): void {
 
         if (paymentInfo) {
           console.log('[ContentScript] ✅ Dynamic content re-parsed:', paymentInfo);
-          updateToggleBar(paymentInfo as ToggleProductData);
+          updateToggleBar({ ...(paymentInfo as ToggleProductData), site });
 
           // Background에 업데이트 메시지 전송
           chrome.runtime.sendMessage(

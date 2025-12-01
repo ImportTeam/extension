@@ -15,6 +15,7 @@ let buttonBadgeEl: HTMLSpanElement | null = null;
 let panelEl: HTMLDivElement | null = null;
 let closeButtonEl: HTMLButtonElement | null = null;
 let contentEl: HTMLDivElement | null = null;
+let panelTitleEl: HTMLDivElement | null = null;
 let mounted = false;
 let cachedData: ToggleProductData | null = null;
 
@@ -85,7 +86,7 @@ const ensureMounted = (): void => {
 	const panelHeaderEl = document.createElement('div');
 	panelHeaderEl.className = 'picsel-panel-header';
 
-	const panelTitleEl = document.createElement('div');
+	panelTitleEl = document.createElement('div');
 	panelTitleEl.className = 'picsel-panel-title';
 	panelTitleEl.textContent = 'PicSel 혜택 정보';
 
@@ -296,7 +297,18 @@ const renderContent = (): void => {
 		const list = document.createElement('div');
 		list.className = 'picsel-benefit-list';
 
-		benefits.forEach((benefit: { cardName?: string; benefit?: string }) => {
+		// Determine which benefit has the highest numeric rate
+		let bestIndex = -1;
+		let bestRate = -Infinity;
+		benefits.forEach((b, idx) => {
+			const r = (b as any)?.rate;
+			if (typeof r === 'number' && r > bestRate) {
+				bestRate = r;
+				bestIndex = idx;
+			}
+		});
+
+		benefits.forEach((benefit: { cardName?: string; benefit?: string; rate?: number }, idx: number) => {
 			const item = document.createElement('div');
 			item.className = 'picsel-benefit-item';
 
@@ -310,6 +322,24 @@ const renderContent = (): void => {
 				desc.className = 'picsel-benefit-desc';
 				desc.textContent = benefit.benefit;
 				item.appendChild(desc);
+			}
+
+			// Highlight the best card with a subtle badge
+			if (idx === bestIndex) {
+				const bestBadge = document.createElement('span');
+				bestBadge.textContent = '추천';
+				bestBadge.style.marginLeft = '6px';
+				bestBadge.style.fontSize = '11px';
+				bestBadge.style.fontWeight = '700';
+				bestBadge.style.background = '#393E44';
+				bestBadge.style.color = '#fff';
+				bestBadge.style.padding = '2px 6px';
+				bestBadge.style.borderRadius = '8px';
+				// Append to card name
+				const cardNameEl = item.querySelector('.picsel-card-name');
+				if (cardNameEl) {
+					cardNameEl.appendChild(bestBadge);
+				}
 			}
 
 			list.appendChild(item);
@@ -393,24 +423,7 @@ const renderContent = (): void => {
 		contentEl.appendChild(section);
 	}
 
-	// Footer Button
-	if (panelEl) {
-		const footerEl = document.createElement('div');
-		footerEl.className = 'picsel-panel-footer';
-		
-		const ctaButton = document.createElement('button');
-		ctaButton.className = 'picsel-cta-button';
-		ctaButton.textContent = '결제시 쿠폰 적용';
-		ctaButton.onclick = (): void => {
-			const url = data.url || window.location.href;
-			if (url) {
-				window.open(url, '_blank');
-			}
-		};
-
-		footerEl.appendChild(ctaButton);
-		panelEl.appendChild(footerEl);
-	}
+	// No footer CTA per PRD - keep UI compact
 
 	updateBadge(data);
 };
@@ -418,6 +431,22 @@ const renderContent = (): void => {
 export const mountToggleBar = (data: ToggleProductData): void => {
 	cachedData = { ...data };
 	ensureMounted();
+	// Update panel title with site/platform name if available
+	if (panelTitleEl && cachedData?.site) {
+		const platformNames: Record<string, string> = {
+			coupang: '쿠팡',
+			amazon: '아마존',
+			ebay: '이베이',
+			gmarket: 'G마켓',
+			'11st': '11번가',
+			naver: '네이버쇼핑',
+			tmon: '티몬',
+			wemakeprice: '위메프',
+		};
+		const siteKey = String(cachedData.site).toLowerCase();
+		const resource = platformNames[siteKey] || String(cachedData.site);
+		panelTitleEl.textContent = `${resource} 혜택 정보`;
+	}
 	renderContent();
 	setPanelOpen(false);
 };
@@ -427,6 +456,22 @@ export const updateToggleBar = (data: ToggleProductData): void => {
 	if (!mounted) {
 		mountToggleBar(cachedData);
 		return;
+	}
+	// Update header title if platform/site provided
+	if (panelTitleEl && cachedData?.site) {
+		const platformNames: Record<string, string> = {
+			coupang: '쿠팡',
+			amazon: '아마존',
+			ebay: '이베이',
+			gmarket: 'G마켓',
+			'11st': '11번가',
+			naver: '네이버쇼핑',
+			tmon: '티몬',
+			wemakeprice: '위메프',
+		};
+		const siteKey = String(cachedData.site).toLowerCase();
+		const resource = platformNames[siteKey] || String(cachedData.site);
+		panelTitleEl.textContent = `${resource} 혜택 정보`;
 	}
 	renderContent();
 };

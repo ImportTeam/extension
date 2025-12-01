@@ -30,4 +30,5 @@ export type ToggleProductData = (ParsedProductInfo & Record<string, unknown>) &
 			price: number;
 			discount?: string;
 		}>;
+		site?: string; // e.g. 'coupang', 'amazon'
 	}>;
