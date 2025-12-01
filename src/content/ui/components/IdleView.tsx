@@ -9,7 +9,7 @@ export const IdleView: React.FC = () => {
           <span>이번달</span>
         </div>
         <div style={styles.amount}>
-          ₩123,456
+          ₩12,000
         </div>
         <p style={styles.text}>
           절약했어요

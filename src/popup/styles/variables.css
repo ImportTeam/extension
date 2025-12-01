@@ -1,14 +1,14 @@
 /**
- * CSS Variables
+ * CSS Variables - Single Source of Truth
  * 
  * All design tokens in one place
- * Single source of truth for colors (synced with colors.ts)
+ * colors.ts references these values for TypeScript usage
  * Spacing: 4px base unit
  * Typography: 12px ~ 24px range
  */
 
 :root {
-  /* ========== BRAND COLORS (from colors.ts) ========== */
+  /* ========== BRAND COLORS ========== */
   --color-brand: #393E44;
   --color-brand-light: #4a5058;
   --color-brand-dark: #2d3136;
@@ -19,67 +19,78 @@
   --color-primary-dark: #030712;
 
   /* ========== COLORS: SEMANTIC ========== */
-  /* Success (Green) - for savings, positive actions */
+  /* Success (Green) */
   --color-success: #059669;
   --color-success-light: #ecfdf5;
   --color-success-dark: #047857;
+  --color-success-border: #10b981;
 
-  /* Error (Red) - for alerts, errors */
+  /* Error (Red) */
   --color-error: #dc2626;
   --color-error-light: #fef2f2;
   --color-error-dark: #b91c1c;
 
-  /* Warning (Amber) - for cautions */
+  /* Warning (Amber) / Accent */
   --color-warning: #d97706;
   --color-warning-light: #fffbeb;
   --color-warning-dark: #b45309;
+  --color-accent: #d97706;
+  --color-accent-bg: #fffbeb;
 
-  /* Info (Blue) - for information */
+  /* Info (Blue) */
   --color-info: #3b82f6;
   --color-info-light: #eff6ff;
   --color-info-dark: #2563eb;
 
+  /* Primary Background */
+  --color-primary-bg: #eef2ff;
+  --color-primary-border: #4f46e5;
+
   /* ========== COLORS: GRAYSCALE ========== */
-  --color-gray-900: #111827;  /* Primary text */
+  --color-gray-900: #111827;
   --color-gray-800: #1f2937;
   --color-gray-700: #374151;
-  --color-gray-600: #4b5563;  /* Secondary text */
-  --color-gray-500: #6b7280;  /* Tertiary text */
+  --color-gray-600: #4b5563;
+  --color-gray-500: #6b7280;
   --color-gray-400: #9ca3af;
   --color-gray-300: #d1d5db;
-  --color-gray-200: #e5e7eb;  /* Borders */
-  --color-gray-100: #f3f4f6;  /* Backgrounds */
+  --color-gray-200: #e5e7eb;
+  --color-gray-100: #f3f4f6;
   --color-gray-50: #f9fafb;
   --color-white: #ffffff;
 
-  /* ========== COLORS: TEXT (from colors.ts) ========== */
+  /* ========== COLORS: TEXT ========== */
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;
   --color-text-tertiary: #9ca3af;
   --color-text-on-dark: #ffffff;
   --color-label: #111827;
 
-  /* ========== COLORS: BACKGROUNDS (from colors.ts) ========== */
+  /* ========== COLORS: BACKGROUNDS ========== */
   --color-background: #ffffff;
   --color-background-secondary: #f9fafb;
   --color-card-bg: #ffffff;
   --color-card-bg-alt: #f3f4f6;
 
-  /* ========== COLORS: BUTTONS (from colors.ts) ========== */
+  /* ========== COLORS: BUTTONS ========== */
   --color-button-dark: #393E44;
   --color-button-light: #ffffff;
-  --color-button-hover: #3B82F6;
+  --color-button-hover: #2d3136;
+
+  /* ========== COLORS: BORDERS ========== */
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+
+  /* ========== COLORS: STATES ========== */
+  --color-hover: #f3f4f6;
+  --color-active: #e5e7eb;
 
   /* ========== COLORS: SYSTEM ========== */
   --color-foreground: #111827;
   --color-muted: #6b7280;
   --color-muted-foreground: #9ca3af;
-  --color-border: #e5e7eb;
-  --color-border-light: #f3f4f6;
   --color-input: #ffffff;
   --color-ring: #393E44;
-  --color-hover: #f3f4f6;
-  --color-active: #e5e7eb;
 
   /* ========== TYPOGRAPHY ========== */
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
