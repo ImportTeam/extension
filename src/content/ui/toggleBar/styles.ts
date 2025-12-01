@@ -270,6 +270,140 @@ export const toggleBarStyles = `
 			gap: 8px;
 		}
 
+		/* Card Benefits Section - 메인 콘텐츠 */
+		.picsel-card-section {
+			margin-top: 4px;
+		}
+
+		.picsel-card-benefit-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.picsel-card-benefit-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			padding: 14px 16px;
+			border-radius: 12px;
+			background: #ffffff;
+			border: 1px solid #e5e7eb;
+			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+			transition: all 0.2s ease;
+		}
+
+		.picsel-card-benefit-item.recommended {
+			background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+			border-color: #f59e0b;
+			box-shadow: 0 2px 8px -2px rgba(245, 158, 11, 0.3);
+		}
+
+		.picsel-card-left {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			flex: 1;
+			min-width: 0;
+		}
+
+		.picsel-card-name-row {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.picsel-recommended-badge {
+			font-size: 11px;
+			font-weight: 700;
+			color: #92400e;
+			background: rgba(255, 255, 255, 0.8);
+			padding: 2px 8px;
+			border-radius: 999px;
+			white-space: nowrap;
+		}
+
+		.picsel-card-benefit-item .picsel-card-name {
+			font-size: 14px;
+			font-weight: 700;
+			color: #1f2937;
+		}
+
+		.picsel-card-benefit-item.recommended .picsel-card-name {
+			color: #92400e;
+		}
+
+		.picsel-card-benefit-desc {
+			font-size: 12px;
+			color: #6b7280;
+		}
+
+		.picsel-card-benefit-item.recommended .picsel-card-benefit-desc {
+			color: #a16207;
+		}
+
+		.picsel-card-right {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			gap: 2px;
+			flex-shrink: 0;
+		}
+
+		.picsel-card-discount {
+			font-size: 16px;
+			font-weight: 800;
+			color: #dc2626;
+		}
+
+		.picsel-card-benefit-item.recommended .picsel-card-discount {
+			color: #b91c1c;
+		}
+
+		.picsel-card-final {
+			font-size: 11px;
+			color: #6b7280;
+		}
+
+		.picsel-card-benefit-item.recommended .picsel-card-final {
+			color: #a16207;
+		}
+
+		.picsel-card-rate {
+			font-size: 14px;
+			font-weight: 700;
+			color: #4f46e5;
+		}
+
+		/* Footer Section */
+		.picsel-footer {
+			margin-top: 4px;
+			padding-top: 12px;
+			border-top: 1px solid #e5e7eb;
+		}
+
+		.picsel-footer-list {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+		}
+
+		.picsel-footer-item {
+			font-size: 13px;
+			color: #4f46e5;
+			padding: 10px 12px;
+			background: #eef2ff;
+			border-radius: 8px;
+		}
+
+		/* Empty Benefits */
+		.picsel-empty-benefits {
+			padding: 16px;
+			text-align: center;
+			color: #9ca3af;
+			font-size: 13px;
+		}
+
 		.picsel-variants {
 			display: flex;
 			flex-direction: column; /* Vertical stack */

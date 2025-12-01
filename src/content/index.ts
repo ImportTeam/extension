@@ -87,7 +87,12 @@ function getParser(site: string): BaseParser {
   }
 }
 
-function extractPaymentInfo(): ParsedProductInfo | null {
+interface ExtractionResult {
+  paymentInfo: ParsedProductInfo;
+  site: string;
+}
+
+function extractPaymentInfo(): ExtractionResult | null {
   const url = window.location.href;
   console.log('[Content] 🚀 Starting payment info extraction for URL:', url);
   
@@ -109,7 +114,7 @@ function extractPaymentInfo(): ParsedProductInfo | null {
     return null;
   }
 
-  const result = siteParser.parse(document);
+  let result = siteParser.parse(document);
   
   if (result) {
     console.log('[Content] ✅ Parse successful:', {
@@ -120,13 +125,16 @@ function extractPaymentInfo(): ParsedProductInfo | null {
   } else {
     console.warn('[Content] ⚠️ Parse returned null, trying fallback...');
     const fallbackParser = new FallbackParser();
-    return fallbackParser.parse(document);
+    result = fallbackParser.parse(document);
+    if (!result) {
+      return null;
+    }
   }
   
-  return result;
+  return { paymentInfo: result, site };
 }
 
-function sendToBackground(paymentInfo: ParsedProductInfo): void {
+function sendToBackground(paymentInfo: ParsedProductInfo, site: string): void {
   chrome.runtime.sendMessage(
     {
       type: 'SAVE_PRODUCT_DATA',
@@ -143,7 +151,7 @@ function sendToBackground(paymentInfo: ParsedProductInfo): void {
         });
 
         // UI 토글 최신 데이터 반영
-        updateToggleBar(paymentInfo as ToggleProductData);
+        updateToggleBar({ ...paymentInfo, site } as ToggleProductData);
       } else {
         console.error('[ContentScript] ❌ Background error:', {
           error: response?.error,
@@ -163,17 +171,19 @@ function init(): void {
     return;
   }
 
-  const paymentInfo = extractPaymentInfo();
+  const extractionResult = extractPaymentInfo();
 
-  if (!paymentInfo) {
+  if (!extractionResult) {
     console.warn('[ContentScript] Failed to extract');
     return;
   }
 
+  const { paymentInfo, site } = extractionResult;
+
   console.log('[ContentScript] Extracted data:', paymentInfo);
-  mountToggleBar({ ...(paymentInfo as ToggleProductData), site });
+  mountToggleBar({ ...paymentInfo, site } as ToggleProductData);
   console.log('[ContentScript] Sending to background...');
-  sendToBackground(paymentInfo);
+  sendToBackground(paymentInfo, site);
 }
 
 /**
@@ -203,11 +213,12 @@ function setupDynamicContentObserver(): void {
 
       // 500ms 대기 (iframe 콘텐츠 로드 완료 대기)
       setTimeout(() => {
-        const paymentInfo = extractPaymentInfo();
+        const extractionResult = extractPaymentInfo();
 
-        if (paymentInfo) {
+        if (extractionResult) {
+          const { paymentInfo, site } = extractionResult;
           console.log('[ContentScript] ✅ Dynamic content re-parsed:', paymentInfo);
-          updateToggleBar({ ...(paymentInfo as ToggleProductData), site });
+          updateToggleBar({ ...paymentInfo, site } as ToggleProductData);
 
           // Background에 업데이트 메시지 전송
           chrome.runtime.sendMessage(

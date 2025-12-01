@@ -12,9 +12,11 @@ export type ToggleProductData = (ParsedProductInfo & Record<string, unknown>) &
 		originalPrice: number;
 		discountPrice: number;
 		cardBenefits: Array<{
-			cardName: string;
-			benefit: string;
-			rate?: number;
+			card: string;        // 카드사명
+			cardName?: string;   // 카드사명 (별칭)
+			benefit: string;     // 혜택 설명
+			discount?: number;   // 할인율 (%)
+			rate?: number;       // 할인율 (별칭)
 		}>;
 		giftCardDiscount: {
 			rate: number;
