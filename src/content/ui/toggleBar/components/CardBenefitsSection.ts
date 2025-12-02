@@ -48,9 +48,9 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 		const emptySection = document.createElement('section');
 		emptySection.className = 'picsel-section picsel-card-section';
 
-		const title = document.createElement('h4');
-		title.className = 'picsel-section-title';
-		title.innerHTML = '💳 카드별 혜택';
+	const title = document.createElement('h4');
+	title.className = 'picsel-section-title';
+	title.textContent = '카드별 혜택';
 		emptySection.appendChild(title);
 
 		const emptyMsg = document.createElement('div');
@@ -100,17 +100,17 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 
 	const title = document.createElement('h4');
 	title.className = 'picsel-section-title';
-	title.innerHTML = '💳 카드별 혜택 비교';
+	title.textContent = '카드별 혜택 비교';
 	section.appendChild(title);
 
 	const list = document.createElement('div');
 	list.className = 'picsel-card-benefit-list';
 
-	enrichedBenefits.forEach((benefit, idx) => {
-		const isRecommended = idx === 0 && (benefit.discountAmount ?? 0) > 0;
+enrichedBenefits.forEach((benefit, idx) => {
+	const rankClass = idx === 0 ? ' recommended' : idx === 1 ? ' rank-2' : idx === 2 ? ' rank-3' : '';
 
 		const item = document.createElement('div');
-		item.className = `picsel-card-benefit-item${isRecommended ? ' recommended' : ''}`;
+		item.className = `picsel-card-benefit-item${rankClass}`;
 
 		// 왼쪽: 카드명 + 혜택 설명
 		const leftCol = document.createElement('div');
@@ -119,10 +119,11 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 		const cardNameRow = document.createElement('div');
 		cardNameRow.className = 'picsel-card-name-row';
 
-		if (isRecommended) {
+		// 상위 3개에 순위 배지 표시
+		if (idx < 3 && (benefit.discountAmount ?? 0) > 0) {
 			const badge = document.createElement('span');
 			badge.className = 'picsel-recommended-badge';
-			badge.textContent = '🏆 최고 혜택';
+			badge.textContent = `${idx + 1}위`;
 			cardNameRow.appendChild(badge);
 		}
 
@@ -190,10 +191,10 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 	// 추가 혜택 (sub) - 카드 섹션 아래에 작게 표시
 	const extras: string[] = [];
 	if (data.giftCardDiscount?.description) {
-		extras.push(`🎁 ${data.giftCardDiscount.description}`);
+		extras.push(data.giftCardDiscount.description);
 	}
 	if (data.cashback?.description) {
-		extras.push(`💰 ${data.cashback.description}`);
+		extras.push(data.cashback.description);
 	}
 
 	if (extras.length > 0) {

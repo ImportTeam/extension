@@ -1,19 +1,29 @@
 /**
  * Footer Section 컴포넌트
- * 확인 메시지 표시 (추가 혜택은 CardBenefitsSection 아래로 이동)
+ * 확인 버튼 표시 (클릭 시 토글바 닫기)
  */
 
 import type { ToggleProductData } from '../types';
+import { state } from '../state';
 
 export const createFooterSection = (_data: ToggleProductData): HTMLElement | null => {
 	const footer = document.createElement('footer');
 	footer.className = 'picsel-footer';
 
-	const confirmMsg = document.createElement('div');
-	confirmMsg.className = 'picsel-footer-confirm';
-	confirmMsg.textContent = '✅ 확인했습니다.';
+	// 버튼 요소로 변경
+	const confirmBtn = document.createElement('button');
+	confirmBtn.className = 'picsel-footer-confirm';
+	confirmBtn.textContent = '확인했습니다';
+	confirmBtn.type = 'button';
+	
+	// 클릭 시 토글바 닫기
+	confirmBtn.addEventListener('click', () => {
+		if (state.panelEl) {
+			state.panelEl.classList.remove('show');
+		}
+	});
 
-	footer.appendChild(confirmMsg);
+	footer.appendChild(confirmBtn);
 
 	return footer;
 };

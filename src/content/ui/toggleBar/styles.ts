@@ -272,31 +272,56 @@ export const toggleBarStyles = `
 
 		/* Card Benefits Section - 메인 콘텐츠 */
 		.picsel-card-section {
-			margin-top: 4px;
+			margin-top: 8px;
 		}
 
 		.picsel-card-benefit-list {
 			display: flex;
 			flex-direction: column;
-			gap: 8px;
+			gap: 10px;
 		}
 
 		.picsel-card-benefit-item {
+			position: relative;
 			display: flex;
 			justify-content: space-between;
 			align-items: flex-start;
 			padding: 16px 18px;
-			border-radius: 12px;
-			background: #f8fafc;
-			border: 1px solid #cbd5e1;
-			box-shadow: none;
+			border-radius: 14px;
+			background: #ffffff;
+			border: 1px solid #e2e8f0;
+			box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 			transition: all 0.2s ease;
+			overflow: hidden;
 		}
 
+		.picsel-card-benefit-item:hover {
+			border-color: #c7d2fe;
+			box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.15);
+			transform: translateY(-1px);
+		}
+
+		/* 1위 - Indigo 그라데이션 */
 		.picsel-card-benefit-item.recommended {
-			background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-			border: 2px solid #0ea5e9;
-			box-shadow: 0 2px 8px -2px rgba(14, 165, 233, 0.25);
+			background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+			border: 2px solid #6366f1;
+			box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.3);
+		}
+
+		.picsel-card-benefit-item.recommended:hover {
+			box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.4);
+		}
+
+		/* 2위 스타일 */
+		.picsel-card-benefit-item.rank-2 {
+			background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+			border: 1px solid #22c55e;
+		}
+
+		/* 3위 스타일 */
+		.picsel-card-benefit-item.rank-3 {
+			background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+			border: 1px solid #f59e0b;
 		}
 
 		.picsel-card-left {
@@ -314,24 +339,45 @@ export const toggleBarStyles = `
 		}
 
 		.picsel-recommended-badge {
-			font-size: 11px;
-			font-weight: 700;
-			color: #0369a1;
-			background: rgba(255, 255, 255, 0.9);
-			padding: 3px 10px;
+			font-size: 10px;
+			font-weight: 800;
+			color: #ffffff;
+			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+			padding: 4px 10px;
 			border-radius: 999px;
 			white-space: nowrap;
+			box-shadow: 0 2px 4px -1px rgba(99, 102, 241, 0.4);
+		}
+
+		/* 2위 배지 */
+		.picsel-card-benefit-item.rank-2 .picsel-recommended-badge {
+			background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+			box-shadow: 0 2px 4px -1px rgba(34, 197, 94, 0.4);
+		}
+
+		/* 3위 배지 */
+		.picsel-card-benefit-item.rank-3 .picsel-recommended-badge {
+			background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+			box-shadow: 0 2px 4px -1px rgba(245, 158, 11, 0.4);
 		}
 
 		.picsel-card-benefit-item .picsel-card-name {
 			font-size: 14px;
 			font-weight: 700;
-			color: #334155;
+			color: #1e293b;
 			line-height: 1.5;
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-name {
-			color: #0c4a6e;
+			color: #3730a3;
+		}
+
+		.picsel-card-benefit-item.rank-2 .picsel-card-name {
+			color: #166534;
+		}
+
+		.picsel-card-benefit-item.rank-3 .picsel-card-name {
+			color: #92400e;
 		}
 
 		.picsel-card-benefit-desc {
@@ -341,7 +387,15 @@ export const toggleBarStyles = `
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-benefit-desc {
-			color: #0369a1;
+			color: #4338ca;
+		}
+
+		.picsel-card-benefit-item.rank-2 .picsel-card-benefit-desc {
+			color: #15803d;
+		}
+
+		.picsel-card-benefit-item.rank-3 .picsel-card-benefit-desc {
+			color: #b45309;
 		}
 
 		.picsel-card-right {
@@ -353,22 +407,40 @@ export const toggleBarStyles = `
 		}
 
 		.picsel-card-discount {
-			font-size: 16px;
+			font-size: 17px;
 			font-weight: 800;
-			color: #e11d48;
+			color: #dc2626;
+			text-shadow: 0 1px 2px rgba(220, 38, 38, 0.1);
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-discount {
-			color: #be123c;
+			color: #4f46e5;
+		}
+
+		.picsel-card-benefit-item.rank-2 .picsel-card-discount {
+			color: #16a34a;
+		}
+
+		.picsel-card-benefit-item.rank-3 .picsel-card-discount {
+			color: #d97706;
 		}
 
 		.picsel-card-final {
 			font-size: 11px;
 			color: #64748b;
+			font-weight: 500;
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-final {
-			color: #0369a1;
+			color: #6366f1;
+		}
+
+		.picsel-card-benefit-item.rank-2 .picsel-card-final {
+			color: #22c55e;
+		}
+
+		.picsel-card-benefit-item.rank-3 .picsel-card-final {
+			color: #f59e0b;
 		}
 
 		.picsel-card-rate {
@@ -379,29 +451,60 @@ export const toggleBarStyles = `
 
 		/* Footer Section */
 		.picsel-footer {
-			margin-top: 8px;
+			margin-top: 12px;
 			padding-top: 12px;
-			border-top: 1px solid #e2e8f0;
 		}
 
 		.picsel-footer-confirm {
-			font-size: 13px;
-			color: #64748b;
-			text-align: center;
-			padding: 8px 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			padding: 14px 24px;
+			font-size: 14px;
+			font-weight: 600;
+			color: #ffffff;
+			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+			border: none;
+			border-radius: 18px;
+			box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.5);
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+
+		.picsel-footer-confirm:hover {
+			background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+			box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.6);
+			transform: translateY(-1px);
+		}
+
+		.picsel-footer-confirm:active {
+			transform: translateY(0);
+			box-shadow: 0 2px 8px -2px rgba(99, 102, 241, 0.4);
 		}
 
 		/* Sub Benefits - 카드 섹션 아래 */
 		.picsel-sub-benefits {
-			margin-top: 10px;
-			padding-top: 10px;
-			border-top: 1px dashed #cbd5e1;
+			margin-top: 12px;
+			padding: 12px;
+			background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+			border-radius: 12px;
+			border: 1px solid #e9d5ff;
 		}
 
 		.picsel-sub-benefit-item {
 			font-size: 12px;
-			color: #64748b;
+			color: #7c3aed;
 			padding: 6px 0;
+			font-weight: 500;
+		}
+
+		.picsel-sub-benefit-item:first-child {
+			padding-top: 0;
+		}
+
+		.picsel-sub-benefit-item:last-child {
+			padding-bottom: 0;
 		}
 
 		.picsel-footer-list {

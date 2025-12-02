@@ -99,6 +99,9 @@ export const Colors = {
   },
 };
 
-export const getColors = (theme: 'light' | 'dark' = 'light') => Colors[theme];
+type Theme = keyof typeof Colors;
+type ColorScheme = (typeof Colors)[Theme];
+
+export const getColors = (theme: Theme = 'light'): ColorScheme => Colors[theme];
 
 export default Colors.light;

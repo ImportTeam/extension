@@ -17,7 +17,7 @@ export interface ProductInfo {
     rate: number;
     type: string; // "COUPANG_WOW", "CARD_DISCOUNT" 등
   }>;
-  cardBenefits?: Array<{
+ cardBenefits?: Array<{
     card: string;
     benefit: string;
   }>;
@@ -27,8 +27,10 @@ export interface ProductInfo {
  * 카드 혜택 정보
  */
 export interface CardBenefit {
-  cardName: string;
+  cardName?: string;
+  card?: string;
   rate?: number;
+  discount?: number;
   benefit?: string;
 }
 

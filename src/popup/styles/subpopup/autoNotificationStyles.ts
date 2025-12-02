@@ -6,8 +6,8 @@ export const autoNotificationStyles: Record<string, CSSProperties> = {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#f3f4f6', // Gray-100
-    color: '#1f2937', // Gray-800
+    backgroundColor: '#f8fafc', // Slate-50
+    color: '#1e293b', // Slate-800
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     overflow: 'hidden',
   },
@@ -16,8 +16,8 @@ export const autoNotificationStyles: Record<string, CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '16px 20px',
-    backgroundColor: '#374151', // Dark Gray
-    color: '#ffffff',
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #e2e8f0',
     flexShrink: 0,
   },
   logoWrapper: {
@@ -25,20 +25,16 @@ export const autoNotificationStyles: Record<string, CSSProperties> = {
     alignItems: 'center',
     gap: '8px',
   },
-  logo: {
-    width: '24px',
-    height: '24px',
-    objectFit: 'contain',
-  },
   title: {
-    fontSize: '16px',
+    fontSize: '17px',
     fontWeight: 700,
-    letterSpacing: '-0.5px',
+    color: '#0f172a',
+    letterSpacing: '-0.3px',
   },
   closeBtn: {
     background: 'transparent',
     border: 'none',
-    color: '#9ca3af',
+    color: '#94a3b8',
     fontSize: '20px',
     cursor: 'pointer',
     padding: '4px',
@@ -46,34 +42,36 @@ export const autoNotificationStyles: Record<string, CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'color 0.2s',
+    borderRadius: '6px',
   },
   content: {
     flex: 1,
-    padding: '20px',
+    padding: '16px 20px',
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: '24px',
+    gap: '20px',
   },
-  // 1. Product Card
+
+  // 1. Product Card - Compact
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    padding: '20px',
+    borderRadius: '14px',
+    border: '1px solid #e2e8f0',
+    padding: '16px',
   },
   productSection: {
     display: 'flex',
-    gap: '16px',
-    alignItems: 'flex-start',
+    gap: '14px',
+    alignItems: 'center',
   },
   imageWrapper: {
-    width: '80px',
-    height: '80px',
-    borderRadius: '12px',
+    width: '64px',
+    height: '64px',
+    borderRadius: '10px',
     overflow: 'hidden',
-    backgroundColor: '#f3f4f6',
-    border: '1px solid #e5e7eb',
+    backgroundColor: '#f1f5f9',
+    border: '1px solid #e2e8f0',
     flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
@@ -92,9 +90,9 @@ export const autoNotificationStyles: Record<string, CSSProperties> = {
     minWidth: 0,
   },
   productTitle: {
-    fontSize: '15px',
+    fontSize: '14px',
     fontWeight: 600,
-    color: '#111827',
+    color: '#1e293b',
     lineHeight: '1.4',
     display: '-webkit-box',
     WebkitLineClamp: 2,
@@ -103,179 +101,176 @@ export const autoNotificationStyles: Record<string, CSSProperties> = {
   },
   priceRow: {
     display: 'flex',
-    alignItems: 'baseline',
+    alignItems: 'center',
     gap: '8px',
-    flexWrap: 'wrap',
   },
   finalPrice: {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: 800,
-    color: '#111827',
-  },
-  originalPrice: {
-    fontSize: '13px',
-    color: '#9ca3af',
-    textDecoration: 'line-through',
+    color: '#0f172a',
   },
   discountBadge: {
-    padding: '2px 8px',
-    borderRadius: '6px',
-    backgroundColor: '#eef2ff',
-    color: '#6366f1', // Indigo-500
-    fontSize: '12px',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    backgroundColor: '#fef2f2',
+    color: '#dc2626',
+    fontSize: '11px',
     fontWeight: 700,
   },
-  shippingText: {
-    fontSize: '12px',
-    color: '#6b7280',
-  },
 
-  // 2. Benefit Section (High Visibility)
+  // 2. Section Header
   sectionHeader: {
     fontSize: '15px',
     fontWeight: 700,
-    color: '#111827',
+    color: '#334155',
     marginBottom: '12px',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
   },
-  benefitCard: {
-    backgroundColor: '#fffbeb', // Amber-50
-    border: '1px solid #fcd34d', // Amber-300
-    borderRadius: '16px',
-    padding: '20px',
+
+  // 3. Ranking List - 통합 혜택 랭킹
+  rankingList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '10px',
+  },
+
+  // Best Item (1등)
+  rankItemBest: {
+    backgroundColor: '#4f46e5', // Indigo-600
+    borderRadius: '16px',
+    padding: '18px',
     position: 'relative',
     overflow: 'hidden',
   },
-  bestBadge: {
-    position: 'absolute',
-    top: '0',
-    right: '0',
-    backgroundColor: '#fbbf24', // Amber-400
+  rankBadgeBest: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     color: '#ffffff',
     fontSize: '11px',
     fontWeight: 700,
-    padding: '4px 12px',
-    borderBottomLeftRadius: '12px',
+    padding: '4px 10px',
+    borderRadius: '999px',
+    marginBottom: '12px',
   },
-  benefitRow: {
+  rankContent: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: '12px',
   },
-  benefitTitle: {
-    fontSize: '16px',
-    fontWeight: 700,
-    color: '#92400e', // Amber-800
-    marginBottom: '4px',
-    whiteSpace: 'pre-wrap',
-    lineHeight: '1.4',
-  },
-  benefitDesc: {
-    fontSize: '13px',
-    color: '#b45309', // Amber-700
-    fontWeight: 500,
-  },
-  benefitAmount: {
-    fontSize: '18px',
-    fontWeight: 800,
-    color: '#b91c1c', // Red-700
-    textAlign: 'right',
-  },
-  benefitTotal: {
-    fontSize: '12px',
-    color: '#92400e',
-    textAlign: 'right',
-    marginTop: '2px',
-  },
-
-  // Nested Additional Benefits
-  nestedBenefitDivider: {
-    height: '1px',
-    backgroundColor: 'rgba(251, 191, 36, 0.4)', // Amber-400 with opacity
-    margin: '4px 0',
-  },
-  nestedBenefitItem: {
+  rankLeft: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '12px',
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    border: '1px solid #fcd34d', // Amber-300
+    gap: '12px',
+    flex: 1,
+    minWidth: 0,
   },
-  nestedIconCircle: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    backgroundColor: '#fff7ed', // Orange-50
+  rankIconBest: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#ea580c', // Orange-600
+    color: '#ffffff',
     flexShrink: 0,
   },
-  nestedBenefitText: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#6366f1', // Indigo-500
+  rankTitleBest: {
+    fontSize: '15px',
+    fontWeight: 700,
+    color: '#ffffff',
+    marginBottom: '2px',
+  },
+  rankDescBest: {
+    fontSize: '12px',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: 500,
+  },
+  rankAmountBest: {
+    fontSize: '20px',
+    fontWeight: 800,
+    color: '#ffffff',
+    flexShrink: 0,
   },
 
-  // 3. Options Section
-  optionsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  optionItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '16px',
+  // Normal Items (2등 이하)
+  rankItem: {
     backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    border: '1px solid #e5e7eb',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
+    borderRadius: '14px',
+    border: '1px solid #e2e8f0',
+    padding: '16px',
   },
-  optionLabel: {
+  rankBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    color: '#64748b',
+    fontSize: '11px',
+    fontWeight: 700,
+    padding: '3px 8px',
+    borderRadius: '999px',
+    marginBottom: '10px',
+  },
+  rankIcon: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    backgroundColor: '#f1f5f9',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#64748b',
+    flexShrink: 0,
+  },
+  rankTitle: {
     fontSize: '14px',
     fontWeight: 600,
-    color: '#374151',
+    color: '#1e293b',
+    marginBottom: '2px',
   },
-  optionPrice: {
-    fontSize: '14px',
+  rankDesc: {
+    fontSize: '12px',
+    color: '#64748b',
+  },
+  rankAmount: {
+    fontSize: '16px',
     fontWeight: 700,
-    color: '#111827',
+    color: '#dc2626',
+    flexShrink: 0,
+  },
+
+  // Empty State
+  emptyState: {
+    padding: '32px',
+    textAlign: 'center',
+    color: '#94a3b8',
+    fontSize: '14px',
   },
 
   // Footer
   footer: {
-    padding: '20px',
+    padding: '16px 20px',
     backgroundColor: '#ffffff',
-    borderTop: '1px solid #e5e7eb',
+    borderTop: '1px solid #e2e8f0',
     marginTop: 'auto',
   },
   ctaButton: {
     width: '100%',
-    height: '52px',
-    backgroundColor: '#6366f1', // Indigo-500
+    height: '48px',
+    backgroundColor: '#1e293b', // Slate-800
     color: '#ffffff',
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: 700,
     border: 'none',
     borderRadius: '12px',
     cursor: 'pointer',
-    boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.4)',
     transition: 'background-color 0.2s',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
   },
 };

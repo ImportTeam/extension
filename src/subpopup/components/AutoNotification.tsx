@@ -1,19 +1,17 @@
 import React, { useRef, useMemo } from 'react';
 import { useProductData, useWindowResize } from '../../shared/hooks';
 import { autoNotificationStyles as styles } from '../../popup/styles/subpopup/autoNotificationStyles';
-import { CreditCard, Gift, Tag } from 'lucide-react';
+import { X, CreditCard, Coins, Gift, Award } from 'lucide-react';
 
-// Platform display names
-const platformNames: Record<string, string> = {
-  coupang: '쿠팡',
-  amazon: '아마존',
-  ebay: '이베이',
-  gmarket: 'G마켓',
-  '11st': '11번가',
-  naver: '네이버쇼핑',
-  tmon: '티몬',
-  wemakeprice: '위메프',
-};
+// Benefit type for unified ranking
+interface RankedBenefit {
+  id: string;
+  type: 'card' | 'cashback' | 'giftcard' | 'point';
+  title: string;
+  description: string;
+  amount: number; // 혜택 금액 (원)
+  icon: 'card' | 'coins' | 'gift';
+}
 
 export const AutoNotification: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
@@ -27,11 +25,68 @@ export const AutoNotification: React.FC = () => {
     contentRef,
   });
 
-  // Process variants
-  const variants = useMemo(() => {
-    if (!product?.variants) return [];
-    return product.variants.slice(0, 6); // Limit to 6 variants
-  }, [product?.variants]); // Keep as is to avoid breaking change, or update if safe. Linter suggested product.variants.
+  // 모든 혜택을 금액 기준으로 통합 랭킹
+  const rankedBenefits = useMemo((): RankedBenefit[] => {
+    if (!product) return [];
+    
+    const benefits: RankedBenefit[] = [];
+    const finalPrice = product.discountPrice || product.price || product.amount || 0;
+    
+    // 1. 캐시백 혜택
+    if (product.cashback) {
+      const cashbackAmount = (product.cashback as { amount?: number })?.amount || 0;
+      if (cashbackAmount > 0) {
+        benefits.push({
+          id: 'cashback',
+          type: 'cashback',
+          title: '쿠팡캐시 적립',
+          description: '혜택 금액이 가장 큽니다. (적립)',
+          amount: cashbackAmount,
+          icon: 'coins',
+        });
+      }
+    }
+    
+    // 2. 카드 혜택
+    if (topBenefits && topBenefits.length > 0) {
+      topBenefits.forEach((benefit, idx) => {
+        const rate = (benefit as { rate?: number; discount?: number }).rate ?? 
+                     (benefit as { rate?: number; discount?: number }).discount ?? 0;
+        const cardAmount = rate > 0 ? Math.round(finalPrice * (rate / 100)) : 0;
+        
+        if (cardAmount > 0) {
+          benefits.push({
+            id: `card-${idx}`,
+            type: 'card',
+            title: benefit.cardName || benefit.card || '제휴 카드',
+            description: benefit.benefit || `${rate}% 즉시 할인 (최대 3만)`,
+            amount: cardAmount,
+            icon: 'card',
+          });
+        }
+      });
+    }
+    
+    // 3. 기프트카드 혜택
+    if (product.giftCardDiscount) {
+      const giftRate = (product.giftCardDiscount as { rate?: number })?.rate || 0;
+      const giftAmount = giftRate > 0 ? Math.round(finalPrice * (giftRate / 100)) : 0;
+      
+      if (giftAmount > 0) {
+        benefits.push({
+          id: 'giftcard',
+          type: 'giftcard',
+          title: '기프트카드 할인',
+          description: (product.giftCardDiscount as { description?: string })?.description || `${giftRate}% 할인`,
+          amount: giftAmount,
+          icon: 'gift',
+        });
+      }
+    }
+    
+    // 금액 기준 내림차순 정렬
+    return benefits.sort((a, b) => b.amount - a.amount);
+  }, [product, topBenefits]);
 
   if (loading || !product) {
     return null;
@@ -45,46 +100,32 @@ export const AutoNotification: React.FC = () => {
       : 0
   );
 
-  // Platform name for header
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const platform = (product as any).platform || (product as any).source || '';
-  const platformDisplayName = platform 
-    ? (platformNames[platform.toLowerCase()] || platform)
-    : '쇼핑';
-
-  const logoUrl = chrome.runtime.getURL('assets/icon/picsel-logo.png');
-
-  // Check for additional benefits
-  const cashbackInfo = product.cashback;
-  const giftCardInfo = product.giftCardDiscount;
-  const hasCashback = !!cashbackInfo;
-  const hasGiftCard = !!giftCardInfo;
-  const hasAdditionalBenefits = hasCashback || hasGiftCard;
+  // Icon component selector
+  const getIcon = (iconType: RankedBenefit['icon']): React.ReactElement => {
+    switch (iconType) {
+      case 'card': return <CreditCard size={18} />;
+      case 'coins': return <Coins size={18} />;
+      case 'gift': return <Gift size={18} />;
+      default: return <CreditCard size={18} />;
+    }
+  };
 
   return (
     <div ref={contentRef} style={styles.wrapper}>
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.logoWrapper}>
-          <img
-            src={logoUrl}
-            alt="PicSel"
-            style={styles.logo}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-            }}
-          />
-          <span style={styles.title}>{platformDisplayName} 혜택 정보</span>
+          <span style={styles.title}>PicSel 결제 추천</span>
         </div>
         <button style={styles.closeBtn} onClick={() => window.close()}>
-          ✕
+          <X size={20} />
         </button>
       </div>
 
       {/* Content */}
       <div style={styles.content}>
         
-        {/* 1. Product Card */}
+        {/* 1. Product Card - Compact */}
         <div style={styles.card}>
           <div style={styles.productSection}>
             <div style={styles.imageWrapper}>
@@ -98,9 +139,9 @@ export const AutoNotification: React.FC = () => {
                   alignItems: 'center', 
                   justifyContent: 'center',
                   color: '#9ca3af',
-                  fontSize: '12px'
+                  fontSize: '11px'
                 }}>
-                  No Image
+                  Product
                 </div>
               )}
             </div>
@@ -108,124 +149,59 @@ export const AutoNotification: React.FC = () => {
               <div style={styles.productTitle}>{product.title || '상품명 없음'}</div>
               <div style={styles.priceRow}>
                 <span style={styles.finalPrice}>₩{finalPrice.toLocaleString()}</span>
-                {originalPrice > 0 && originalPrice !== finalPrice && (
-                  <span style={styles.originalPrice}>₩{originalPrice.toLocaleString()}</span>
-                )}
-              </div>
-              <div style={styles.priceRow}>
                 {discountRate > 0 && (
                   <span style={styles.discountBadge}>-{discountRate}%</span>
                 )}
-                {product.shippingInfo && (
-                  <span style={styles.shippingText}>배송: {product.shippingInfo}</span>
-                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* 2. Card Benefits (Nested Structure) */}
+        {/* 2. Unified Benefit Ranking */}
         <div>
           <div style={styles.sectionHeader}>
-            <CreditCard size={18} />
-            <span>카드별 혜택 비교</span>
+            <span>결제 혜택 랭킹 TOP {rankedBenefits.length}</span>
           </div>
-          <div style={styles.benefitCard}>
-            {/* Best Badge */}
-            <div style={styles.bestBadge}>최고 혜택</div>
-
-            {/* Main Benefit (Card) */}
-            <div style={styles.benefitRow}>
-              <div>
-                <div style={styles.benefitTitle}>
-                  {topBenefits.length > 0 ? topBenefits[0].cardName : '제휴 카드'}
-                </div>
-                <div style={styles.benefitDesc}>
-                  {topBenefits.length > 0 ? topBenefits[0].benefit : '최대 5% 즉시할인 (와우전용)'}
-                </div>
-              </div>
-              <div>
-                 <div style={styles.benefitAmount}>
-                    -{Math.round(finalPrice * 0.05).toLocaleString()}원
-                 </div>
-                 <div style={styles.benefitTotal}>
-                    최종 {Math.round(finalPrice * 0.95).toLocaleString()}
-                 </div>
-              </div>
-            </div>
-
-            {/* Nested Additional Benefits */}
-            {hasAdditionalBenefits && (
-              <>
-                <div style={styles.nestedBenefitDivider} />
-                
-                {hasCashback && (
-                  <div style={styles.nestedBenefitItem}>
-                    <div style={styles.nestedIconCircle}>
-                      <Tag size={18} />
-                    </div>
-                    <span style={styles.nestedBenefitText}>
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      쿠팡캐시 {(cashbackInfo as any)?.amount?.toLocaleString() || ''} 원 적립
-                    </span>
-                  </div>
-                )}
-                
-                {hasGiftCard && (
-                  <div style={styles.nestedBenefitItem}>
-                    <div style={styles.nestedIconCircle}>
-                      <Gift size={18} />
-                    </div>
-                    <span style={styles.nestedBenefitText}>
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {(giftCardInfo as any)?.description || '기프트카드 혜택'}
-                    </span>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* 3. Other Options */}
-        <div>
-          <div style={styles.sectionHeader}>
-            <span>다른 구성</span>
-          </div>
-          <div style={styles.optionsList}>
-            {variants.length > 0 ? (
-              variants.map((variant, index) => (
+          
+          <div style={styles.rankingList}>
+            {rankedBenefits.length > 0 ? (
+              rankedBenefits.map((benefit, index) => (
                 <div 
-                  key={index}
-                  style={styles.optionItem}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                  key={benefit.id} 
+                  style={index === 0 ? styles.rankItemBest : styles.rankItem}
                 >
-                  <span style={styles.optionLabel}>{variant.name}</span>
-                  <span style={styles.optionPrice}>
-                    ₩{(variant.price || finalPrice).toLocaleString()}
-                  </span>
+                  {/* Rank Badge */}
+                  {index === 0 && (
+                    <div style={styles.rankBadgeBest}>
+                      <Award size={12} style={{ marginRight: '4px' }} />#1 BEST
+                    </div>
+                  )}
+                  
+                  {/* Content */}
+                  <div style={styles.rankContent}>
+                    <div style={styles.rankLeft}>
+                      <div style={index === 0 ? styles.rankIconBest : styles.rankIcon}>
+                        {getIcon(benefit.icon)}
+                      </div>
+                      <div>
+                        <div style={index === 0 ? styles.rankTitleBest : styles.rankTitle}>
+                          {benefit.title}
+                        </div>
+                        <div style={index === 0 ? styles.rankDescBest : styles.rankDesc}>
+                          {benefit.description}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={index === 0 ? styles.rankAmountBest : styles.rankAmount}>
+                      ₩{benefit.amount.toLocaleString()}
+                    </div>
+                  </div>
                 </div>
               ))
             ) : (
-              <>
-                <div 
-                  style={styles.optionItem}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
-                >
-                  <span style={styles.optionLabel}>512GB</span>
-                  <span style={styles.optionPrice}>₩{finalPrice.toLocaleString()}</span>
-                </div>
-                <div 
-                  style={styles.optionItem}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
-                >
-                  <span style={styles.optionLabel}>16GB</span>
-                  <span style={styles.optionPrice}>₩{finalPrice.toLocaleString()}</span>
-                </div>
-              </>
+              <div style={styles.emptyState}>
+                혜택 정보를 불러오는 중...
+              </div>
             )}
           </div>
         </div>
@@ -235,15 +211,9 @@ export const AutoNotification: React.FC = () => {
       <div style={styles.footer}>
         <button 
           style={styles.ctaButton}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#6366f1')}
-          onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const url = (product as any).url || window.location.href;
-            window.open(url, '_blank');
-          }}
+          onClick={() => window.close()}
         >
-          결제시 쿠폰 적용
+          확인
         </button>
       </div>
     </div>
