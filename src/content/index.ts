@@ -18,18 +18,8 @@ import {
 
 // 🛑 Iframe 가드: 메인 페이지에서만 실행
 if (window.self !== window.top) {
-  // Iframe 상세 정보 로깅 (디버깅용)
-  const iframeUrl = window.location.href;
-  const iframeHost = window.location.hostname;
-  const iframePathname = window.location.pathname;
-  console.debug('[ContentScript:iframe] 📍 Iframe detected', {
-    context: 'iframe',
-    url: iframeUrl,
-    host: iframeHost,
-    pathname: iframePathname,
-    selfIsTop: window.self === window.top,
-  });
-  // Iframe에서는 조용히 종료
+  // Iframe에서는 완전히 종료 (throw로 모듈 실행 중단)
+  throw new Error('[ContentScript] Skipping iframe context');
 }
 
 console.log('[ContentScript] ✅ Content script initialized in main frame');

@@ -14,8 +14,16 @@ export interface PointInfo {
 export interface CardBenefitInfo {
   cardName: string;      // 카드명 (예: '11번가 신한카드')
   benefitAmount: number; // 혜택 금액
-  benefitType: string;   // 혜택 유형 (포인트, 할인 등)
+  benefitType: string;   // 혜택 유형 (포인트, 할인, 무이자 등)
   condition: string;     // 조건 (예: '결제 시')
+}
+
+export interface InstallmentInfo {
+  cardName: string;           // 카드명
+  maxMonths: number;          // 최대 무이자 개월수
+  minAmount: number | null;   // 최소 결제 금액
+  months: string;             // 할부 개월 표시 (예: "2,3,4,5개월")
+  condition: string;          // 조건 (예: "5만원 ↑")
 }
 
 export interface CouponInfo {
@@ -27,9 +35,11 @@ export interface CouponInfo {
 export interface BenefitsInfo {
   points: PointInfo[];
   cardBenefits: CardBenefitInfo[];
+  installments: InstallmentInfo[];
   coupons: CouponInfo[];
   totalPointAmount: number;
   totalCardBenefitAmount: number;
+  maxInstallmentMonths: number;
 }
 
 /**
@@ -39,9 +49,11 @@ export const extractBenefits = (doc: Document): BenefitsInfo => {
   const result: BenefitsInfo = {
     points: [],
     cardBenefits: [],
+    installments: [],
     coupons: [],
     totalPointAmount: 0,
     totalCardBenefitAmount: 0,
+    maxInstallmentMonths: 0,
   };
 
   try {
@@ -49,15 +61,22 @@ export const extractBenefits = (doc: Document): BenefitsInfo => {
     result.points = extractPoints(doc);
     result.totalPointAmount = result.points.reduce((sum, p) => sum + p.amount, 0);
 
-    // 카드 혜택 추출
+    // 카드 혜택 추출 (할인 + 적립)
     result.cardBenefits = extractCardBenefits(doc);
     result.totalCardBenefitAmount = result.cardBenefits.reduce((sum, c) => sum + c.benefitAmount, 0);
+
+    // 무이자 할부 추출
+    result.installments = extractInstallments(doc);
+    result.maxInstallmentMonths = result.installments.reduce(
+      (max, i) => Math.max(max, i.maxMonths), 0
+    );
 
     // 쿠폰 추출
     result.coupons = extractCoupons(doc);
 
     console.log('[11stParser][Benefits] 총 포인트:', result.totalPointAmount);
     console.log('[11stParser][Benefits] 총 카드혜택:', result.totalCardBenefitAmount);
+    console.log('[11stParser][Benefits] 최대 무이자:', result.maxInstallmentMonths, '개월');
   } catch (error) {
     console.error('[11stParser][Benefits] 혜택 추출 오류:', error);
   }
@@ -219,6 +238,151 @@ function parseCardBenefitText(text: string): CardBenefitInfo | null {
   }
 
   return null;
+}
+
+/**
+ * 무이자 할부 정보 추출
+ * 11번가 카드 무이자 할부 텍스트 파싱
+ */
+export const extractInstallments = (doc: Document): InstallmentInfo[] => {
+  const installments: InstallmentInfo[] = [];
+  const selectors = ELEVEN_ST_SELECTORS.installment;
+
+  try {
+    // 무이자 할부 컨테이너 찾기
+    const container = doc.querySelector(selectors.container);
+    
+    // 컨테이너 내 카드별 항목
+    const cardItems = container 
+      ? container.querySelectorAll(selectors.cardItem)
+      : doc.querySelectorAll(selectors.cardItem);
+
+    cardItems.forEach((item) => {
+      const cardNameEl = item.querySelector(selectors.cardName);
+      const infoEl = item.querySelector(selectors.installmentInfo);
+      
+      if (cardNameEl && infoEl) {
+        const cardName = cardNameEl.textContent?.trim() || '';
+        const infoText = infoEl.textContent?.trim() || '';
+        
+        // 무이자 정보 파싱
+        const parsed = parseInstallmentText(cardName, infoText);
+        if (parsed) {
+          installments.push(parsed);
+        }
+      }
+    });
+
+    // DOM에서 직접 텍스트 패턴 검색 (레이어 팝업이 열리지 않은 경우)
+    if (installments.length === 0) {
+      const installmentFromText = extractInstallmentFromPageText(doc);
+      installments.push(...installmentFromText);
+    }
+
+    console.log('[11stParser][Installment] 무이자 할부 카드 수:', installments.length);
+  } catch (error) {
+    console.error('[11stParser][Installment] 무이자 할부 추출 오류:', error);
+  }
+
+  return installments;
+};
+
+/**
+ * 무이자 할부 텍스트 파싱
+ * 예: "2,3개월(5만원 ↑)" → { months: "2,3개월", maxMonths: 3, minAmount: 50000 }
+ */
+function parseInstallmentText(cardName: string, text: string): InstallmentInfo | null {
+  if (!cardName || !text) return null;
+
+  // 패턴: "2,3,4,5개월(5만원 ↑)"
+  const monthPattern = /([\d,]+)개월/;
+  const amountPattern = /\((\d+)만원/;
+
+  const monthMatch = text.match(monthPattern);
+  if (!monthMatch) return null;
+
+  // 개월수 추출 (최대값)
+  const monthsStr = monthMatch[1];
+  const monthNumbers = monthsStr.split(',').map(m => parseInt(m.trim(), 10));
+  const maxMonths = Math.max(...monthNumbers.filter(n => !isNaN(n)));
+
+  // 최소 금액 추출
+  const amountMatch = text.match(amountPattern);
+  const minAmount = amountMatch ? parseInt(amountMatch[1], 10) * 10000 : null;
+
+  // 조건 추출
+  let condition = '';
+  if (text.includes('11pay')) {
+    condition = '11pay 결제 시';
+  } else if (text.includes('카카오페이')) {
+    condition = '카카오페이 결제 시';
+  } else if (minAmount) {
+    condition = `${minAmount / 10000}만원 이상`;
+  }
+
+  return {
+    cardName: cardName.replace('카드', '').trim() + '카드',
+    maxMonths,
+    minAmount,
+    months: monthsStr + '개월',
+    condition,
+  };
+}
+
+/**
+ * 페이지 텍스트에서 무이자 할부 정보 추출
+ * (레이어가 열리지 않은 경우 대비)
+ */
+function extractInstallmentFromPageText(doc: Document): InstallmentInfo[] {
+  const results: InstallmentInfo[] = [];
+  
+  // 카드 무이자 관련 버튼/링크 텍스트 검색
+  const cardKeywords = ['신한', 'KB국민', '국민', '비씨', 'BC', '우리', '현대', '삼성', '하나', '롯데', '농협', 'NH'];
+  
+  // 무이자 할부 관련 요소 검색
+  const elements = doc.querySelectorAll('[class*="installment"], [class*="할부"], [data-log-actionid*="무이자"]');
+  
+  elements.forEach((el: Element) => {
+    const text = el.textContent || '';
+    
+    // "최대 22개월 무이자" 같은 요약 정보 파싱
+    const maxMonthMatch = text.match(/최대\s*(\d+)\s*개월\s*무이자/);
+    if (maxMonthMatch && results.length === 0) {
+      results.push({
+        cardName: '카드',
+        maxMonths: parseInt(maxMonthMatch[1], 10),
+        minAmount: null,
+        months: `최대 ${maxMonthMatch[1]}개월`,
+        condition: '무이자 할부',
+      });
+    }
+
+    // 개별 카드 정보 파싱
+    cardKeywords.forEach((keyword) => {
+      if (text.includes(keyword)) {
+        const cardSection = text.substring(text.indexOf(keyword));
+        const monthMatch = cardSection.match(/([\d,]+)개월/);
+        if (monthMatch) {
+          const existing = results.find(r => r.cardName.includes(keyword));
+          if (!existing) {
+            const monthsStr = monthMatch[1];
+            const monthNumbers = monthsStr.split(',').map((m: string) => parseInt(m.trim(), 10));
+            const maxMonths = Math.max(...monthNumbers.filter((n: number) => !isNaN(n)));
+            
+            results.push({
+              cardName: keyword + '카드',
+              maxMonths,
+              minAmount: null,
+              months: monthsStr + '개월',
+              condition: '',
+            });
+          }
+        }
+      }
+    });
+  });
+
+  return results;
 }
 
 /**

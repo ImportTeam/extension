@@ -95,6 +95,38 @@ export const ELEVEN_ST_SELECTORS = {
     cardDetailDesc: '.c-detail-cont__discription',
   },
 
+  // ===== 카드 무이자 할부 =====
+  installment: {
+    // 무이자 할부 컨테이너 (레이어 팝업)
+    container: '#arInstallment, [id*="arInstallment"], .c_layer_installment',
+    // 무이자 할부 버튼 (클릭하면 레이어 열림)
+    triggerButton: '[aria-controls*="Installment"], .c_product_btn[data-log-actionid*="무이자"]',
+    // 카드별 무이자 정보 항목
+    cardItem: '.c_layer_installment .c_layer_item, #arInstallment .c_layer_item',
+    // 카드명
+    cardName: '.c_layer_item .layer_title .title, .c_layer_item dt',
+    // 할부 조건 (개월수, 금액조건)
+    installmentInfo: '.c_layer_item .c-detail-cont__discription, .c_layer_item dd',
+    // 제외 품목 안내
+    excludeInfo: '.c_layer_installment .notice, #arInstallment .notice',
+  },
+
+  // ===== 카드 할인 혜택 (11번가 신한카드 등) =====
+  cardDiscount: {
+    // 카드 할인 레이어
+    container: '#arCardBenefit, [id*="arCardBenefit"], .c_layer_card_benefit',
+    // 할인 버튼
+    triggerButton: '[aria-controls*="CardBenefit"], .c_product_btn[data-log-actionid*="카드"]',
+    // 혜택 제목 (예: "11번가 신한카드 첫 결제할인 + 최대 5% 적립")
+    title: '.c_layer_card_benefit .layer_title .title, #arCardBenefit .title',
+    // 혜택 상세 항목
+    benefitItem: '.c_layer_card_benefit .c_layer_item, #arCardBenefit .c_layer_item',
+    // 할인 금액/적립률
+    discountValue: '.c_layer_item .value, .c_layer_item .text_em2',
+    // 조건 설명
+    condition: '.c_layer_item .c-detail-cont__discription, .c_layer_item dd',
+  },
+
   // ===== 쿠폰 =====
   coupon: {
     // 쿠폰받기 버튼
