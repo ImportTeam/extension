@@ -25,6 +25,11 @@ export const COUPANG_SELECTORS = {
   instantOption: '.instant-option',
   benefitBadge: '.ccid-benefit-badge',
   shipping: '[class*="shipping"]',
+  // 카드 이미지 선택자 (w-[76px] 클래스 내 이미지)
+  cardImages: {
+    container: '.twc-w-\\[76px\\], [class*="w-[76px]"], [class*="card-icon"], [class*="card-image"]',
+    image: 'img',
+  },
   // 카드 혜택 상세 팝업 선택자
   cardBenefitPopup: {
     container: '#creditCardBenefitPopup, .card-benefit-popup',

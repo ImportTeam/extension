@@ -17,6 +17,7 @@ export type ToggleProductData = (ParsedProductInfo & Record<string, unknown>) &
 			benefit: string;     // 혜택 설명
 			discount?: number;   // 할인율 (%)
 			rate?: number;       // 할인율 (별칭)
+			imageUrl?: string;   // 카드 이미지 URL
 		}>;
 		giftCardDiscount: {
 			rate: number;

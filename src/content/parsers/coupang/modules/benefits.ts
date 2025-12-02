@@ -8,6 +8,14 @@ interface CardBenefitDetail {
   benefit: string;     // 혜택 설명
   discount?: number;   // 할인율 (%)
   rate?: number;       // 할인율 (별칭)
+  imageUrl?: string;   // 카드 이미지 URL
+}
+
+// 카드 이미지 매핑 (카드사명 -> 이미지 URL 패턴)
+interface CardImageInfo {
+  src: string;
+  alt: string;
+  cardName: string;
 }
 
 const extractCardNameFromUrl = (url: string): string | null => {
@@ -23,6 +31,74 @@ const extractCardNameFromUrl = (url: string): string | null => {
 const extractPercentage = (text: string): number | undefined => {
   const match = text.match(/(\d+(?:\.\d+)?)\s*%/);
   return match ? parseFloat(match[1]) : undefined;
+};
+
+/**
+ * 페이지에서 카드 이미지 정보 추출
+ * w-[76px] 클래스 또는 유사한 카드 아이콘 컨테이너에서 이미지 추출
+ */
+const extractCardImages = (doc: Document): CardImageInfo[] => {
+  const cardImages: CardImageInfo[] = [];
+  const selectors = COUPANG_SELECTORS.cardImages;
+
+  // 여러 선택자 시도
+  const containers = doc.querySelectorAll(selectors.container);
+  
+  containers.forEach((container) => {
+    const img = container.querySelector(selectors.image) as HTMLImageElement | null;
+    if (img && img.src) {
+      const alt = img.alt || '';
+      const src = img.src;
+      
+      // alt 또는 src에서 카드사명 추출
+      let cardName = alt.replace(/\s*(카드|로고|아이콘|이미지)/g, '').trim();
+      
+      // alt가 없으면 src URL에서 추출 시도
+      if (!cardName) {
+        cardName = extractCardNameFromUrl(src) || '';
+      }
+      
+      // 카드명 정규화
+      if (cardName && !cardName.includes('카드')) {
+        cardName = `${cardName}카드`;
+      }
+      
+      if (src && cardName) {
+        // 중복 체크
+        if (!cardImages.some(c => c.cardName === cardName)) {
+          cardImages.push({ src, alt, cardName });
+        }
+      }
+    }
+  });
+
+  // 추가: 일반 카드 아이콘 이미지 검색
+  const allCardImages = doc.querySelectorAll('img[src*="card"], img[alt*="카드"], img[class*="card"]');
+  allCardImages.forEach((img) => {
+    const imgEl = img as HTMLImageElement;
+    const src = imgEl.src;
+    const alt = imgEl.alt || '';
+    
+    // 이미지 크기 체크 (너무 큰 이미지는 제외)
+    const width = imgEl.width || imgEl.naturalWidth;
+    if (width > 150) return; // 150px 이상은 제외
+    
+    let cardName = alt.replace(/\s*(카드|로고|아이콘|이미지)/g, '').trim();
+    if (!cardName) {
+      cardName = extractCardNameFromUrl(src) || '';
+    }
+    
+    if (cardName && !cardName.includes('카드')) {
+      cardName = `${cardName}카드`;
+    }
+    
+    if (src && cardName && !cardImages.some(c => c.cardName === cardName)) {
+      cardImages.push({ src, alt, cardName });
+    }
+  });
+
+  console.log('[CoupangParser] 추출된 카드 이미지:', cardImages);
+  return cardImages;
 };
 
 /**
@@ -181,6 +257,9 @@ const scanPageForCardBenefits = (doc: Document): CardBenefitDetail[] => {
 export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
   let benefits: CardBenefitDetail[] = [];
 
+  // 0. 카드 이미지 먼저 추출
+  const cardImages = extractCardImages(doc);
+
   // 1. creditCardBenefitPopup iframe에서 상세 정보 파싱 시도
   const popupBenefits = extractCardBenefitsFromPopup(doc);
   if (popupBenefits.length > 0) {
@@ -202,6 +281,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
     if (benefitBadge) {
       const cardIcons = benefitBadge.querySelectorAll('img.benefit-ico');
       const cardNames: string[] = [];
+      const cardImageUrls: string[] = [];
 
       cardIcons.forEach((icon) => {
         const src = icon.getAttribute('src');
@@ -209,6 +289,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
           const cardName = extractCardNameFromUrl(src);
           if (cardName) {
             cardNames.push(cardName);
+            cardImageUrls.push(src);
           }
         }
       });
@@ -228,10 +309,30 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
           benefit: `${benefitText}${woowonOnly ? ` (${woowonOnly})` : ''}`,
           discount: rate,
           rate: rate,
+          imageUrl: cardImageUrls[0], // 첫 번째 카드 이미지
         });
       }
     }
   }
+
+  // 4. 카드 이미지 매칭
+  benefits = benefits.map((benefit) => {
+    if (!benefit.imageUrl) {
+      // 카드명으로 이미지 매칭
+      const cardName = benefit.cardName || benefit.card || '';
+      const matchedImage = cardImages.find((img) => {
+        const imgCardName = img.cardName.toLowerCase();
+        const benefitCardName = cardName.toLowerCase();
+        return imgCardName.includes(benefitCardName.replace('카드', '')) || 
+               benefitCardName.includes(imgCardName.replace('카드', ''));
+      });
+      
+      if (matchedImage) {
+        return { ...benefit, imageUrl: matchedImage.src };
+      }
+    }
+    return benefit;
+  });
 
   // 할인율 기준 내림차순 정렬
   benefits.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0));

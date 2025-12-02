@@ -298,7 +298,6 @@ export const toggleBarStyles = `
 		.picsel-card-benefit-item:hover {
 			border-color: #c7d2fe;
 			box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.15);
-			transform: translateY(-1px);
 		}
 
 		/* 1위 - Indigo 그라데이션 */
@@ -475,7 +474,6 @@ export const toggleBarStyles = `
 		.picsel-footer-confirm:hover {
 			background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
 			box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.6);
-			transform: translateY(-1px);
 		}
 
 		.picsel-footer-confirm:active {
@@ -483,20 +481,32 @@ export const toggleBarStyles = `
 			box-shadow: 0 2px 8px -2px rgba(99, 102, 241, 0.4);
 		}
 
-		/* Sub Benefits - 카드 섹션 아래 */
+		/* Sub Benefits - 카드 섹션 아래 (쿠팡캐시 등) */
 		.picsel-sub-benefits {
 			margin-top: 12px;
-			padding: 12px;
-			background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+			padding: 14px 16px;
+			background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
 			border-radius: 12px;
-			border: 1px solid #e9d5ff;
+			border: 1px solid #22d3ee;
 		}
 
 		.picsel-sub-benefit-item {
-			font-size: 12px;
-			color: #7c3aed;
+			font-size: 13px;
+			color: #0891b2;
 			padding: 6px 0;
-			font-weight: 500;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.picsel-sub-benefit-item::before {
+			content: '';
+			width: 6px;
+			height: 6px;
+			background: #06b6d4;
+			border-radius: 50%;
+			flex-shrink: 0;
 		}
 
 		.picsel-sub-benefit-item:first-child {
