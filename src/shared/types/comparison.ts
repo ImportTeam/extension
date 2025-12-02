@@ -3,7 +3,7 @@
  */
 
 // Provider 종류
-export type ProviderType = 'danawa' | 'naver' | 'coupang' | 'amazon' | 'gmarket' | '11st';
+export type ProviderType = 'danawa' | 'naver' | 'coupang';
 
 // 개별 상품 정보
 export interface ComparedProduct {
@@ -28,31 +28,31 @@ export interface ProviderResult {
   success: boolean;
   products: ComparedProduct[];
   totalCount?: number;
-  searchTime: number; // ms
+  duration: number; // ms
   error?: string;
 }
 
 // 가격 비교 응답
 export interface ComparisonResponse {
+  success: boolean;
   query: string;
   timestamp: number;
   results: ProviderResult[];
+  totalDuration: number;
+  fromCache: boolean;
+  error?: string;
   lowestPrice?: {
     provider: ProviderType;
     product: ComparedProduct;
   };
-  cached: boolean;
 }
 
 // 가격 비교 요청
 export interface ComparisonRequest {
-  productName: string;
-  options?: {
-    providers?: ProviderType[];
-    maxResults?: number;
-    includeImages?: boolean;
-    timeout?: number;
-  };
+  query: string;
+  providers?: ProviderType[];
+  maxResults?: number;
+  useCache?: boolean;
 }
 
 // Provider 설정
@@ -138,7 +138,4 @@ export const PROVIDER_META: Record<ProviderType, { displayName: string; currency
   danawa: { displayName: '다나와', currency: 'KRW', locale: 'ko-KR' },
   naver: { displayName: '네이버쇼핑', currency: 'KRW', locale: 'ko-KR' },
   coupang: { displayName: '쿠팡', currency: 'KRW', locale: 'ko-KR' },
-  amazon: { displayName: '아마존', currency: 'USD', locale: 'en-US' },
-  gmarket: { displayName: 'G마켓', currency: 'KRW', locale: 'ko-KR' },
-  '11st': { displayName: '11번가', currency: 'KRW', locale: 'ko-KR' },
 };

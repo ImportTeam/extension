@@ -2,7 +2,7 @@
  * 다나와 가격 스크래퍼
  * 
  * 다나와는 가격비교 사이트로, 여러 쇼핑몰의 가격을 한눈에 볼 수 있다.
- * Selector 구조: li.prod_item > .prod_name, .price_sect, .thumb_image
+ * 2024년 업데이트된 셀렉터 구조 적용
  */
 
 import { Page } from 'playwright';
@@ -16,19 +16,49 @@ export class DanawaProvider extends BaseProvider {
   readonly searchUrl = 'https://search.danawa.com/dsearch.php?k1=';
   readonly currency = 'KRW';
 
-  // 다나와 전용 셀렉터
+  // 다나와 전용 셀렉터 (여러 버전 대응)
   private readonly selectors = {
-    productList: 'li.prod_item.prod_layer:not(.ad_item)',
-    productName: 'p.prod_name a',
-    priceArea: '.price_sect',
-    lowestPrice: '.price_sect .lwst_prc a strong',
-    priceLink: '.price_sect .lwst_prc a',
-    image: 'div.thumb_image img',
-    thumbLink: 'a.thumb_link',
-    spec: '.spec_list li',
-    mallList: '.mall_list li',
-    mallName: '.logo_over img',
-    mallPrice: 'a strong',
+    // 상품 목록 셀렉터들 (여러 버전 지원)
+    productLists: [
+      'li.prod_item',
+      'ul.product_list > li',
+      '.main_prodlist li[data-productcode]',
+      '.product_list li.product_item',
+    ],
+    // 광고 제외 셀렉터
+    adMarker: '.ad_badge, .prod_ad_item, [class*="ad_"]',
+    // 상품명 셀렉터들
+    productNames: [
+      'p.prod_name a',
+      '.prod_name a',
+      'a.prod_name',
+      '.product_name a',
+      '.prod_info .name a',
+    ],
+    // 가격 셀렉터들
+    prices: [
+      '.price_sect .lwst_prc a strong',
+      '.price_sect strong',
+      '.prod_pricelist .price_sect .price strong',
+      '.prod_pricelist .price',
+      '.price strong',
+      '.price em',
+    ],
+    // 이미지 셀렉터들
+    images: [
+      'div.thumb_image img',
+      '.thumb_image img',
+      '.product_image img',
+      'img.lazy',
+      'img[data-original]',
+    ],
+    // 링크 셀렉터들
+    links: [
+      'a.thumb_link',
+      'a.prod_link',
+      '.prod_name a',
+      'a[href*="prod_detail"]',
+    ],
   };
 
   /**
@@ -47,31 +77,31 @@ export class DanawaProvider extends BaseProvider {
 
       // 페이지 로드
       await page.goto(searchUrl, {
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'networkidle',
         timeout: this.defaultTimeout,
       });
 
       // 동적 콘텐츠 로딩 대기
-      await this.randomDelay(1000, 2000);
+      await this.randomDelay(2000, 3000);
 
-      // 상품 목록 대기
-      try {
-        await page.waitForSelector(this.selectors.productList, { timeout: 10000 });
-      } catch {
-        console.log('[Danawa] 상품 목록을 찾을 수 없음');
+      // 스크롤하여 lazy loading 이미지 로드
+      await this.scrollPage(page, 3);
+      await this.randomDelay(1000, 1500);
+
+      // 상품 파싱
+      const products = await this.parseProducts(page, maxResults);
+
+      if (products.length === 0) {
+        // 디버깅: 페이지 HTML 일부 출력
+        const html = await page.content();
+        console.log('[Danawa] 페이지 HTML 샘플:', html.substring(0, 1000));
+        
         return {
           success: false,
           error: '검색 결과가 없습니다',
           duration: Date.now() - startTime,
         };
       }
-
-      // 스크롤하여 lazy loading 이미지 로드
-      await this.scrollPage(page, 2);
-      await this.randomDelay(500, 1000);
-
-      // 상품 파싱
-      const products = await this.parseProducts(page, maxResults);
 
       console.log(`[Danawa] 검색 완료: ${products.length}개 상품 발견`);
 
@@ -100,43 +130,93 @@ export class DanawaProvider extends BaseProvider {
   private async parseProducts(page: Page, maxResults: number): Promise<ComparedProduct[]> {
     const products: ComparedProduct[] = [];
 
-    const items = await page.$$(this.selectors.productList);
-    const itemsToProcess = items.slice(0, maxResults);
+    // 여러 셀렉터 시도하여 상품 목록 찾기
+    let items: Awaited<ReturnType<Page['$$']>> = [];
+    for (const selector of this.selectors.productLists) {
+      try {
+        const found = await page.$$(selector);
+        if (found.length > 0) {
+          console.log(`[Danawa] 셀렉터 "${selector}"로 ${found.length}개 요소 발견`);
+          items = found;
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    if (items.length === 0) {
+      console.log('[Danawa] 어떤 셀렉터로도 상품을 찾지 못함');
+      return products;
+    }
+
+    // 광고 아이템 필터링
+    const nonAdItems = [];
+    for (const item of items) {
+      const isAd = await item.$(this.selectors.adMarker);
+      if (!isAd) {
+        nonAdItems.push(item);
+      }
+    }
+
+    const itemsToProcess = nonAdItems.slice(0, maxResults);
+    console.log(`[Danawa] 처리할 상품 수: ${itemsToProcess.length}`);
 
     for (const item of itemsToProcess) {
       try {
-        // 상품명
-        const nameEl = await item.$(this.selectors.productName);
-        const name = nameEl ? (await nameEl.textContent())?.trim() : null;
+        // 상품명 찾기
+        let name: string | null = null;
+        for (const selector of this.selectors.productNames) {
+          const nameEl = await item.$(selector);
+          if (nameEl) {
+            name = ((await nameEl.textContent()) || '').trim();
+            if (name) break;
+          }
+        }
         if (!name) continue;
 
-        // 가격
-        const priceEl = await item.$(this.selectors.lowestPrice);
-        const priceText = priceEl ? await priceEl.textContent() : null;
+        // 가격 찾기
+        let priceText: string | null = null;
+        for (const selector of this.selectors.prices) {
+          const priceEl = await item.$(selector);
+          if (priceEl) {
+            priceText = await priceEl.textContent();
+            if (priceText && priceText.match(/\d/)) break;
+          }
+        }
         const price = this.parsePrice(priceText || '');
         if (!price) continue;
 
-        // 링크
-        const linkEl = await item.$(this.selectors.thumbLink);
-        const href = linkEl ? await linkEl.getAttribute('href') : null;
-        const url = href ? (href.startsWith('http') ? href : `${this.baseUrl}${href}`) : '';
-
-        // 이미지 (lazy loading 대응)
-        const imgEl = await item.$(this.selectors.image);
-        let image: string | undefined;
-        if (imgEl) {
-          image = (await imgEl.getAttribute('data-original')) || (await imgEl.getAttribute('src')) || undefined;
-          if (image && image.startsWith('//')) {
-            image = `https:${image}`;
+        // 링크 찾기
+        let url = '';
+        for (const selector of this.selectors.links) {
+          const linkEl = await item.$(selector);
+          if (linkEl) {
+            const href = await linkEl.getAttribute('href');
+            if (href) {
+              url = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
+              break;
+            }
           }
         }
 
-        // 스펙 정보
-        const specEls = await item.$$(this.selectors.spec);
-        const specs: string[] = [];
-        for (const spec of specEls.slice(0, 3)) {
-          const text = await spec.textContent();
-          if (text) specs.push(text.trim());
+        // 이미지 찾기 (lazy loading 대응)
+        let image: string | undefined;
+        for (const selector of this.selectors.images) {
+          const imgEl = await item.$(selector);
+          if (imgEl) {
+            image =
+              (await imgEl.getAttribute('data-original')) ||
+              (await imgEl.getAttribute('data-src')) ||
+              (await imgEl.getAttribute('src')) ||
+              undefined;
+            if (image) {
+              if (image.startsWith('//')) {
+                image = `https:${image}`;
+              }
+              break;
+            }
+          }
         }
 
         products.push({
@@ -146,7 +226,6 @@ export class DanawaProvider extends BaseProvider {
           currency: this.currency,
           url,
           image,
-          deliveryInfo: specs.length > 0 ? specs.join(' | ') : undefined,
         });
       } catch (err) {
         console.warn('[Danawa] 상품 파싱 실패:', err);

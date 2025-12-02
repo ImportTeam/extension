@@ -51,6 +51,12 @@ interface ComparisonResponse {
   fromCache?: boolean;
 }
 
+interface PriceComparisonMessage {
+  type: 'COMPARE_PRICES';
+  query: string;
+  providers?: string[];
+}
+
 /**
  * 가격 비교 API 호출
  */
@@ -190,7 +196,7 @@ chrome.runtime.onMessage.addListener(
 
       // 가격 비교 요청 처리
       if (message.type === 'COMPARE_PRICES') {
-        const { query, providers: targetProviders } = message as { query: string; providers?: string[] };
+        const { query, providers: targetProviders } = message as unknown as PriceComparisonMessage;
         
         console.log('[Background] 💰 Price comparison request:', {
           query,

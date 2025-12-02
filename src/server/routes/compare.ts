@@ -24,6 +24,22 @@ const cache = new NodeCache({
   useClones: true,
 });
 
+const isProvider = (value: string): value is ProviderType => value in providers;
+
+const buildErrorResponse = (
+  query: string,
+  durationMs: number,
+  errorMessage: string,
+): ComparisonResponse => ({
+  success: false,
+  query,
+  timestamp: Date.now(),
+  totalDuration: durationMs,
+  fromCache: false,
+  results: [],
+  error: errorMessage,
+});
+
 /**
  * 캐시 키 생성
  */
@@ -58,36 +74,31 @@ router.post('/', async (req: Request, res: Response) => {
 
     // 검색어 유효성 검사
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
-      res.status(400).json({
-        success: false,
-        error: '검색어가 필요합니다',
-        query: '',
-        results: [],
-        totalDuration: Date.now() - startTime,
-      } as ComparisonResponse);
+      const errorResponse = buildErrorResponse('', Date.now() - startTime, '검색어가 필요합니다');
+      res.status(400).json(errorResponse);
       return;
     }
 
     const trimmedQuery = query.trim();
 
+
     // 사용할 Provider 결정
-    const providersToUse: ProviderType[] = requestedProviders && requestedProviders.length > 0
-      ? requestedProviders.filter(p => providers[p])
+    const providerTypesToUse: ProviderType[] = requestedProviders && requestedProviders.length > 0
+      ? requestedProviders.filter(isProvider)
       : (Object.keys(providers) as ProviderType[]);
 
-    if (providersToUse.length === 0) {
-      res.status(400).json({
-        success: false,
-        error: '유효한 쇼핑몰이 지정되지 않았습니다',
-        query: trimmedQuery,
-        results: [],
-        totalDuration: Date.now() - startTime,
-      } as ComparisonResponse);
+    if (providerTypesToUse.length === 0) {
+      const errorResponse = buildErrorResponse(
+        trimmedQuery,
+        Date.now() - startTime,
+        '유효한 쇼핑몰이 지정되지 않았습니다',
+      );
+      res.status(400).json(errorResponse);
       return;
     }
 
     // 캐시 확인
-    const cacheKey = getCacheKey(trimmedQuery, providersToUse);
+    const cacheKey = getCacheKey(trimmedQuery, providerTypesToUse);
     if (useCache) {
       const cachedResult = cache.get<ComparisonResponse>(cacheKey);
       if (cachedResult) {
@@ -100,10 +111,10 @@ router.post('/', async (req: Request, res: Response) => {
       }
     }
 
-    console.log(`[Compare] 검색 시작: "${trimmedQuery}" (${providersToUse.join(', ')})`);
+    console.log(`[Compare] 검색 시작: "${trimmedQuery}" (${providerTypesToUse.join(', ')})`);
 
     // 모든 Provider에서 병렬 검색
-    const searchPromises = providersToUse.map(async (providerType): Promise<ProviderResult> => {
+    const searchPromises = providerTypesToUse.map(async (providerType): Promise<ProviderResult> => {
       const provider = getProvider(providerType);
       if (!provider) {
         return {
@@ -144,6 +155,7 @@ router.post('/', async (req: Request, res: Response) => {
     const response: ComparisonResponse = {
       success: successCount > 0,
       query: trimmedQuery,
+      timestamp: Date.now(),
       results,
       totalDuration,
       fromCache: false,
@@ -159,13 +171,12 @@ router.post('/', async (req: Request, res: Response) => {
     res.json(response);
   } catch (error) {
     console.error('[Compare] 서버 에러:', error);
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : '서버 오류가 발생했습니다',
-      query: req.body?.query || '',
-      results: [],
-      totalDuration: Date.now() - startTime,
-    } as ComparisonResponse);
+    const response = buildErrorResponse(
+      typeof req.body?.query === 'string' ? req.body.query.trim() : '',
+      Date.now() - startTime,
+      error instanceof Error ? error.message : '서버 오류가 발생했습니다',
+    );
+    res.status(500).json(response);
   }
 });
 
