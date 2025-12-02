@@ -8,7 +8,7 @@
  * 4. Auto Popup 트리거
  */
 
-import { CoupangParser, AmazonParser, EbayParser, FallbackParser, BaseParser } from './parsers';
+import { CoupangParser, AmazonParser, EbayParser, FallbackParser, BaseParser, ElevenStreetParser } from './parsers';
 import { ParsedProductInfo } from '../shared/types';
 import {
   mountToggleBar,
@@ -60,6 +60,10 @@ function detectCheckoutPage(url: string): { site: string; isCheckout: boolean } 
     console.log('[Content] ✅ Detected Coupang checkout page');
     return { site: 'coupang', isCheckout: true };
   }
+  if (ElevenStreetParser.isProductPage(url)) {
+    console.log('[Content] ✅ Detected 11번가 product page');
+    return { site: '11st', isCheckout: true };
+  }
   if (AmazonParser.isCheckoutPage(url)) {
     console.log('[Content] ✅ Detected Amazon checkout page');
     return { site: 'amazon', isCheckout: true };
@@ -78,6 +82,8 @@ function getParser(site: string): BaseParser {
   switch (site) {
     case 'coupang':
       return new CoupangParser();
+    case '11st':
+      return new ElevenStreetParser();
     case 'amazon':
       return new AmazonParser();
     case 'ebay':
