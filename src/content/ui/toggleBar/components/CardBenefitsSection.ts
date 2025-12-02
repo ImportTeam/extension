@@ -73,29 +73,41 @@ const getCardInitial = (cardName: string): string => {
 /**
  * 카드사명에서 SVG 파일명 추출
  * assets/card/*.svg 파일과 매핑
+ * 
+ * 매칭 우선순위: 정확한 키워드 → 부분 문자열
+ * BC카드가 다른 카드로 잘못 매칭되지 않도록 순서 조정
  */
 const getCardSvgPath = (cardName: string): string | null => {
-	const cardSvgMapping: Record<string, string> = {
-		'삼성': 'samsungCard.svg',
-		'현대': 'hyundaiCard.svg',
-		'신한': 'shinhanCard.svg',
-		'국민': 'kbCard.svg',
-		'KB': 'kbCard.svg',
-		'롯데': 'lotteCard.svg',
-		'하나': 'hanaCard.svg',
-		'우리': 'wooriCard.svg',
-		'BC': 'bcCard.svg',
-		'VISA': 'visaCard.svg',
-		'visa': 'visaCard.svg',
-		'비자': 'visaCard.svg',
-		'MASTER': 'masterCard.svg',
-		'master': 'masterCard.svg',
-		'마스터': 'masterCard.svg',
-	};
+	const normalizedName = cardName.toUpperCase();
 
-	for (const [key, svgFile] of Object.entries(cardSvgMapping)) {
-		if (cardName.toUpperCase().includes(key.toUpperCase())) {
-			return chrome.runtime.getURL(`assets/card/${svgFile}`);
+	// 우선순위가 높은 정확한 매칭 (짧은 키워드가 다른 단어에 포함될 수 있으므로)
+	// 배열로 순서 보장
+	const cardSvgMapping: Array<{ keywords: string[]; svg: string }> = [
+		// BC는 가장 먼저 체크 (다른 단어에 포함될 가능성 낮음)
+		{ keywords: ['BC', 'BC카드', '비씨'], svg: 'bcCard.svg' },
+		// KB/국민 - KB가 다른 단어에 포함될 수 있으므로 국민과 함께
+		{ keywords: ['KB', '국민', 'KB국민', '케이비'], svg: 'kbCard.svg' },
+		// NH/농협
+		{ keywords: ['NH', '농협', 'NH농협'], svg: 'nhCard.svg' },
+		// 나머지 카드사 (긴 이름 우선)
+		{ keywords: ['삼성', 'SAMSUNG', '삼성카드'], svg: 'samsungCard.svg' },
+		{ keywords: ['현대', 'HYUNDAI', '현대카드'], svg: 'hyundaiCard.svg' },
+		{ keywords: ['신한', 'SHINHAN', '신한카드'], svg: 'shinhanCard.svg' },
+		{ keywords: ['롯데', 'LOTTE', '롯데카드'], svg: 'lotteCard.svg' },
+		{ keywords: ['하나', 'HANA', '하나카드', 'SK'], svg: 'hanaCard.svg' },
+		{ keywords: ['우리', 'WOORI', '우리카드'], svg: 'wooriCard.svg' },
+		{ keywords: ['씨티', 'CITI', '씨티카드', 'CITIBANK'], svg: 'citiCard.svg' },
+		// 해외 카드
+		{ keywords: ['VISA', '비자'], svg: 'visaCard.svg' },
+		{ keywords: ['MASTER', '마스터', 'MASTERCARD'], svg: 'masterCard.svg' },
+		{ keywords: ['AMEX', '아멕스', 'AMERICAN EXPRESS'], svg: 'amexCard.svg' },
+	];
+
+	for (const { keywords, svg } of cardSvgMapping) {
+		for (const keyword of keywords) {
+			if (normalizedName.includes(keyword.toUpperCase())) {
+				return chrome.runtime.getURL(`assets/card/${svg}`);
+			}
 		}
 	}
 

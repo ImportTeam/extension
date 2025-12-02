@@ -297,9 +297,9 @@ export const toggleBarStyles = `
 
 		/* 카드 이미지 영역 */
 		.picsel-card-image-wrapper {
-			width: 48px;
-			height: 48px;
-			border-radius: 6px;
+			width: 80px;
+			height: 80px;
+			border-radius: 10px;
 			overflow: hidden;
 			background: #f3f4f6;
 			display: flex;
@@ -329,8 +329,8 @@ export const toggleBarStyles = `
 			align-items: center;
 			justify-content: center;
 			background: #f1f5f9;
-			border-radius: 6px;
-			font-size: 11px;
+			border-radius: 10px;
+			font-size: 18px;
 			font-weight: 700;
 			color: #64748b;
 			letter-spacing: -0.5px;
@@ -617,5 +617,270 @@ export const toggleBarStyles = `
 
 		::-webkit-scrollbar-track {
 			background: transparent;
+		}
+
+		/* Footer Buttons Container */
+		.picsel-footer-buttons {
+			display: flex;
+			gap: 8px;
+		}
+
+		.picsel-footer-compare {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 12px 16px;
+			font-size: 14px;
+			font-weight: 600;
+			color: #4f46e5;
+			background: #eef2ff;
+			border: none;
+			border-radius: 16px;
+			cursor: pointer;
+			transition: background-color 0.15s ease;
+		}
+
+		.picsel-footer-compare:hover {
+			background: #e0e7ff;
+		}
+
+		/* Price Comparison Panel */
+		.picsel-comparison-panel {
+			position: fixed;
+			bottom: 160px;
+			right: 24px;
+			width: 380px;
+			max-height: 500px;
+			background: #ffffff;
+			border-radius: 12px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+			overflow: hidden;
+			z-index: 2147483646;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.picsel-comparison-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 12px 16px;
+			background: #f8f9fa;
+			border-bottom: 1px solid #eee;
+		}
+
+		.picsel-comparison-header h3 {
+			margin: 0;
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+		}
+
+		.picsel-comparison-close {
+			background: none;
+			border: none;
+			font-size: 18px;
+			color: #888;
+			cursor: pointer;
+			padding: 4px;
+		}
+
+		.picsel-comparison-loading {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 40px;
+		}
+
+		.picsel-spinner {
+			width: 40px;
+			height: 40px;
+			border: 3px solid #f3f3f3;
+			border-top: 3px solid #4f46e5;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		.picsel-comparison-loading p {
+			margin-top: 16px;
+			color: #666;
+			font-size: 14px;
+		}
+
+		.picsel-comparison-error {
+			text-align: center;
+		}
+
+		.picsel-comparison-error p {
+			color: #e74c3c;
+			margin-bottom: 12px;
+		}
+
+		.picsel-comparison-error code {
+			display: block;
+			padding: 12px;
+			background: #2d3748;
+			color: #68d391;
+			border-radius: 6px;
+			font-size: 14px;
+			margin-bottom: 12px;
+		}
+
+		.picsel-comparison-help {
+			color: #666 !important;
+			font-size: 12px !important;
+		}
+
+		.picsel-comparison-current {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 12px 16px;
+			background: #fff9e6;
+			border-bottom: 1px solid #ffeaa7;
+		}
+
+		.picsel-comparison-current strong {
+			font-size: 18px;
+			color: #f39c12;
+		}
+
+		.picsel-comparison-results {
+			flex: 1;
+			overflow-y: auto;
+			max-height: 350px;
+		}
+
+		.picsel-comparison-provider {
+			padding: 12px 16px;
+			border-bottom: 1px solid #eee;
+		}
+
+		.picsel-comparison-provider-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 8px;
+		}
+
+		.picsel-comparison-count {
+			font-size: 12px;
+			color: #888;
+		}
+
+		.picsel-comparison-error-badge {
+			font-size: 10px;
+			padding: 2px 6px;
+			background: #ffebee;
+			color: #c62828;
+			border-radius: 4px;
+		}
+
+		.picsel-comparison-product-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.picsel-comparison-product {
+			display: flex;
+			gap: 10px;
+			padding: 8px;
+			background: #f8f9fa;
+			border-radius: 8px;
+			text-decoration: none;
+			color: inherit;
+			transition: background-color 0.2s;
+		}
+
+		.picsel-comparison-product:hover {
+			background: #e9ecef;
+		}
+
+		.picsel-comparison-img {
+			width: 50px;
+			height: 50px;
+			object-fit: cover;
+			border-radius: 6px;
+		}
+
+		.picsel-comparison-info {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.picsel-comparison-name {
+			margin: 0 0 4px 0;
+			font-size: 12px;
+			color: #333;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.picsel-comparison-price-row {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			margin-bottom: 2px;
+		}
+
+		.picsel-comparison-price {
+			font-size: 14px;
+			font-weight: 600;
+		}
+
+		.picsel-comparison-saving {
+			font-size: 10px;
+			padding: 1px 4px;
+			background: #fce4ec;
+			color: #c2185b;
+			border-radius: 3px;
+		}
+
+		.picsel-comparison-meta {
+			display: flex;
+			gap: 8px;
+			font-size: 11px;
+			color: #888;
+		}
+
+		.picsel-comparison-provider-error {
+			font-size: 12px;
+			color: #e74c3c;
+			padding: 8px;
+			margin: 0;
+		}
+
+		.picsel-comparison-empty {
+			font-size: 12px;
+			color: #888;
+			padding: 8px;
+			text-align: center;
+			margin: 0;
+		}
+
+		.picsel-comparison-meta-info {
+			display: flex;
+			justify-content: flex-end;
+			gap: 8px;
+			padding: 8px 16px;
+			font-size: 11px;
+			color: #888;
+			border-top: 1px solid #eee;
+		}
+
+		.picsel-comparison-cache {
+			padding: 2px 6px;
+			background: #e3f2fd;
+			color: #1976d2;
+			border-radius: 4px;
 		}
 `;

@@ -6,9 +6,13 @@
  * 2. chrome.storage에 데이터 저장
  * 3. Content Script에 성공 응답
  * 4. Popup을 자동 표시 (optional)
+ * 5. 가격 비교 API 호출
  */
 
 console.log('[Background] 🟢 Service Worker initialized');
+
+// 가격 비교 서버 URL
+const COMPARISON_SERVER_URL = 'http://localhost:3001';
 
 interface ProductData {
   amount: number;
@@ -19,6 +23,55 @@ interface ProductData {
   cardBenefits?: unknown[];
   cashback?: boolean;
   [key: string]: unknown;
+}
+
+interface ComparisonResponse {
+  success: boolean;
+  query: string;
+  results: Array<{
+    provider: string;
+    success: boolean;
+    products: Array<{
+      id: string;
+      name: string;
+      price: number;
+      originalPrice?: number;
+      currency: string;
+      url: string;
+      image?: string;
+      rating?: number;
+      ratingCount?: number;
+      isFreeShipping?: boolean;
+      deliveryInfo?: string;
+    }>;
+    error?: string;
+    duration: number;
+  }>;
+  totalDuration: number;
+  fromCache?: boolean;
+}
+
+/**
+ * 가격 비교 API 호출
+ */
+async function fetchPriceComparison(query: string, providers?: string[]): Promise<ComparisonResponse> {
+  const response = await fetch(`${COMPARISON_SERVER_URL}/api/compare`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query,
+      providers,
+      maxResults: 5,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`API 요청 실패: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 chrome.runtime.onMessage.addListener(
@@ -131,6 +184,63 @@ chrome.runtime.onMessage.addListener(
             });
           }
         });
+
+        return true;
+      }
+
+      // 가격 비교 요청 처리
+      if (message.type === 'COMPARE_PRICES') {
+        const { query, providers: targetProviders } = message as { query: string; providers?: string[] };
+        
+        console.log('[Background] 💰 Price comparison request:', {
+          query,
+          providers: targetProviders || 'all',
+        });
+
+        fetchPriceComparison(query, targetProviders)
+          .then((result) => {
+            console.log('[Background] ✅ Price comparison completed:', {
+              success: result.success,
+              resultCount: result.results.length,
+              totalDuration: result.totalDuration,
+              fromCache: result.fromCache,
+            });
+            sendResponse({
+              success: true,
+              data: result,
+            });
+          })
+          .catch((error) => {
+            console.error('[Background] ❌ Price comparison failed:', error);
+            sendResponse({
+              success: false,
+              error: error instanceof Error ? error.message : '가격 비교 실패',
+            });
+          });
+
+        return true;
+      }
+
+      // 가격 비교 서버 상태 확인
+      if (message.type === 'CHECK_COMPARISON_SERVER') {
+        console.log('[Background] 🔍 Checking comparison server status');
+        
+        fetch(`${COMPARISON_SERVER_URL}/api/health`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log('[Background] ✅ Comparison server is healthy:', data);
+            sendResponse({
+              success: true,
+              data,
+            });
+          })
+          .catch((error) => {
+            console.error('[Background] ❌ Comparison server is down:', error);
+            sendResponse({
+              success: false,
+              error: '가격 비교 서버에 연결할 수 없습니다',
+            });
+          });
 
         return true;
       }

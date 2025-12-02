@@ -1,18 +1,28 @@
 export const COUPANG_SELECTORS = {
   amount: [
+    // 쿠팡 최신 구조 (2024~)
+    '.prod-sale-price',
+    '.prod-coupon-price',
+    '.total-price strong',
+    '.price-value',
+    // Tailwind 기반 셀렉터
+    '[class*="text-"][class*="font-bold"]',
+    // 기존 셀렉터
     '.price-amount.sales-price-amount',
     '.price-amount.final-price-amount',
     '.total-price',
     '[data-testid="total-price"]',
     '.price-amount',
     '[data-price]',
-    '[class*="price"]',
+    // 일반 가격 패턴
     '.product-price',
     '.prod-price',
     '.product__price',
     '.prod_price',
     'strong.price',
     'span.price',
+    // 더 넓은 범위 (최후 수단)
+    '[class*="price"]',
   ],
   title: [
     '.product-title',
