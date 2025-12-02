@@ -1,38 +1,19 @@
 /**
  * Footer Section 컴포넌트
- * 추가 혜택 (쿠팡캐시, 상품권 할인 등)을 간결하게 표시
+ * 확인 메시지 표시 (추가 혜택은 CardBenefitsSection 아래로 이동)
  */
 
 import type { ToggleProductData } from '../types';
 
-export const createFooterSection = (data: ToggleProductData): HTMLElement | null => {
-	const extras: string[] = [];
-	
-	if (data.giftCardDiscount?.description) {
-		extras.push(`🎁 ${data.giftCardDiscount.description}`);
-	}
-	if (data.cashback?.description) {
-		extras.push(`💰 ${data.cashback.description}`);
-	}
-
-	if (extras.length === 0) {
-		return null;
-	}
-
+export const createFooterSection = (_data: ToggleProductData): HTMLElement | null => {
 	const footer = document.createElement('footer');
 	footer.className = 'picsel-footer';
 
-	const list = document.createElement('div');
-	list.className = 'picsel-footer-list';
+	const confirmMsg = document.createElement('div');
+	confirmMsg.className = 'picsel-footer-confirm';
+	confirmMsg.textContent = '✅ 확인했습니다.';
 
-	extras.forEach((text) => {
-		const item = document.createElement('div');
-		item.className = 'picsel-footer-item';
-		item.textContent = text;
-		list.appendChild(item);
-	});
-
-	footer.appendChild(list);
+	footer.appendChild(confirmMsg);
 
 	return footer;
 };

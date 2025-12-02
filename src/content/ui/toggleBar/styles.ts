@@ -285,18 +285,18 @@ export const toggleBarStyles = `
 			display: flex;
 			justify-content: space-between;
 			align-items: flex-start;
-			padding: 14px 16px;
+			padding: 16px 18px;
 			border-radius: 12px;
-			background: #ffffff;
-			border: 1px solid #e5e7eb;
-			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+			background: #f8fafc;
+			border: 1px solid #cbd5e1;
+			box-shadow: none;
 			transition: all 0.2s ease;
 		}
 
 		.picsel-card-benefit-item.recommended {
-			background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-			border-color: #f59e0b;
-			box-shadow: 0 2px 8px -2px rgba(245, 158, 11, 0.3);
+			background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+			border: 2px solid #0ea5e9;
+			box-shadow: 0 2px 8px -2px rgba(14, 165, 233, 0.25);
 		}
 
 		.picsel-card-left {
@@ -316,9 +316,9 @@ export const toggleBarStyles = `
 		.picsel-recommended-badge {
 			font-size: 11px;
 			font-weight: 700;
-			color: #92400e;
-			background: rgba(255, 255, 255, 0.8);
-			padding: 2px 8px;
+			color: #0369a1;
+			background: rgba(255, 255, 255, 0.9);
+			padding: 3px 10px;
 			border-radius: 999px;
 			white-space: nowrap;
 		}
@@ -326,20 +326,22 @@ export const toggleBarStyles = `
 		.picsel-card-benefit-item .picsel-card-name {
 			font-size: 14px;
 			font-weight: 700;
-			color: #1f2937;
+			color: #334155;
+			line-height: 1.5;
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-name {
-			color: #92400e;
+			color: #0c4a6e;
 		}
 
 		.picsel-card-benefit-desc {
 			font-size: 12px;
-			color: #6b7280;
+			color: #64748b;
+			margin-top: 4px;
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-benefit-desc {
-			color: #a16207;
+			color: #0369a1;
 		}
 
 		.picsel-card-right {
@@ -353,33 +355,53 @@ export const toggleBarStyles = `
 		.picsel-card-discount {
 			font-size: 16px;
 			font-weight: 800;
-			color: #dc2626;
+			color: #e11d48;
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-discount {
-			color: #b91c1c;
+			color: #be123c;
 		}
 
 		.picsel-card-final {
 			font-size: 11px;
-			color: #6b7280;
+			color: #64748b;
 		}
 
 		.picsel-card-benefit-item.recommended .picsel-card-final {
-			color: #a16207;
+			color: #0369a1;
 		}
 
 		.picsel-card-rate {
 			font-size: 14px;
 			font-weight: 700;
-			color: #4f46e5;
+			color: #0ea5e9;
 		}
 
 		/* Footer Section */
 		.picsel-footer {
-			margin-top: 4px;
+			margin-top: 8px;
 			padding-top: 12px;
-			border-top: 1px solid #e5e7eb;
+			border-top: 1px solid #e2e8f0;
+		}
+
+		.picsel-footer-confirm {
+			font-size: 13px;
+			color: #64748b;
+			text-align: center;
+			padding: 8px 0;
+		}
+
+		/* Sub Benefits - 카드 섹션 아래 */
+		.picsel-sub-benefits {
+			margin-top: 10px;
+			padding-top: 10px;
+			border-top: 1px dashed #cbd5e1;
+		}
+
+		.picsel-sub-benefit-item {
+			font-size: 12px;
+			color: #64748b;
+			padding: 6px 0;
 		}
 
 		.picsel-footer-list {

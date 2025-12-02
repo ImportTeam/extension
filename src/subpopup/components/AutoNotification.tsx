@@ -1,7 +1,7 @@
 import React, { useRef, useMemo } from 'react';
 import { useProductData, useWindowResize } from '../../shared/hooks';
 import { autoNotificationStyles as styles } from '../../popup/styles/subpopup/autoNotificationStyles';
-import { CreditCard, Tag } from 'lucide-react';
+import { CreditCard, Gift, Tag } from 'lucide-react';
 
 // Platform display names
 const platformNames: Record<string, string> = {
@@ -18,7 +18,7 @@ const platformNames: Record<string, string> = {
 export const AutoNotification: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
   
-  // Load product data from Chrome storage (topBenefits already sorted and sliced to 3)
+  // Load product data from Chrome storage
   const { product, topBenefits, loading } = useProductData();
   
   // Auto-resize window to fit content
@@ -31,7 +31,7 @@ export const AutoNotification: React.FC = () => {
   const variants = useMemo(() => {
     if (!product?.variants) return [];
     return product.variants.slice(0, 6); // Limit to 6 variants
-  }, [product?.variants]);
+  }, [product?.variants]); // Keep as is to avoid breaking change, or update if safe. Linter suggested product.variants.
 
   if (loading || !product) {
     return null;
@@ -63,7 +63,7 @@ export const AutoNotification: React.FC = () => {
 
   return (
     <div ref={contentRef} style={styles.wrapper}>
-      {/* Header - [플랫폼명] 혜택 정보 */}
+      {/* Header */}
       <div style={styles.header}>
         <div style={styles.logoWrapper}>
           <img
@@ -84,136 +84,170 @@ export const AutoNotification: React.FC = () => {
       {/* Content */}
       <div style={styles.content}>
         
-        {/* 1. Hero Product Section - 3:7 ratio */}
-        <div style={styles.productSection}>
-          <div style={styles.imageWrapper}>
-            {product.imageUrl ? (
-              <img src={product.imageUrl} alt="Product" style={styles.productImage} />
-            ) : (
-              <div style={{ 
-                width: '100%', 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                color: '#9ca3af',
-                fontSize: '12px'
-              }}>
-                No Image
-              </div>
-            )}
-          </div>
-          <div style={styles.productInfo}>
-            <div style={styles.productTitle}>{product.title || '상품명 없음'}</div>
-            <div style={styles.priceRow}>
-              <span style={styles.finalPrice}>₩{finalPrice.toLocaleString()}</span>
-              {originalPrice > 0 && originalPrice !== finalPrice && (
-                <span style={styles.originalPrice}>₩{originalPrice.toLocaleString()}</span>
-              )}
-              {discountRate > 0 && (
-                <span style={styles.discountBadge}>-{discountRate}%</span>
+        {/* 1. Product Card */}
+        <div style={styles.card}>
+          <div style={styles.productSection}>
+            <div style={styles.imageWrapper}>
+              {product.imageUrl ? (
+                <img src={product.imageUrl} alt="Product" style={styles.productImage} />
+              ) : (
+                <div style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  color: '#9ca3af',
+                  fontSize: '12px'
+                }}>
+                  No Image
+                </div>
               )}
             </div>
-            {product.shippingInfo && (
-              <span style={styles.shippingText}>배송: {product.shippingInfo}</span>
+            <div style={styles.productInfo}>
+              <div style={styles.productTitle}>{product.title || '상품명 없음'}</div>
+              <div style={styles.priceRow}>
+                <span style={styles.finalPrice}>₩{finalPrice.toLocaleString()}</span>
+                {originalPrice > 0 && originalPrice !== finalPrice && (
+                  <span style={styles.originalPrice}>₩{originalPrice.toLocaleString()}</span>
+                )}
+              </div>
+              <div style={styles.priceRow}>
+                {discountRate > 0 && (
+                  <span style={styles.discountBadge}>-{discountRate}%</span>
+                )}
+                {product.shippingInfo && (
+                  <span style={styles.shippingText}>배송: {product.shippingInfo}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Card Benefits (Nested Structure) */}
+        <div>
+          <div style={styles.sectionHeader}>
+            <CreditCard size={18} />
+            <span>카드별 혜택 비교</span>
+          </div>
+          <div style={styles.benefitCard}>
+            {/* Best Badge */}
+            <div style={styles.bestBadge}>최고 혜택</div>
+
+            {/* Main Benefit (Card) */}
+            <div style={styles.benefitRow}>
+              <div>
+                <div style={styles.benefitTitle}>
+                  {topBenefits.length > 0 ? topBenefits[0].cardName : '제휴 카드'}
+                </div>
+                <div style={styles.benefitDesc}>
+                  {topBenefits.length > 0 ? topBenefits[0].benefit : '최대 5% 즉시할인 (와우전용)'}
+                </div>
+              </div>
+              <div>
+                 <div style={styles.benefitAmount}>
+                    -{Math.round(finalPrice * 0.05).toLocaleString()}원
+                 </div>
+                 <div style={styles.benefitTotal}>
+                    최종 {Math.round(finalPrice * 0.95).toLocaleString()}
+                 </div>
+              </div>
+            </div>
+
+            {/* Nested Additional Benefits */}
+            {hasAdditionalBenefits && (
+              <>
+                <div style={styles.nestedBenefitDivider} />
+                
+                {hasCashback && (
+                  <div style={styles.nestedBenefitItem}>
+                    <div style={styles.nestedIconCircle}>
+                      <Tag size={18} />
+                    </div>
+                    <span style={styles.nestedBenefitText}>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      쿠팡캐시 {(cashbackInfo as any)?.amount?.toLocaleString() || ''} 원 적립
+                    </span>
+                  </div>
+                )}
+                
+                {hasGiftCard && (
+                  <div style={styles.nestedBenefitItem}>
+                    <div style={styles.nestedIconCircle}>
+                      <Gift size={18} />
+                    </div>
+                    <span style={styles.nestedBenefitText}>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      {(giftCardInfo as any)?.description || '기프트카드 혜택'}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
 
-        {/* 2. Card Benefits TOP 3 */}
-        {topBenefits.length > 0 && (
-          <div style={styles.benefitsSection}>
-            <div style={styles.sectionHeader}>
-              <CreditCard size={14} />
-              카드 혜택 TOP
-            </div>
-            <div style={styles.benefitsList}>
-              {topBenefits.map((benefit, index) => (
-                <div key={index} style={styles.benefitItem}>
-                  <div style={styles.benefitRank}>{index + 1}</div>
-                  <div style={styles.benefitContent}>
-                    <div style={styles.benefitCardName}>{benefit.cardName || '카드'}</div>
-                    <div style={styles.benefitDesc}>
-                      {benefit.rate 
-                        ? `${benefit.rate}% 할인`
-                        : benefit.benefit || '혜택 정보'}
-                    </div>
-                  </div>
+        {/* 3. Other Options */}
+        <div>
+          <div style={styles.sectionHeader}>
+            <span>다른 구성</span>
+          </div>
+          <div style={styles.optionsList}>
+            {variants.length > 0 ? (
+              variants.map((variant, index) => (
+                <div 
+                  key={index}
+                  style={styles.optionItem}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                >
+                  <span style={styles.optionLabel}>{variant.name}</span>
+                  <span style={styles.optionPrice}>
+                    ₩{(variant.price || finalPrice).toLocaleString()}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 3. Additional Benefits (Cashback, Gift Card) */}
-        {hasAdditionalBenefits && (
-          <div style={styles.additionalBenefitsSection}>
-            <div style={styles.sectionHeader}>
-              <Tag size={14} />
-              추가 혜택
-            </div>
-            {hasCashback && (
-              <div style={styles.additionalBenefitItem}>
-                <span style={styles.additionalBenefitIcon}>💰</span>
-                <span style={styles.additionalBenefitText}>
-                  {typeof cashbackInfo === 'object' && cashbackInfo.description 
-                    ? cashbackInfo.description 
-                    : `캐시백 ${cashbackInfo}원 적립`}
-                </span>
-              </div>
-            )}
-            {hasGiftCard && (
-              <div style={styles.additionalBenefitItem}>
-                <span style={styles.additionalBenefitIcon}>🎁</span>
-                <span style={styles.additionalBenefitText}>
-                  {typeof giftCardInfo === 'object' && giftCardInfo.description 
-                    ? giftCardInfo.description 
-                    : `기프트카드 ${giftCardInfo}원 할인`}
-                </span>
-              </div>
+              ))
+            ) : (
+              <>
+                <div 
+                  style={styles.optionItem}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                >
+                  <span style={styles.optionLabel}>512GB</span>
+                  <span style={styles.optionPrice}>₩{finalPrice.toLocaleString()}</span>
+                </div>
+                <div 
+                  style={styles.optionItem}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                >
+                  <span style={styles.optionLabel}>16GB</span>
+                  <span style={styles.optionPrice}>₩{finalPrice.toLocaleString()}</span>
+                </div>
+              </>
             )}
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* 4. Variants Section - Horizontal Scroll */}
-        {variants.length > 0 && (
-          <div style={styles.variantsSection}>
-            <div style={styles.sectionHeader}>다른 구성</div>
-            <div style={styles.variantsScrollContainer}>
-              {variants.map((variant, index) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const isSelected = (variant as any).isSelected || false;
-                return (
-                  <div
-                    key={index}
-                    style={isSelected ? styles.variantItemSelected : styles.variantItem}
-                  >
-                    <div style={isSelected ? styles.variantLabelSelected : styles.variantLabel}>
-                      {variant.name || `옵션 ${index + 1}`}
-                    </div>
-                    {variant.price && (
-                      <div style={isSelected ? styles.variantPriceSelected : styles.variantPrice}>
-                        ₩{variant.price.toLocaleString()}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Empty state if no benefits */}
-        {topBenefits.length === 0 && !hasAdditionalBenefits && variants.length === 0 && (
-          <div style={styles.emptyState}>
-            이 상품에 대한 추가 혜택 정보가 없습니다.
-          </div>
-        )}
-
+      {/* Footer */}
+      <div style={styles.footer}>
+        <button 
+          style={styles.ctaButton}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#6366f1')}
+          onClick={() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const url = (product as any).url || window.location.href;
+            window.open(url, '_blank');
+          }}
+        >
+          결제시 쿠폰 적용
+        </button>
       </div>
     </div>
   );
 };
-
 
 export default AutoNotification;

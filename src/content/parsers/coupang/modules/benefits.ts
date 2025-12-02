@@ -49,7 +49,7 @@ const extractCardBenefitsFromPopup = (doc: Document): CardBenefitDetail[] => {
       if (iframeDoc) {
         return parseCardBenefitsFromDocument(iframeDoc);
       }
-    } catch (e) {
+    } catch {
       // Cross-origin이면 접근 불가
       console.log('[CoupangParser] iframe 접근 불가 (cross-origin)');
     }

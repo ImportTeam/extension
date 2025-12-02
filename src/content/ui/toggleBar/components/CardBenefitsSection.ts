@@ -128,7 +128,22 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 
 		const cardName = document.createElement('span');
 		cardName.className = 'picsel-card-name';
-		cardName.textContent = benefit.cardName || '제휴 카드';
+		// 카드명이 여러 개일 경우 줄바꿈으로 분리 ("신한카드, 우리카드, 롯데카드 외" -> 각각 줄바꿈)
+		const cardNameText = benefit.cardName || '제휴 카드';
+		if (cardNameText.includes(',')) {
+			// 여러 카드사를 줄바꿈으로 분리
+			const cards = cardNameText.split(',').map(c => c.trim());
+			cards.forEach((c, i) => {
+				const cardSpan = document.createElement('span');
+				cardSpan.textContent = c;
+				cardName.appendChild(cardSpan);
+				if (i < cards.length - 1) {
+					cardName.appendChild(document.createElement('br'));
+				}
+			});
+		} else {
+			cardName.textContent = cardNameText;
+		}
 		cardNameRow.appendChild(cardName);
 
 		leftCol.appendChild(cardNameRow);
@@ -171,6 +186,27 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 	});
 
 	section.appendChild(list);
+
+	// 추가 혜택 (sub) - 카드 섹션 아래에 작게 표시
+	const extras: string[] = [];
+	if (data.giftCardDiscount?.description) {
+		extras.push(`🎁 ${data.giftCardDiscount.description}`);
+	}
+	if (data.cashback?.description) {
+		extras.push(`💰 ${data.cashback.description}`);
+	}
+
+	if (extras.length > 0) {
+		const subBenefits = document.createElement('div');
+		subBenefits.className = 'picsel-sub-benefits';
+		extras.forEach((text) => {
+			const item = document.createElement('div');
+			item.className = 'picsel-sub-benefit-item';
+			item.textContent = text;
+			subBenefits.appendChild(item);
+		});
+		section.appendChild(subBenefits);
+	}
 
 	return section;
 };

@@ -53,11 +53,17 @@ export class CoupangParser extends BaseParser {
       }
 
       // 3. 혜택
-      const cardBenefits = Benefits.extractCardBenefits(doc).map(b => ({
-        card: b.cardName,
-        benefit: b.benefit,
-        discount: b.rate
-      }));
+      const cardBenefits = Benefits.extractCardBenefits(doc).map((b) => {
+        const rate = b.rate ?? b.discount;
+        const cardName = b.cardName || b.card;
+        return {
+          card: cardName,
+          cardName,
+          benefit: b.benefit,
+          discount: rate,
+          rate,
+        };
+      });
 
       const giftCardDiscount = Benefits.extractGiftCardDiscount(doc);
       const cashback = Benefits.extractCashback(doc);
