@@ -12,7 +12,7 @@
 console.log('[Background] 🟢 Service Worker initialized');
 
 // 가격 비교 서버 URL
-const COMPARISON_SERVER_URL = 'http://localhost:3001';
+const COMPARISON_SERVER_URL = 'http://localhost:8000';
 
 interface ProductData {
   amount: number;
