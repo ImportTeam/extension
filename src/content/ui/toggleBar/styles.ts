@@ -409,8 +409,8 @@ export const toggleBarStyles = `
 		}
 
 		.picsel-card-discount {
-			font-size: 15px;
-			font-weight: 700;
+			font-size: 12px;
+			font-weight: 500;
 			color: #dc2626;
 		}
 
@@ -419,6 +419,13 @@ export const toggleBarStyles = `
 		.picsel-card-benefit-item.rank-2 .picsel-card-discount,
 		.picsel-card-benefit-item.rank-3 .picsel-card-discount {
 			color: #dc2626;
+		}
+
+		/* 최종 가격 (위에 크게 표시) */
+		.picsel-card-final-price {
+			font-size: 15px;
+			font-weight: 700;
+			color: #1f2937;
 		}
 
 		.picsel-card-final {

@@ -4,7 +4,7 @@
  */
 
 import type { ToggleProductData } from '../types';
-import { state } from '../state';
+import { setPanelOpen } from '../mount';
 
 export const createFooterSection = (_data: ToggleProductData): HTMLElement | null => {
 	const footer = document.createElement('footer');
@@ -18,9 +18,7 @@ export const createFooterSection = (_data: ToggleProductData): HTMLElement | nul
 	
 	// 클릭 시 토글바 닫기
 	confirmBtn.addEventListener('click', () => {
-		if (state.panelEl) {
-			state.panelEl.classList.remove('show');
-		}
+		setPanelOpen(false);
 	});
 
 	footer.appendChild(confirmBtn);

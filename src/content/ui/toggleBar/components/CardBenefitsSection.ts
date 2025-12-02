@@ -71,6 +71,38 @@ const getCardInitial = (cardName: string): string => {
 };
 
 /**
+ * 카드사명에서 SVG 파일명 추출
+ * assets/card/*.svg 파일과 매핑
+ */
+const getCardSvgPath = (cardName: string): string | null => {
+	const cardSvgMapping: Record<string, string> = {
+		'삼성': 'samsungCard.svg',
+		'현대': 'hyundaiCard.svg',
+		'신한': 'shinhanCard.svg',
+		'국민': 'kbCard.svg',
+		'KB': 'kbCard.svg',
+		'롯데': 'lotteCard.svg',
+		'하나': 'hanaCard.svg',
+		'우리': 'wooriCard.svg',
+		'BC': 'bcCard.svg',
+		'VISA': 'visaCard.svg',
+		'visa': 'visaCard.svg',
+		'비자': 'visaCard.svg',
+		'MASTER': 'masterCard.svg',
+		'master': 'masterCard.svg',
+		'마스터': 'masterCard.svg',
+	};
+
+	for (const [key, svgFile] of Object.entries(cardSvgMapping)) {
+		if (cardName.toUpperCase().includes(key.toUpperCase())) {
+			return chrome.runtime.getURL(`assets/card/${svgFile}`);
+		}
+	}
+
+	return null;
+};
+
+/**
  * 개별 카드 아이템 생성
  */
 const createCardItem = (
@@ -85,13 +117,16 @@ const createCardItem = (
 
 	const cardNameText = benefit.cardName || benefit.card || '카드';
 
-	// 카드 이미지 (있는 경우에만 표시)
-	if (benefit.imageUrl) {
+	// 카드 이미지: 1) SVG 매핑, 2) 외부 URL, 3) 이니셜 표시
+	const svgPath = getCardSvgPath(cardNameText);
+	const imageSrc = svgPath || benefit.imageUrl;
+
+	if (imageSrc) {
 		const imageWrapper = document.createElement('div');
 		imageWrapper.className = 'picsel-card-image-wrapper';
 		
 		const img = document.createElement('img');
-		img.src = benefit.imageUrl;
+		img.src = imageSrc;
 		img.alt = cardNameText;
 		img.className = 'picsel-card-image';
 		img.onerror = () => {
@@ -104,8 +139,14 @@ const createCardItem = (
 		
 		imageWrapper.appendChild(img);
 		item.appendChild(imageWrapper);
+	} else {
+		// SVG도 없고 외부 이미지도 없으면 이니셜 표시
+		const initial = getCardInitial(cardNameText);
+		const imageWrapper = document.createElement('div');
+		imageWrapper.className = 'picsel-card-image-wrapper';
+		imageWrapper.innerHTML = `<div class="picsel-card-initial">${initial}</div>`;
+		item.appendChild(imageWrapper);
 	}
-	// 이미지가 없으면 이미지 영역 자체를 표시하지 않음
 
 	// 카드 정보 영역
 	const infoArea = document.createElement('div');
@@ -149,19 +190,21 @@ const createCardItem = (
 	amountArea.className = 'picsel-card-amount';
 
 	if (typeof benefit.discountAmount === 'number' && benefit.discountAmount > 0) {
+		// 최종 가격을 위에 표시 (더 중요한 정보)
+		if (typeof benefit.finalPrice === 'number') {
+			const finalEl = document.createElement('div');
+			finalEl.className = 'picsel-card-final-price';
+			const formattedFinal = formatCurrency(benefit.finalPrice, currency);
+			finalEl.textContent = formattedFinal;
+			amountArea.appendChild(finalEl);
+		}
+
+		// 할인 금액을 아래에 표시 (보조 정보)
 		const discountEl = document.createElement('div');
 		discountEl.className = 'picsel-card-discount';
 		const formatted = formatCurrency(benefit.discountAmount, currency);
 		discountEl.textContent = `-${formatted}`;
 		amountArea.appendChild(discountEl);
-
-		if (typeof benefit.finalPrice === 'number') {
-			const finalEl = document.createElement('div');
-			finalEl.className = 'picsel-card-final';
-			const formattedFinal = formatCurrency(benefit.finalPrice, currency);
-			finalEl.textContent = `→ ${formattedFinal}`;
-			amountArea.appendChild(finalEl);
-		}
 	} else if (typeof benefit.rate === 'number') {
 		const rateEl = document.createElement('div');
 		rateEl.className = 'picsel-card-rate';
