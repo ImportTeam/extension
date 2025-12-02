@@ -35,55 +35,87 @@ const extractPercentage = (text: string): number | undefined => {
 
 /**
  * 페이지에서 카드 이미지 정보 추출
- * w-[76px] 클래스 또는 유사한 카드 아이콘 컨테이너에서 이미지 추출
+ * 쿠팡 실제 구조: <img class="w-[76px]" src="..." alt="NH농협카드">
  */
 const extractCardImages = (doc: Document): CardImageInfo[] => {
   const cardImages: CardImageInfo[] = [];
   const selectors = COUPANG_SELECTORS.cardImages;
 
-  // 여러 선택자 시도
-  const containers = doc.querySelectorAll(selectors.container);
+  // 1. 직접 img.w-[76px] 선택 (가장 정확한 방법)
+  const directImages = doc.querySelectorAll(selectors.directClass);
   
-  containers.forEach((container) => {
-    const img = container.querySelector(selectors.image) as HTMLImageElement | null;
-    if (img && img.src) {
-      const alt = img.alt || '';
-      const src = img.src;
-      
-      // alt 또는 src에서 카드사명 추출
-      let cardName = alt.replace(/\s*(카드|로고|아이콘|이미지)/g, '').trim();
-      
-      // alt가 없으면 src URL에서 추출 시도
-      if (!cardName) {
-        cardName = extractCardNameFromUrl(src) || '';
-      }
-      
-      // 카드명 정규화
-      if (cardName && !cardName.includes('카드')) {
-        cardName = `${cardName}카드`;
-      }
-      
-      if (src && cardName) {
-        // 중복 체크
-        if (!cardImages.some(c => c.cardName === cardName)) {
-          cardImages.push({ src, alt, cardName });
-        }
+  directImages.forEach((img) => {
+    const imgEl = img as HTMLImageElement;
+    const src = imgEl.src;
+    const alt = imgEl.alt || '';
+    
+    if (!src) return;
+    
+    // alt에서 카드사명 추출 (예: "NH농협카드" -> "NH농협카드")
+    let cardName = alt.trim();
+    
+    // alt가 없으면 src URL에서 추출 시도
+    if (!cardName) {
+      cardName = extractCardNameFromUrl(src) || '';
+    }
+    
+    // 카드명 정규화
+    if (cardName && !cardName.includes('카드')) {
+      cardName = `${cardName}카드`;
+    }
+    
+    if (src && cardName) {
+      // 중복 체크
+      if (!cardImages.some(c => c.cardName === cardName)) {
+        cardImages.push({ src, alt, cardName });
+        console.log('[CoupangParser] 카드 이미지 발견:', { cardName, src: src.substring(0, 80) });
       }
     }
   });
 
-  // 추가: 일반 카드 아이콘 이미지 검색
-  const allCardImages = doc.querySelectorAll('img[src*="card"], img[alt*="카드"], img[class*="card"]');
+  // 2. 대체 선택자로 추가 검색
+  if (cardImages.length === 0) {
+    const containerImages = doc.querySelectorAll(selectors.container);
+    containerImages.forEach((img) => {
+      const imgEl = img as HTMLImageElement;
+      const src = imgEl.src;
+      const alt = imgEl.alt || '';
+      
+      if (!src) return;
+      
+      // 이미지 크기 체크 (너무 큰 이미지는 제외)
+      const width = imgEl.width || imgEl.naturalWidth;
+      if (width > 100) return;
+      
+      let cardName = alt.trim();
+      if (!cardName) {
+        cardName = extractCardNameFromUrl(src) || '';
+      }
+      
+      if (cardName && !cardName.includes('카드')) {
+        cardName = `${cardName}카드`;
+      }
+      
+      if (src && cardName && !cardImages.some(c => c.cardName === cardName)) {
+        cardImages.push({ src, alt, cardName });
+      }
+    });
+  }
+
+  // 3. 추가: 일반 카드 아이콘 이미지 검색
+  const allCardImages = doc.querySelectorAll('img[src*="cardbenefit"], img[alt*="카드"]');
   allCardImages.forEach((img) => {
     const imgEl = img as HTMLImageElement;
     const src = imgEl.src;
     const alt = imgEl.alt || '';
     
+    if (!src) return;
+    
     // 이미지 크기 체크 (너무 큰 이미지는 제외)
     const width = imgEl.width || imgEl.naturalWidth;
-    if (width > 150) return; // 150px 이상은 제외
+    if (width > 100) return;
     
-    let cardName = alt.replace(/\s*(카드|로고|아이콘|이미지)/g, '').trim();
+    let cardName = alt.trim();
     if (!cardName) {
       cardName = extractCardNameFromUrl(src) || '';
     }
@@ -97,7 +129,7 @@ const extractCardImages = (doc: Document): CardImageInfo[] => {
     }
   });
 
-  console.log('[CoupangParser] 추출된 카드 이미지:', cardImages);
+  console.log('[CoupangParser] 추출된 카드 이미지 총:', cardImages.length);
   return cardImages;
 };
 

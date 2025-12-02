@@ -42,6 +42,35 @@ const calculateFinalPrice = (
 };
 
 /**
+ * 카드사명에서 이니셜 추출
+ */
+const getCardInitial = (cardName: string): string => {
+	// 대표적인 카드사 이니셜 매핑
+	const cardInitials: Record<string, string> = {
+		'삼성': 'SS',
+		'현대': 'HD',
+		'신한': 'SH',
+		'국민': 'KB',
+		'KB': 'KB',
+		'롯데': 'LT',
+		'하나': 'HN',
+		'우리': 'WR',
+		'농협': 'NH',
+		'BC': 'BC',
+		'씨티': 'CT',
+	};
+
+	for (const [key, initial] of Object.entries(cardInitials)) {
+		if (cardName.includes(key)) {
+			return initial;
+		}
+	}
+
+	// 매핑이 없으면 첫 2글자
+	return cardName.replace('카드', '').substring(0, 2).toUpperCase();
+};
+
+/**
  * 개별 카드 아이템 생성
  */
 const createCardItem = (
@@ -54,43 +83,29 @@ const createCardItem = (
 	const item = document.createElement('div');
 	item.className = `picsel-card-benefit-item${rankClass}`;
 
-	// 카드 이미지 (있는 경우)
+	const cardNameText = benefit.cardName || benefit.card || '카드';
+
+	// 카드 이미지 (있는 경우에만 표시)
 	if (benefit.imageUrl) {
 		const imageWrapper = document.createElement('div');
 		imageWrapper.className = 'picsel-card-image-wrapper';
 		
 		const img = document.createElement('img');
 		img.src = benefit.imageUrl;
-		img.alt = benefit.cardName || benefit.card || '카드';
+		img.alt = cardNameText;
 		img.className = 'picsel-card-image';
 		img.onerror = () => {
-			// 이미지 로드 실패 시 기본 아이콘으로 대체
+			// 이미지 로드 실패 시 이니셜로 대체
+			const initial = getCardInitial(cardNameText);
 			imageWrapper.innerHTML = `
-				<div class="picsel-card-icon-fallback">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-						<line x1="1" y1="10" x2="23" y2="10"></line>
-					</svg>
-				</div>
+				<div class="picsel-card-initial">${initial}</div>
 			`;
 		};
 		
 		imageWrapper.appendChild(img);
 		item.appendChild(imageWrapper);
-	} else {
-		// 카드 이미지가 없으면 기본 아이콘 표시
-		const iconWrapper = document.createElement('div');
-		iconWrapper.className = 'picsel-card-image-wrapper';
-		iconWrapper.innerHTML = `
-			<div class="picsel-card-icon-fallback">
-				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-					<line x1="1" y1="10" x2="23" y2="10"></line>
-				</svg>
-			</div>
-		`;
-		item.appendChild(iconWrapper);
 	}
+	// 이미지가 없으면 이미지 영역 자체를 표시하지 않음
 
 	// 카드 정보 영역
 	const infoArea = document.createElement('div');
@@ -110,7 +125,6 @@ const createCardItem = (
 
 	const cardName = document.createElement('span');
 	cardName.className = 'picsel-card-name';
-	const cardNameText = benefit.cardName || benefit.card || '제휴 카드';
 	// 콤마로 구분된 여러 카드는 첫 번째 카드만 표시
 	const primaryCard = cardNameText.includes(',') 
 		? cardNameText.split(',')[0].trim() 

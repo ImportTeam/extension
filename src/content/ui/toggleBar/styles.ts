@@ -270,7 +270,7 @@ export const toggleBarStyles = `
 			gap: 8px;
 		}
 
-		/* Card Benefits Section - 메인 콘텐츠 */
+		/* Card Benefits Section - 메인 콘텐츠 (8pt 그리드) */
 		.picsel-card-section {
 			margin-top: 8px;
 		}
@@ -278,36 +278,30 @@ export const toggleBarStyles = `
 		.picsel-card-benefit-list {
 			display: flex;
 			flex-direction: column;
-			gap: 10px;
+			gap: 8px;
 		}
 
 		.picsel-card-benefit-item {
-			position: relative;
 			display: flex;
 			align-items: center;
-			gap: 14px;
-			padding: 14px 16px;
-			border-radius: 14px;
+			gap: 12px;
+			padding: 12px;
+			border-radius: 8px;
 			background: #ffffff;
-			border: 1px solid #e2e8f0;
-			box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-			transition: all 0.2s ease;
-			overflow: hidden;
+			border: 1px solid #e5e7eb;
 		}
 
 		.picsel-card-benefit-item:hover {
-			border-color: #c7d2fe;
-			box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.15);
+			background: #f9fafb;
 		}
 
 		/* 카드 이미지 영역 */
 		.picsel-card-image-wrapper {
-			width: 52px;
-			height: 52px;
-			border-radius: 10px;
+			width: 48px;
+			height: 48px;
+			border-radius: 6px;
 			overflow: hidden;
-			background: #f8fafc;
-			border: 1px solid #e2e8f0;
+			background: #f3f4f6;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -321,151 +315,110 @@ export const toggleBarStyles = `
 		}
 
 		.picsel-card-icon-fallback {
-			color: #94a3b8;
+			color: #9ca3af;
 			display: flex;
 			align-items: center;
 			justify-content: center;
+		}
+
+		/* 카드 이니셜 (이미지 없을 때) */
+		.picsel-card-initial {
+			width: 100%;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #f1f5f9;
+			border-radius: 6px;
+			font-size: 11px;
+			font-weight: 700;
+			color: #64748b;
+			letter-spacing: -0.5px;
 		}
 
 		/* 카드 정보 영역 */
 		.picsel-card-info {
 			flex: 1;
 			min-width: 0;
-			display: flex;
-			flex-direction: column;
-			gap: 4px;
 		}
 
 		.picsel-card-header {
 			display: flex;
 			align-items: center;
-			gap: 8px;
+			gap: 6px;
+			flex-wrap: wrap;
 		}
 
 		/* 할인 금액 영역 */
 		.picsel-card-amount {
-			display: flex;
-			flex-direction: column;
-			align-items: flex-end;
-			gap: 2px;
+			text-align: right;
 			flex-shrink: 0;
 		}
 
-		/* 1위 - Indigo 그라데이션 */
+		/* 1위 스타일 - 가장 진한 강조 */
 		.picsel-card-benefit-item.recommended {
-			background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-			border: 2px solid #6366f1;
-			box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.3);
+			border-left: 3px solid #4f46e5;
+			background: #f8fafc;
 		}
 
-		.picsel-card-benefit-item.recommended:hover {
-			box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.4);
-		}
-
-		.picsel-card-benefit-item.recommended .picsel-card-image-wrapper {
-			border-color: #a5b4fc;
-			background: rgba(255, 255, 255, 0.8);
-		}
-
-		/* 2위 스타일 */
+		/* 2위 스타일 - 중간 강조 */
 		.picsel-card-benefit-item.rank-2 {
-			background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-			border: 1px solid #22c55e;
+			border-left: 3px solid #818cf8;
+			background: #f8fafc;
 		}
 
-		.picsel-card-benefit-item.rank-2 .picsel-card-image-wrapper {
-			border-color: #86efac;
-			background: rgba(255, 255, 255, 0.8);
-		}
-
-		/* 3위 스타일 */
+		/* 3위 스타일 - 약한 강조 */
 		.picsel-card-benefit-item.rank-3 {
-			background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-			border: 1px solid #f59e0b;
+			border-left: 3px solid #c7d2fe;
+			background: #f8fafc;
 		}
 
-		.picsel-card-benefit-item.rank-3 .picsel-card-image-wrapper {
-			border-color: #fcd34d;
-			background: rgba(255, 255, 255, 0.8);
-		}
-
+		/* 순위 배지 - Indigo 계열 명도 변화 */
 		.picsel-recommended-badge {
-			font-size: 10px;
-			font-weight: 800;
-			color: #ffffff;
-			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-			padding: 4px 10px;
-			border-radius: 999px;
-			white-space: nowrap;
-			box-shadow: 0 2px 4px -1px rgba(99, 102, 241, 0.4);
+			font-size: 11px;
+			font-weight: 600;
+			color: #4f46e5;
+			background: #eef2ff;
+			padding: 2px 6px;
+			border-radius: 4px;
 		}
 
-		/* 2위 배지 */
 		.picsel-card-benefit-item.rank-2 .picsel-recommended-badge {
-			background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-			box-shadow: 0 2px 4px -1px rgba(34, 197, 94, 0.4);
+			color: #6366f1;
+			background: #eef2ff;
 		}
 
-		/* 3위 배지 */
 		.picsel-card-benefit-item.rank-3 .picsel-recommended-badge {
-			background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-			box-shadow: 0 2px 4px -1px rgba(245, 158, 11, 0.4);
+			color: #818cf8;
+			background: #f5f3ff;
 		}
 
-		.picsel-card-benefit-item .picsel-card-name {
-			font-size: 14px;
-			font-weight: 700;
-			color: #1e293b;
-			line-height: 1.5;
+		.picsel-card-name {
+			font-size: 13px;
+			font-weight: 600;
+			color: #1f2937;
 		}
 
-		.picsel-card-benefit-item.recommended .picsel-card-name {
-			color: #3730a3;
-		}
-
-		.picsel-card-benefit-item.rank-2 .picsel-card-name {
-			color: #166534;
-		}
-
-		.picsel-card-benefit-item.rank-3 .picsel-card-name {
-			color: #92400e;
-		}
-
+		/* 혜택 설명 - 여러 줄 허용 */
 		.picsel-card-benefit-desc {
 			font-size: 12px;
-			color: #64748b;
-			margin-top: 4px;
-		}
-
-		.picsel-card-benefit-item.recommended .picsel-card-benefit-desc {
-			color: #4338ca;
-		}
-
-		.picsel-card-benefit-item.rank-2 .picsel-card-benefit-desc {
-			color: #15803d;
-		}
-
-		.picsel-card-benefit-item.rank-3 .picsel-card-benefit-desc {
-			color: #b45309;
+			color: #6b7280;
+			margin-top: 2px;
+			line-height: 1.4;
+			word-break: keep-all;
 		}
 
 		.picsel-card-discount {
-			font-size: 17px;
-			font-weight: 800;
+			font-size: 15px;
+			font-weight: 700;
 			color: #dc2626;
-			text-shadow: 0 1px 2px rgba(220, 38, 38, 0.1);
 		}
 
-		.picsel-card-benefit-item.recommended .picsel-card-discount {
-			color: #4f46e5;
-		}
-
-		.picsel-card-benefit-item.rank-2 .picsel-card-discount {
-			color: #16a34a;
-		}
-
+		/* 모든 순위에서 할인 금액은 빨간색 유지 (할인 = 빨강 직관적) */
+		.picsel-card-benefit-item.recommended .picsel-card-discount,
+		.picsel-card-benefit-item.rank-2 .picsel-card-discount,
 		.picsel-card-benefit-item.rank-3 .picsel-card-discount {
-			color: #d97706;
+			color: #dc2626;
 		}
 
 		.picsel-card-final {
@@ -474,22 +427,17 @@ export const toggleBarStyles = `
 			font-weight: 500;
 		}
 
-		.picsel-card-benefit-item.recommended .picsel-card-final {
-			color: #6366f1;
-		}
-
-		.picsel-card-benefit-item.rank-2 .picsel-card-final {
-			color: #22c55e;
-		}
-
+		/* 최종가격은 모두 동일한 회색 (보조 정보) */
+		.picsel-card-benefit-item.recommended .picsel-card-final,
+		.picsel-card-benefit-item.rank-2 .picsel-card-final,
 		.picsel-card-benefit-item.rank-3 .picsel-card-final {
-			color: #f59e0b;
+			color: #64748b;
 		}
 
 		.picsel-card-rate {
 			font-size: 14px;
 			font-weight: 700;
-			color: #0ea5e9;
+			color: #4f46e5;
 		}
 
 		/* Footer Section */
@@ -503,53 +451,49 @@ export const toggleBarStyles = `
 			align-items: center;
 			justify-content: center;
 			width: 100%;
-			padding: 14px 24px;
+			padding: 12px 24px;
 			font-size: 14px;
 			font-weight: 600;
 			color: #ffffff;
-			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+			background: #4f46e5;
 			border: none;
-			border-radius: 18px;
-			box-shadow: 0 4px 14px -3px rgba(99, 102, 241, 0.5);
+			border-radius: 16px;
 			cursor: pointer;
-			transition: all 0.2s ease;
+			transition: background-color 0.15s ease;
 		}
 
 		.picsel-footer-confirm:hover {
-			background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-			box-shadow: 0 6px 20px -3px rgba(99, 102, 241, 0.6);
+			background: #4338ca;
 		}
 
 		.picsel-footer-confirm:active {
-			transform: translateY(0);
-			box-shadow: 0 2px 8px -2px rgba(99, 102, 241, 0.4);
+			background: #3730a3;
 		}
 
-		/* Sub Benefits - 카드 섹션 아래 (쿠팡캐시 등) */
+		/* Sub Benefits - 중립적 회색 배경 (보조 정보) */
 		.picsel-sub-benefits {
 			margin-top: 12px;
-			padding: 14px 16px;
-			background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
-			border-radius: 12px;
-			border: 1px solid #22d3ee;
+			padding: 12px 16px;
+			background: #f8fafc;
+			border-radius: 8px;
+			border: 1px solid #e2e8f0;
 		}
 
 		.picsel-sub-benefit-item {
 			font-size: 13px;
-			color: #0891b2;
-			padding: 6px 0;
-			font-weight: 600;
+			color: #475569;
+			padding: 4px 0;
+			font-weight: 500;
 			display: flex;
 			align-items: center;
 			gap: 8px;
+			line-height: 1.4;
 		}
 
 		.picsel-sub-benefit-item::before {
-			content: '';
-			width: 6px;
-			height: 6px;
-			background: #06b6d4;
-			border-radius: 50%;
+			content: '•';
+			color: #94a3b8;
+			font-weight: 700;
 			flex-shrink: 0;
 		}
 
