@@ -189,39 +189,72 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
       
       benefitBlocks.forEach((block: Element) => {
         const titleEl = block.querySelector('dt');
-        const title = titleEl?.textContent?.trim() || '';
+        const mainTitle = titleEl?.textContent?.trim() || '';
         
-        if (!title) return;
+        if (!mainTitle) return;
         
-        // 제목에서 카드명과 혜택 정보 추출
-        // 예: "11번가 신한카드 첫 결제할인 + 최대 5% 적립"
-        const parsed = parseCardDiscountTitle(title);
-        if (parsed) {
-          benefits.push(parsed);
+        // 메인 타이틀 추가 (예: "11번가 신한카드 첫 결제할인 + 최대 5% 적립")
+        const mainParsed = parseCardDiscountTitle(mainTitle);
+        if (mainParsed) {
+          // 메인 타이틀은 요약이므로 별도로 추가하지 않음
+          // 대신 서브 항목들을 상세하게 추가
         }
         
-        // 상세 혜택 추출 (서브타이틀과 리스트)
-        const subTitles = block.querySelectorAll('.tit_sub');
-        const lists = block.querySelectorAll('dd ul');
-        
-        subTitles.forEach((subEl: Element, idx: number) => {
-          const subTitle = subEl.textContent?.trim() || '';
-          const list = lists[idx];
+        // dd 안의 서브타이틀과 리스트 항목 추출
+        const dd = block.querySelector('dd');
+        if (dd) {
+          // 서브타이틀들 (.tit_sub)과 그 뒤의 ul 매칭
+          const subTitles = dd.querySelectorAll('.tit_sub');
           
-          if (list) {
-            const items = list.querySelectorAll('li');
-            items.forEach((li: Element) => {
-              const itemText = li.textContent?.trim() || '';
-              const subBenefit = parseCardBenefitDetailItem(subTitle, itemText);
-              if (subBenefit && !benefits.find(b => 
-                b.cardName === subBenefit.cardName && 
-                b.condition === subBenefit.condition
-              )) {
-                benefits.push(subBenefit);
+          subTitles.forEach((subTitleEl: Element) => {
+            const subTitle = subTitleEl.textContent?.trim() || '';
+            
+            // '적립 안내사항', '포인트 적립제외' 등은 스킵
+            if (subTitle.includes('안내사항') || subTitle.includes('적립제외')) {
+              return;
+            }
+            
+            // 서브타이틀 바로 다음의 ul 찾기
+            let nextEl = subTitleEl.nextElementSibling;
+            while (nextEl && nextEl.tagName !== 'UL' && nextEl.tagName !== 'SPAN') {
+              nextEl = nextEl.nextElementSibling;
+            }
+            
+            if (nextEl && nextEl.tagName === 'UL') {
+              const items = nextEl.querySelectorAll('li');
+              items.forEach((li: Element) => {
+                const itemText = li.textContent?.trim() || '';
+                const subBenefit = parseCardBenefitDetailItem(subTitle, itemText);
+                if (subBenefit) {
+                  // 중복 체크
+                  const isDuplicate = benefits.find(b => 
+                    b.cardName === subBenefit.cardName && 
+                    b.benefitType === subBenefit.benefitType &&
+                    b.benefitAmount === subBenefit.benefitAmount
+                  );
+                  if (!isDuplicate) {
+                    benefits.push(subBenefit);
+                  }
+                }
+              });
+            }
+            
+            // 서브타이틀 자체도 의미있는 정보일 수 있음
+            // 예: "11번가 신한카드 11pay 첫 결제 할인"
+            if (subTitle.includes('할인') || subTitle.includes('적립')) {
+              const subTitleBenefit = parseCardDiscountTitle(subTitle);
+              if (subTitleBenefit && subTitleBenefit.benefitAmount > 0) {
+                const isDuplicate = benefits.find(b =>
+                  b.cardName === subTitleBenefit.cardName &&
+                  b.benefitType === subTitleBenefit.benefitType
+                );
+                if (!isDuplicate) {
+                  benefits.push(subTitleBenefit);
+                }
               }
-            });
-          }
-        });
+            }
+          });
+        }
       });
     }
 
@@ -238,7 +271,8 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
           
           if (amount) {
             const cardName = btnText.replace(' 결제 시', '').trim();
-            if (!benefits.find(b => b.cardName === cardName)) {
+            // 중복 체크
+            if (!benefits.find(b => b.cardName === cardName && b.benefitType === '포인트')) {
               benefits.push({
                 cardName,
                 benefitAmount: amount,
@@ -252,6 +286,9 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
     }
 
     console.log('[11stParser][CardBenefit] 추출된 카드 혜택:', benefits.length);
+    benefits.forEach((b, i) => {
+      console.log(`  [${i + 1}] ${b.cardName}: ${b.benefitAmount}${b.benefitType === '적립' ? '%' : b.benefitType === '할인' ? '원' : ''} ${b.benefitType}`);
+    });
   } catch (error) {
     console.error('[11stParser][CardBenefit] 카드 혜택 추출 오류:', error);
   }
@@ -330,6 +367,7 @@ function parseCardDiscountTitle(title: string): CardBenefitInfo | null {
 /**
  * 카드 혜택 상세 아이템 파싱
  * 예: subTitle="11번가 신한카드 11pay 첫 결제 할인", itemText="신용카드 30,000원 할인"
+ * 예: subTitle="11번가 신한카드 11pay 결제 시", itemText="신용카드 최대 5% 적립 (기본 적립 1% + 프로모션 적립 4%)"
  */
 function parseCardBenefitDetailItem(subTitle: string, itemText: string): CardBenefitInfo | null {
   if (!itemText) return null;
@@ -346,7 +384,7 @@ function parseCardBenefitDetailItem(subTitle: string, itemText: string): CardBen
     cardName = '체크카드';
   }
 
-  // subTitle에서 카드명 추가
+  // subTitle에서 카드사명 추출하여 접두어로 붙이기
   if (subTitle.includes('신한카드')) {
     cardName = cardName ? `11번가 신한 ${cardName}` : '11번가 신한카드';
   }
@@ -360,7 +398,7 @@ function parseCardBenefitDetailItem(subTitle: string, itemText: string): CardBen
 
   // 퍼센트 적립 (최대 5% 적립, 기본 0.5% 적립)
   const percentMatch = itemText.match(/(?:최대\s*)?(\d+(?:\.\d+)?)%\s*적립/);
-  if (percentMatch) {
+  if (percentMatch && !benefitType) {
     benefitAmount = parseFloat(percentMatch[1]);
     benefitType = '적립';
   }
@@ -372,7 +410,8 @@ function parseCardBenefitDetailItem(subTitle: string, itemText: string): CardBen
     condition = '결제 시';
   }
 
-  if (!cardName || (!benefitAmount && benefitType)) return null;
+  // 카드명이 없거나 혜택 금액이 없으면 null
+  if (!cardName || !benefitAmount || !benefitType) return null;
 
   return {
     cardName,

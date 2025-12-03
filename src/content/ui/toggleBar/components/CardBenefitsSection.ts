@@ -211,12 +211,6 @@ const createCardItem = (
 		installmentEl.className = 'picsel-card-installment';
 		installmentEl.textContent = benefit.benefit || '무이자';
 		amountArea.appendChild(installmentEl);
-	} else if (benefitItem.benefitType === 'point' && typeof benefitItem.pointAmount === 'number' && benefitItem.pointAmount > 0) {
-		// 포인트 혜택 표시
-		const pointEl = document.createElement('div');
-		pointEl.className = 'picsel-card-point';
-		pointEl.textContent = `+${benefitItem.pointAmount.toLocaleString()}P`;
-		amountArea.appendChild(pointEl);
 	} else if (typeof benefit.discountAmount === 'number' && benefit.discountAmount > 0) {
 		// 최종 가격을 위에 표시 (더 중요한 정보)
 		if (typeof benefit.finalPrice === 'number') {
@@ -272,35 +266,14 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 			: data.amount;
 
 	// 각 카드별 할인 금액 계산 및 정렬 (최고 혜택 순)
-	// 카드명이 없는 포인트 혜택만 sub-benefits로 분리
-	const pointBenefits: CardBenefitItem[] = [];
-	
 	const enrichedBenefits: CardBenefitItem[] = benefits
 		.map((b): CardBenefitItem | null => {
 			const item = b as CardBenefitItem;
-			const cardName = item.cardName || item.card || '';
 			
-			// 포인트 혜택 처리
+			// 포인트 혜택(point 타입)은 카드 목록에서 제외
+			// 카드 할인/적립율만 표시
 			if (item.benefitType === 'point') {
-				// 카드명이 없거나 일반 적립(리뷰, 캐시 등)인 경우 → sub 섹션으로
-				const isGeneralPoint = !cardName || 
-					cardName.includes('리뷰') || 
-					cardName.includes('캐시') ||
-					cardName.includes('포인트');
-				
-				if (isGeneralPoint) {
-					pointBenefits.push(item);
-					return null; // 메인 목록에서 제외
-				}
-				
-				// 카드명이 있는 포인트 혜택 → 카드 목록에 포함
-				return {
-					...item,
-					cardName: item.cardName ?? item.card,
-					rate: 0,
-					discountAmount: 0,
-					finalPrice: basePrice,
-				};
+				return null;
 			}
 			
 			// 무이자 할부는 할인 계산하지 않음
@@ -329,10 +302,9 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 		})
 		.filter((item): item is CardBenefitItem => item !== null)
 		.sort((a, b) => {
-			// 포인트 혜택은 pointAmount로, 할인 혜택은 discountAmount로 정렬
-			const aValue = a?.discountAmount || a?.pointAmount || 0;
-			const bValue = b?.discountAmount || b?.pointAmount || 0;
-			return bValue - aValue;
+			const aDiscount = a?.discountAmount ?? 0;
+			const bDiscount = b?.discountAmount ?? 0;
+			return bDiscount - aDiscount;
 		});
 
 	const section = document.createElement('section');
@@ -355,17 +327,15 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 
 	section.appendChild(list);
 
-	// 추가 혜택 (sub) - 쿠팡캐시, 포인트 등
+	// 추가 혜택 (sub) - 최대 적립 포인트, 쿠팡캐시 등
 	const extras: string[] = [];
 	
-	// 포인트 혜택 추가
-	pointBenefits.forEach((pb) => {
-		const pointAmount = pb.pointAmount ?? 0;
-		if (pointAmount > 0) {
-			const cardName = pb.cardName || pb.card || '';
-			extras.push(`${cardName} 결제 시 ${pointAmount.toLocaleString()}P 적립`);
-		}
-	});
+	// 최대 적립 포인트 표시 (11번가: elevenst.totalPointAmount, 쿠팡: 등)
+	// @ts-expect-error: Extended field for 11st
+	const totalPointAmount = data.elevenst?.totalPointAmount ?? 0;
+	if (totalPointAmount > 0) {
+		extras.push(`최대 적립 포인트 ${totalPointAmount.toLocaleString()}P`);
+	}
 	
 	if (data.giftCardDiscount?.description) {
 		extras.push(data.giftCardDiscount.description);

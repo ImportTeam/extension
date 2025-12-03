@@ -121,34 +121,36 @@ export class ElevenStreetParser extends BaseParser {
       const { points, cardBenefits, installments, coupons, totalPointAmount, totalCardBenefitAmount, maxInstallmentMonths } = benefitsResult;
 
       // CardBenefits를 ParsedProductInfo 형식에 맞게 변환
-      // 포인트/적립 혜택은 rate=0으로 설정하여 할인율 계산 방지
+      // 할인/적립 모두 카드별 혜택으로 표시 (할인율 또는 적립율)
       const formattedCardBenefits = cardBenefits.map(cb => {
         const normalizedName = normalizeCardName(cb.cardName);
-        const isPointBenefit = cb.benefitType === '적립' || cb.benefitType === '포인트';
         const isDiscountBenefit = cb.benefitType === '할인';
         
-        // 할인 혜택: rate로 계산 (단, 100% 이하만)
-        // 포인트 혜택: rate=0, 별도 표시
-        let rate = 0;
-        if (isDiscountBenefit && cb.benefitAmount <= 100) {
-          rate = cb.benefitAmount;
-        } else if (!isPointBenefit && cb.benefitAmount <= 100) {
-          rate = cb.benefitAmount;
+        // 할인/적립 혜택: 100 이하인 경우 할인율/적립율로 취급
+        const rate = cb.benefitAmount <= 100 ? cb.benefitAmount : 0;
+        
+        // 혜택 설명 포맷팅
+        let benefitDesc = '';
+        if (isDiscountBenefit) {
+          // 금액 할인 (예: 30,000원 할인)
+          benefitDesc = `${cb.benefitAmount.toLocaleString()}원 할인`;
+        } else if (cb.benefitAmount <= 100) {
+          // 퍼센트 적립 (예: 5% 적립)
+          benefitDesc = `${cb.benefitAmount}% 적립`;
+        } else {
+          // 포인트 적립 (금액이 큰 경우 - 카드 목록에서 제외됨)
+          benefitDesc = `${cb.benefitAmount.toLocaleString()}P 적립`;
         }
         
         return {
           card: normalizedName,
           cardName: normalizedName,
-          benefit: cb.benefitType === '할인' 
-            ? `${cb.benefitAmount.toLocaleString()}원 ${cb.benefitType}`
-            : cb.benefitType === '적립' && cb.benefitAmount < 100
-              ? `${cb.benefitAmount}% ${cb.benefitType}`
-              : `${cb.benefitAmount.toLocaleString()}P ${cb.benefitType}`,
+          benefit: benefitDesc,
           discount: isDiscountBenefit ? cb.benefitAmount : 0,
           rate,
           condition: cb.condition,
-          benefitType: isPointBenefit ? 'point' : isDiscountBenefit ? 'discount' : 'other',
-          pointAmount: isPointBenefit ? cb.benefitAmount : 0,
+          benefitType: isDiscountBenefit ? 'discount' : 'rate', // discount 또는 rate(적립)
+          pointAmount: 0,
         };
       });
 
