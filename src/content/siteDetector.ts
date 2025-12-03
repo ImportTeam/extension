@@ -3,7 +3,7 @@
  * 책임: URL 기반 사이트 감지
  */
 
-import { CoupangParser, AmazonParser, EbayParser, ElevenStreetParser } from './parsers';
+import { CoupangParser, AmazonParser, EbayParser, ElevenStreetParser, GmarketParser } from './parsers';
 
 export interface SiteInfo {
   site: string;
@@ -16,6 +16,9 @@ export function detectSite(url: string): SiteInfo | null {
   }
   if (ElevenStreetParser.isProductPage(url)) {
     return { site: '11st', isCheckout: true };
+  }
+  if (GmarketParser.isCheckoutPage(url)) {
+    return { site: 'gmarket', isCheckout: true };
   }
   if (AmazonParser.isCheckoutPage(url)) {
     return { site: 'amazon', isCheckout: true };

@@ -18,6 +18,17 @@ interface CardImageInfo {
   cardName: string;
 }
 
+/**
+ * 카드명 정규화 - 비교를 위한 표준화
+ */
+const normalizeCardName = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/card$/i, '카드')
+    .trim();
+};
+
 const extractCardNameFromUrl = (url: string): string | null => {
   for (const [key, value] of Object.entries(CARD_NAME_MAPPING)) {
     if (url.includes(key)) {
@@ -347,17 +358,32 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
     }
   }
 
-  // 4. 카드 이미지 매칭
-  benefits = benefits.map((benefit) => {
+  // 4. 카드 이미지 매칭 - 개선된 로직
+  benefits = benefits.map((benefit, index) => {
     if (!benefit.imageUrl) {
-      // 카드명으로 이미지 매칭
       const cardName = benefit.cardName || benefit.card || '';
-      const matchedImage = cardImages.find((img) => {
-        const imgCardName = img.cardName.toLowerCase();
-        const benefitCardName = cardName.toLowerCase();
-        return imgCardName.includes(benefitCardName.replace('카드', '')) || 
-               benefitCardName.includes(imgCardName.replace('카드', ''));
+      
+      // 1차: 정확한 카드명 매칭
+      let matchedImage = cardImages.find((img) => {
+        const imgCardName = normalizeCardName(img.cardName);
+        const benefitCardName = normalizeCardName(cardName);
+        return imgCardName === benefitCardName;
       });
+      
+      // 2차: 부분 매칭 (카드 제거 후 비교)
+      if (!matchedImage) {
+        matchedImage = cardImages.find((img) => {
+          const imgBase = normalizeCardName(img.cardName).replace('카드', '');
+          const benefitBase = normalizeCardName(cardName).replace('카드', '');
+          return imgBase.includes(benefitBase) || benefitBase.includes(imgBase);
+        });
+      }
+      
+      // 3차: 인덱스 기반 매칭 (배열 순서가 동일할 경우)
+      if (!matchedImage && index < cardImages.length) {
+        matchedImage = cardImages[index];
+        console.log(`[CoupangParser] 인덱스 기반 매칭: ${cardName} -> ${matchedImage.cardName}`);
+      }
       
       if (matchedImage) {
         return { ...benefit, imageUrl: matchedImage.src };
