@@ -9,6 +9,46 @@ import * as Product from './modules/product';
 import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
 
+/**
+ * 카드명 정규화 함수
+ * '11번가 신한카드' → '신한카드'
+ * '11번가 신한 신용카드' → '신한카드'
+ */
+function normalizeCardName(cardName: string): string {
+  // '11번가' 제거
+  let normalized = cardName.replace(/11번가\s*/g, '').trim();
+  
+  // '신용카드', '체크카드' → '카드'로 통일
+  normalized = normalized
+    .replace(/\s*신용카드/g, '카드')
+    .replace(/\s*체크카드/g, '카드');
+  
+  // 특정 카드사 매핑 (정확한 이름으로 정규화)
+  const cardMapping: Array<{ keywords: string[]; name: string }> = [
+    { keywords: ['신한', 'SHINHAN'], name: '신한카드' },
+    { keywords: ['KB', '국민', '케이비'], name: 'KB국민카드' },
+    { keywords: ['현대', 'HYUNDAI'], name: '현대카드' },
+    { keywords: ['삼성', 'SAMSUNG'], name: '삼성카드' },
+    { keywords: ['롯데', 'LOTTE'], name: '롯데카드' },
+    { keywords: ['하나', 'HANA'], name: '하나카드' },
+    { keywords: ['우리', 'WOORI'], name: '우리카드' },
+    { keywords: ['농협', 'NH'], name: 'NH농협카드' },
+    { keywords: ['BC', '비씨'], name: 'BC카드' },
+    { keywords: ['씨티', 'CITI'], name: '씨티카드' },
+  ];
+  
+  for (const { keywords, name } of cardMapping) {
+    for (const keyword of keywords) {
+      if (normalized.toUpperCase().includes(keyword.toUpperCase())) {
+        return name;
+      }
+    }
+  }
+  
+  // 매핑이 없으면 정규화된 이름 반환
+  return normalized || cardName;
+}
+
 export class ElevenStreetParser extends BaseParser {
   readonly siteName = ELEVEN_ST_CONSTANTS.siteName;
 
@@ -81,18 +121,36 @@ export class ElevenStreetParser extends BaseParser {
       const { points, cardBenefits, installments, coupons, totalPointAmount, totalCardBenefitAmount, maxInstallmentMonths } = benefitsResult;
 
       // CardBenefits를 ParsedProductInfo 형식에 맞게 변환
-      const formattedCardBenefits = cardBenefits.map(cb => ({
-        card: cb.cardName,
-        cardName: cb.cardName,
-        benefit: cb.benefitType === '할인' 
-          ? `${cb.benefitAmount.toLocaleString()}원 ${cb.benefitType}`
-          : cb.benefitType === '적립' && cb.benefitAmount < 100
-            ? `${cb.benefitAmount}% ${cb.benefitType}`
-            : `${cb.benefitAmount.toLocaleString()}P ${cb.benefitType}`,
-        discount: cb.benefitAmount,
-        rate: cb.benefitAmount,
-        condition: cb.condition,
-      }));
+      // 포인트/적립 혜택은 rate=0으로 설정하여 할인율 계산 방지
+      const formattedCardBenefits = cardBenefits.map(cb => {
+        const normalizedName = normalizeCardName(cb.cardName);
+        const isPointBenefit = cb.benefitType === '적립' || cb.benefitType === '포인트';
+        const isDiscountBenefit = cb.benefitType === '할인';
+        
+        // 할인 혜택: rate로 계산 (단, 100% 이하만)
+        // 포인트 혜택: rate=0, 별도 표시
+        let rate = 0;
+        if (isDiscountBenefit && cb.benefitAmount <= 100) {
+          rate = cb.benefitAmount;
+        } else if (!isPointBenefit && cb.benefitAmount <= 100) {
+          rate = cb.benefitAmount;
+        }
+        
+        return {
+          card: normalizedName,
+          cardName: normalizedName,
+          benefit: cb.benefitType === '할인' 
+            ? `${cb.benefitAmount.toLocaleString()}원 ${cb.benefitType}`
+            : cb.benefitType === '적립' && cb.benefitAmount < 100
+              ? `${cb.benefitAmount}% ${cb.benefitType}`
+              : `${cb.benefitAmount.toLocaleString()}P ${cb.benefitType}`,
+          discount: isDiscountBenefit ? cb.benefitAmount : 0,
+          rate,
+          condition: cb.condition,
+          benefitType: isPointBenefit ? 'point' : isDiscountBenefit ? 'discount' : 'other',
+          pointAmount: isPointBenefit ? cb.benefitAmount : 0,
+        };
+      });
 
       // 무이자 할부 정보를 카드 혜택에 추가 (요약 정보 제외)
       installments.forEach(inst => {
@@ -100,13 +158,14 @@ export class ElevenStreetParser extends BaseParser {
         if (inst.cardName === '__INSTALLMENT_SUMMARY__') return;
         
         formattedCardBenefits.push({
-          card: inst.cardName,
-          cardName: inst.cardName,
+          card: normalizeCardName(inst.cardName),
+          cardName: normalizeCardName(inst.cardName),
           benefit: `${inst.months} 무이자`,
           discount: 0,
           rate: 0, // 무이자 할부는 rate를 0으로 설정 (할인율 계산 방지)
           condition: inst.condition,
           benefitType: 'installment', // 할부 타입 명시
+          pointAmount: 0,
         });
       });
 
