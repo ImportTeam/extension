@@ -15,14 +15,15 @@ import {
   updateToggleBar,
   type ToggleProductData,
 } from './ui/toggleBar';
+import { setupElevenStreetBenefitWatcher, type BenefitRefreshHandler } from './elevenStreetBenefits';
 
-// 🛑 Iframe 가드: 메인 페이지에서만 실행
-if (window.self !== window.top) {
-  // Iframe에서는 완전히 종료 (throw로 모듈 실행 중단)
-  throw new Error('[ContentScript] Skipping iframe context');
+const isMainFrame = window.self === window.top;
+
+if (!isMainFrame) {
+  console.debug('[ContentScript] Skipping iframe context');
+} else {
+  console.log('[ContentScript] ✅ Content script initialized in main frame');
 }
-
-console.log('[ContentScript] ✅ Content script initialized in main frame');
 
 /**
  * 디바운스 헬퍼: DOM 변경 중 반복 실행 방지
@@ -158,6 +159,41 @@ function sendToBackground(paymentInfo: ParsedProductInfo, site: string): void {
   );
 }
 
+function notifyBenefitRefresh(paymentInfo: ParsedProductInfo, site: string, source: string): void {
+  updateToggleBar({ ...paymentInfo, site } as ToggleProductData);
+  console.log('[ContentScript] ✅ Re-parsed after', source, paymentInfo);
+
+  chrome.runtime.sendMessage(
+    {
+      type: 'UPDATE_PRODUCT_DATA',
+      data: paymentInfo,
+      timestamp: Date.now(),
+      source,
+    },
+    (response: { success: boolean }) => {
+      if (response?.success) {
+        console.log('[ContentScript] ✅ Updated benefit data in storage');
+      }
+    }
+  );
+}
+
+function reparsePaymentInfo(source: string): boolean {
+  const extractionResult = extractPaymentInfo();
+  if (!extractionResult) {
+    console.warn('[ContentScript] ❌ Benefit reparse skipped (no data)');
+    return false;
+  }
+
+  const { paymentInfo, site } = extractionResult;
+  notifyBenefitRefresh(paymentInfo, site, source);
+  return true;
+}
+
+const benefitRefreshHandler: BenefitRefreshHandler = (source) => {
+  reparsePaymentInfo(source);
+};
+
 function init(): void {
   console.log('[ContentScript] Initializing...');
 
@@ -189,7 +225,9 @@ function init(): void {
  * 기프트카드, 쿠팡캐시 등 동적 데이터 파싱
  */
 function setupDynamicContentObserver(): void {
-  // MutationObserver: iframe 추가 감지
+  let hasProcessedBenefits = false;
+  
+  // MutationObserver: iframe 및 동적 콘텐츠 감지
   const observer = new MutationObserver((mutations) => {
     // iframe이 추가되었는지 확인
     const hasNewIframe = mutations.some((mutation) => {
@@ -204,37 +242,46 @@ function setupDynamicContentObserver(): void {
       );
     });
 
-    if (hasNewIframe) {
-      console.log('[ContentScript] 🔄 New iframe detected, re-parsing dynamic content...');
+    // 11번가: .benefit 요소가 추가되었는지 확인
+    const hasBenefitContent = !hasProcessedBenefits && mutations.some((mutation) => {
+      return (
+        mutation.addedNodes.length > 0 &&
+        Array.from(mutation.addedNodes).some((node) => {
+          if (node instanceof Element) {
+            // .benefit 클래스 또는 그 안에 dt/dd가 있는지 확인
+            return node.classList?.contains('benefit') || 
+                   node.querySelector?.('.benefit') ||
+                   (node.closest?.('.other_benefits') && (node.querySelector?.('dt') || node.querySelector?.('dd')));
+          }
+          return false;
+        })
+      );
+    });
 
-      // 500ms 대기 (iframe 콘텐츠 로드 완료 대기)
+    // .other_benefits 내부에 콘텐츠가 채워졌는지 확인
+    const benefitElement = document.querySelector('.other_benefits .benefit dt');
+    const shouldReparse = hasNewIframe || (hasBenefitContent && benefitElement);
+
+    if (shouldReparse) {
+      const reason = hasNewIframe ? 'iframe' : 'benefit-content';
+      console.log(`[ContentScript] 🔄 Dynamic content detected (${reason}), re-parsing...`);
+      
+      if (hasBenefitContent) {
+        hasProcessedBenefits = true; // 중복 처리 방지
+      }
+
+      // 500ms 대기 (콘텐츠 로드 완료 대기)
       setTimeout(() => {
-        const extractionResult = extractPaymentInfo();
-
-        if (extractionResult) {
-          const { paymentInfo, site } = extractionResult;
-          console.log('[ContentScript] ✅ Dynamic content re-parsed:', paymentInfo);
-          updateToggleBar({ ...paymentInfo, site } as ToggleProductData);
-
-          // Background에 업데이트 메시지 전송
-          chrome.runtime.sendMessage(
-            {
-              type: 'UPDATE_PRODUCT_DATA',
-              data: paymentInfo,
-              timestamp: Date.now(),
-              source: 'dynamic-iframe',
-            },
-            (response: { success: boolean }) => {
-              if (response?.success) {
-                console.log('[ContentScript] ✅ Dynamic data updated in storage');
-              }
-            }
-          );
+        const refreshed = reparsePaymentInfo(`dynamic-${reason}`);
+        if (!refreshed) {
+          console.warn('[ContentScript] ❌ Dynamic reparse produced no result');
         }
       }, 500);
 
-      // 한 번 감지 후 observer 제거 (무한 반복 방지)
-      observer.disconnect();
+      // iframe 감지 후에만 observer 제거 (benefit은 계속 감시)
+      if (hasNewIframe) {
+        observer.disconnect();
+      }
     }
   });
 
@@ -246,15 +293,21 @@ function setupDynamicContentObserver(): void {
   });
 
   console.log('[ContentScript] 📡 Dynamic content observer started');
+  
+  // 11번가: "추가 혜택" 버튼 클릭 감지하여 강제 재파싱
+  setupElevenStreetBenefitWatcher(benefitRefreshHandler);
 }
 
+
 // 🚀 초기 로드 시 즉시 실행 (DOMContentLoaded 또는 즉시)
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (isMainFrame) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
+      setupDynamicContentObserver();
+    });
+  } else {
     init();
     setupDynamicContentObserver();
-  });
-} else {
-  init();
-  setupDynamicContentObserver();
+  }
 }

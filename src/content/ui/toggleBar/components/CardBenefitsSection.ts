@@ -265,32 +265,36 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 			? data.discountPrice
 			: data.amount;
 
-	// 각 카드별 할인 금액 계산 및 정렬 (최고 혜택 순)
+	// 각 카드별 할인 금액 계산 (포인트 및 무이자 제외)
 	const enrichedBenefits: CardBenefitItem[] = benefits
 		.map((b): CardBenefitItem | null => {
 			const item = b as CardBenefitItem;
 			
 			// 포인트 혜택(point 타입)은 카드 목록에서 제외
-			// 카드 할인/적립율만 표시
 			if (item.benefitType === 'point') {
 				return null;
 			}
 			
-			// 무이자 할부는 할인 계산하지 않음
+			// 무이자 할부는 Top 1에서 제외
 			if (item.benefitType === 'installment') {
-				return {
-					...item,
-					cardName: item.cardName ?? item.card,
-					rate: 0,
-					discountAmount: 0,
-					finalPrice: basePrice,
-				};
+				return null;
 			}
 			
 			// 할인 혜택: rate가 100 이하인 경우만 계산
 			const rate = item.rate ?? item.discount;
-			const safeRate = (typeof rate === 'number' && rate <= 100) ? rate : 0;
-			const discountAmount = calculateDiscountAmount(basePrice, safeRate);
+			let discountAmount = 0;
+			let safeRate = 0;
+
+			// 금액 할인 (rate > 100 또는 benefitType이 discount인 경우)
+			if ((typeof rate === 'number' && rate > 100) || item.benefitType === 'discount') {
+				discountAmount = (typeof rate === 'number' && rate > 100) ? rate : (item.discount ?? 0);
+				safeRate = 0; // 금액 할인은 rate 0으로 처리
+			} else {
+				// 퍼센트 할인/적립
+				safeRate = (typeof rate === 'number' && rate <= 100) ? rate : 0;
+				discountAmount = calculateDiscountAmount(basePrice, safeRate) ?? 0;
+			}
+
 			const finalPrice = calculateFinalPrice(basePrice, discountAmount);
 			return {
 				...item,
@@ -300,19 +304,37 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 				finalPrice: finalPrice ?? undefined,
 			};
 		})
-		.filter((item): item is CardBenefitItem => item !== null)
-		.sort((a, b) => {
-			const aDiscount = a?.discountAmount ?? 0;
-			const bDiscount = b?.discountAmount ?? 0;
+		.filter((item): item is CardBenefitItem => item !== null);
+
+	// 🎯 Top 1 선정 - 우선순위: 1. 가격할인 금액이 가장 큰 것, 2. % 적립률이 가장 높은 것
+	const sortedBenefits = enrichedBenefits.sort((a, b) => {
+		const aDiscount = a?.discountAmount ?? 0;
+		const bDiscount = b?.discountAmount ?? 0;
+		
+		// 할인 금액이 다르면 금액으로 정렬
+		if (aDiscount !== bDiscount) {
 			return bDiscount - aDiscount;
-		});
+		}
+		
+		// 할인 금액이 같으면 적립률로 정렬
+		const aRate = a?.rate ?? 0;
+		const bRate = b?.rate ?? 0;
+		return bRate - aRate;
+	});
+
+	// Top 1만 선택
+	const topBenefit = sortedBenefits[0];
+	
+	if (!topBenefit) {
+		return null;
+	}
 
 	const section = document.createElement('section');
 	section.className = 'picsel-section picsel-card-section';
 
 	const title = document.createElement('h4');
 	title.className = 'picsel-section-title';
-	title.textContent = '카드별 혜택 비교';
+	title.textContent = '추천 카드 혜택';
 	section.appendChild(title);
 
 	const list = document.createElement('div');
@@ -320,10 +342,9 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 
 	const currency = data.currency ?? 'KRW';
 
-	enrichedBenefits.forEach((benefit, idx) => {
-		const cardItem = createCardItem(benefit, idx, currency);
-		list.appendChild(cardItem);
-	});
+	// Top 1 카드만 표시 (idx=0, recommended 클래스 적용)
+	const cardItem = createCardItem(topBenefit, 0, currency);
+	list.appendChild(cardItem);
 
 	section.appendChild(list);
 

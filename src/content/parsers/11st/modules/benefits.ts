@@ -183,79 +183,130 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
 
   try {
     // other_benefits 컨테이너에서 카드 혜택 추출
-    const container = doc.querySelector(selectors.container);
+    // 다이얼로그 내부 (.dialog_cont) 또는 페이지 어디서든 찾기
+    // .benefit은 .dialog_cont .other_benefits dl 안에 있음
+    const containerSelectors = [
+      '.dialog_cont .other_benefits',
+      '#atf_additionalBenefitPopup .other_benefits',
+      selectors.container,
+      '.other_benefits',
+    ];
+    
+    let container: Element | null = null;
+    for (const sel of containerSelectors) {
+      container = doc.querySelector(sel);
+      if (container) {
+        console.log('[11stParser][CardBenefit] 컨테이너 찾음:', sel);
+        break;
+      }
+    }
+    
+    console.log('[11stParser][CardBenefit] other_benefits 컨테이너:', container ? '찾음' : '없음');
+    
     if (container) {
-      const benefitBlocks = container.querySelectorAll('.benefit');
+      // .benefit 블록 찾기 - 다양한 셀렉터 시도
+      // DOM 구조: .other_benefits > dl > div.benefit
+      const benefitSelectors = [
+        'dl > .benefit',
+        'dl > div.benefit', 
+        'dl .benefit',
+        '.benefit',
+        'div.benefit',
+      ];
       
-      benefitBlocks.forEach((block: Element) => {
-        const titleEl = block.querySelector('dt');
-        const mainTitle = titleEl?.textContent?.trim() || '';
-        
-        if (!mainTitle) return;
-        
-        // 메인 타이틀 추가 (예: "11번가 신한카드 첫 결제할인 + 최대 5% 적립")
-        const mainParsed = parseCardDiscountTitle(mainTitle);
-        if (mainParsed) {
-          // 메인 타이틀은 요약이므로 별도로 추가하지 않음
-          // 대신 서브 항목들을 상세하게 추가
+      let benefitBlocks: NodeListOf<Element> | null = null;
+      for (const sel of benefitSelectors) {
+        benefitBlocks = container.querySelectorAll(sel);
+        if (benefitBlocks.length > 0) {
+          console.log('[11stParser][CardBenefit] benefit 찾음:', sel, benefitBlocks.length);
+          break;
         }
-        
-        // dd 안의 서브타이틀과 리스트 항목 추출
-        const dd = block.querySelector('dd');
-        if (dd) {
-          // 서브타이틀들 (.tit_sub)과 그 뒤의 ul 매칭
-          const subTitles = dd.querySelectorAll('.tit_sub');
+      }
+      
+      console.log('[11stParser][CardBenefit] benefit 블록 수:', benefitBlocks?.length || 0);
+      
+      // benefit 블록이 없으면 dl 내부 직접 확인
+      if (!benefitBlocks || benefitBlocks.length === 0) {
+        const dlElement = container.querySelector('dl');
+        console.log('[11stParser][CardBenefit] dl 요소:', dlElement ? '찾음' : '없음');
+        if (dlElement) {
+          // dl 직접 children 확인
+          const children = dlElement.children;
+          console.log('[11stParser][CardBenefit] dl children 수:', children.length);
+          for (let i = 0; i < Math.min(children.length, 3); i++) {
+            console.log(`[11stParser][CardBenefit] dl child[${i}]:`, children[i].tagName, children[i].className);
+          }
+        }
+      }
+      
+      if (benefitBlocks && benefitBlocks.length > 0) {
+        benefitBlocks.forEach((block: Element) => {
+          const titleEl = block.querySelector('dt');
+          const mainTitle = titleEl?.textContent?.trim() || '';
           
-          subTitles.forEach((subTitleEl: Element) => {
-            const subTitle = subTitleEl.textContent?.trim() || '';
+          console.log('[11stParser][CardBenefit] 메인 타이틀:', mainTitle);
+          
+          if (!mainTitle) return;
+          
+          // 메인 타이틀도 혜택으로 추가 (요약 정보)
+          const mainParsed = parseCardDiscountTitle(mainTitle);
+          if (mainParsed && mainParsed.benefitAmount > 0) {
+            benefits.push(mainParsed);
+            console.log('[11stParser][CardBenefit] 메인 혜택 추가:', mainParsed);
+          }
+          
+          // dd 안의 서브타이틀과 리스트 항목 추출
+          const dd = block.querySelector('dd');
+          if (dd) {
+            // 서브타이틀들 (.tit_sub)과 그 뒤의 ul 매칭
+            const subTitles = dd.querySelectorAll('.tit_sub');
+            console.log('[11stParser][CardBenefit] 서브타이틀 수:', subTitles.length);
             
-            // '적립 안내사항', '포인트 적립제외' 등은 스킵
-            if (subTitle.includes('안내사항') || subTitle.includes('적립제외')) {
-              return;
-            }
-            
-            // 서브타이틀 바로 다음의 ul 찾기
-            let nextEl = subTitleEl.nextElementSibling;
-            while (nextEl && nextEl.tagName !== 'UL' && nextEl.tagName !== 'SPAN') {
-              nextEl = nextEl.nextElementSibling;
-            }
-            
-            if (nextEl && nextEl.tagName === 'UL') {
-              const items = nextEl.querySelectorAll('li');
-              items.forEach((li: Element) => {
-                const itemText = li.textContent?.trim() || '';
-                const subBenefit = parseCardBenefitDetailItem(subTitle, itemText);
-                if (subBenefit) {
-                  // 중복 체크
-                  const isDuplicate = benefits.find(b => 
-                    b.cardName === subBenefit.cardName && 
-                    b.benefitType === subBenefit.benefitType &&
-                    b.benefitAmount === subBenefit.benefitAmount
-                  );
-                  if (!isDuplicate) {
-                    benefits.push(subBenefit);
-                  }
-                }
-              });
-            }
-            
-            // 서브타이틀 자체도 의미있는 정보일 수 있음
-            // 예: "11번가 신한카드 11pay 첫 결제 할인"
-            if (subTitle.includes('할인') || subTitle.includes('적립')) {
-              const subTitleBenefit = parseCardDiscountTitle(subTitle);
-              if (subTitleBenefit && subTitleBenefit.benefitAmount > 0) {
-                const isDuplicate = benefits.find(b =>
-                  b.cardName === subTitleBenefit.cardName &&
-                  b.benefitType === subTitleBenefit.benefitType
-                );
-                if (!isDuplicate) {
-                  benefits.push(subTitleBenefit);
-                }
+            subTitles.forEach((subTitleEl: Element) => {
+              const subTitle = subTitleEl.textContent?.trim() || '';
+              
+              console.log('[11stParser][CardBenefit] 서브타이틀:', subTitle);
+              
+              // '적립 안내사항', '포인트 적립제외' 등은 스킵
+              if (subTitle.includes('안내사항') || subTitle.includes('적립제외')) {
+                return;
               }
-            }
-          });
-        }
-      });
+              
+              // 서브타이틀 바로 다음의 ul 찾기
+              let nextEl = subTitleEl.nextElementSibling;
+              while (nextEl && nextEl.tagName !== 'UL' && nextEl.tagName !== 'SPAN') {
+                nextEl = nextEl.nextElementSibling;
+              }
+              
+              if (nextEl && nextEl.tagName === 'UL') {
+                const items = nextEl.querySelectorAll('li');
+                console.log('[11stParser][CardBenefit] 리스트 아이템 수:', items.length);
+                
+                items.forEach((li: Element) => {
+                  const itemText = li.textContent?.trim() || '';
+                  console.log('[11stParser][CardBenefit] 아이템:', itemText);
+                  
+                  const subBenefit = parseCardBenefitDetailItem(subTitle, itemText);
+                  if (subBenefit) {
+                    // 중복 체크
+                    const isDuplicate = benefits.find(b => 
+                      b.cardName === subBenefit.cardName && 
+                      b.benefitType === subBenefit.benefitType &&
+                      b.benefitAmount === subBenefit.benefitAmount
+                    );
+                    if (!isDuplicate) {
+                      benefits.push(subBenefit);
+                      console.log('[11stParser][CardBenefit] 서브 혜택 추가:', subBenefit);
+                    }
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    } else {
+      console.log('[11stParser][CardBenefit] ⚠️ other_benefits 컨테이너를 찾을 수 없음');
     }
 
     // 포인트 적립 레이어에서도 카드 혜택 찾기

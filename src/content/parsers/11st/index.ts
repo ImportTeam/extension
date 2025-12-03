@@ -18,12 +18,10 @@ function normalizeCardName(cardName: string): string {
   // '11번가' 제거
   let normalized = cardName.replace(/11번가\s*/g, '').trim();
   
-  // '신용카드', '체크카드' → '카드'로 통일
-  normalized = normalized
-    .replace(/\s*신용카드/g, '카드')
-    .replace(/\s*체크카드/g, '카드');
+  // '신용카드', '체크카드'는 제거하지 않고 유지 (상세 구분을 위해)
+  // 단, 아이콘 매핑을 위해 키워드 체크는 수행
   
-  // 특정 카드사 매핑 (정확한 이름으로 정규화)
+  // 특정 카드사 매핑 (정확한 이름으로 정규화하되, 신용/체크 구분은 유지)
   const cardMapping: Array<{ keywords: string[]; name: string }> = [
     { keywords: ['신한', 'SHINHAN'], name: '신한카드' },
     { keywords: ['KB', '국민', '케이비'], name: 'KB국민카드' },
@@ -40,6 +38,13 @@ function normalizeCardName(cardName: string): string {
   for (const { keywords, name } of cardMapping) {
     for (const keyword of keywords) {
       if (normalized.toUpperCase().includes(keyword.toUpperCase())) {
+        // 신용/체크 카드가 포함되어 있으면 접미사로 붙임
+        if (normalized.includes('신용카드')) {
+          return `${name} (신용)`;
+        }
+        if (normalized.includes('체크카드')) {
+          return `${name} (체크)`;
+        }
         return name;
       }
     }
