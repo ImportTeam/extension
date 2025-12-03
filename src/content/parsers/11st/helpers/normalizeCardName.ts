@@ -1,6 +1,6 @@
 export function normalizeCardName(cardName: string): string {
   // '11번가' 접두사 제거
-  let normalized = cardName.replace(/11번가\s*/g, '').trim();
+  const normalized = cardName.replace(/11번가\s*/g, '').trim();
 
   const cardMapping: Array<{ keywords: string[]; name: string }> = [
     { keywords: ['신한', 'SHINHAN'], name: '신한카드' },

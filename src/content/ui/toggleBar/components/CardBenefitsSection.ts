@@ -144,7 +144,7 @@ const createCardItem = (
 		img.src = imageSrc;
 		img.alt = cardNameText;
 		img.className = 'picsel-card-image';
-		img.onerror = () => {
+		img.onerror = (): void => {
 			// 이미지 로드 실패 시 이니셜로 대체
 			const initial = getCardInitial(cardNameText);
 			imageWrapper.innerHTML = `

@@ -87,7 +87,7 @@ export const PriceComparisonPanel: React.FC<PriceComparisonPanelProps> = ({
 
   // 서버 상태 확인 및 가격 비교 검색
   useEffect(() => {
-    async function checkServerAndSearch() {
+    async function checkServerAndSearch(): Promise<void> {
       try {
         // 먼저 서버 상태 확인
         const serverCheck = await chrome.runtime.sendMessage({

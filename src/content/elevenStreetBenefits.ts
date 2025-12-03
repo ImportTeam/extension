@@ -32,7 +32,7 @@ export function setupElevenStreetBenefitWatcher(onBenefitRefresh: BenefitRefresh
 
 	attemptAutoClickBenefitButton(onBenefitRefresh);
 
-	const setupClickListeners = () => {
+	const setupClickListeners = (): void => {
 		buttonSelectors.forEach((selector) => {
 			const buttons = document.querySelectorAll(selector);
 			buttons.forEach((btn) => {
