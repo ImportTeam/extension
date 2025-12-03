@@ -78,16 +78,37 @@ export class ElevenStreetParser extends BaseParser {
 
       // 3. 혜택 정보
       const benefitsResult = Benefits.extractBenefits(doc);
-      const { points, cardBenefits, coupons, totalPointAmount, totalCardBenefitAmount } = benefitsResult;
+      const { points, cardBenefits, installments, coupons, totalPointAmount, totalCardBenefitAmount, maxInstallmentMonths } = benefitsResult;
 
       // CardBenefits를 ParsedProductInfo 형식에 맞게 변환
       const formattedCardBenefits = cardBenefits.map(cb => ({
         card: cb.cardName,
         cardName: cb.cardName,
-        benefit: `${cb.benefitAmount.toLocaleString()}P ${cb.condition}`,
+        benefit: cb.benefitType === '할인' 
+          ? `${cb.benefitAmount.toLocaleString()}원 ${cb.benefitType}`
+          : cb.benefitType === '적립' && cb.benefitAmount < 100
+            ? `${cb.benefitAmount}% ${cb.benefitType}`
+            : `${cb.benefitAmount.toLocaleString()}P ${cb.benefitType}`,
         discount: cb.benefitAmount,
         rate: cb.benefitAmount,
+        condition: cb.condition,
       }));
+
+      // 무이자 할부 정보를 카드 혜택에 추가 (요약 정보 제외)
+      installments.forEach(inst => {
+        // '__INSTALLMENT_SUMMARY__'는 요약 정보이므로 제외
+        if (inst.cardName === '__INSTALLMENT_SUMMARY__') return;
+        
+        formattedCardBenefits.push({
+          card: inst.cardName,
+          cardName: inst.cardName,
+          benefit: `${inst.months} 무이자`,
+          discount: 0,
+          rate: 0, // 무이자 할부는 rate를 0으로 설정 (할인율 계산 방지)
+          condition: inst.condition,
+          benefitType: 'installment', // 할부 타입 명시
+        });
+      });
 
       // Discounts 배열 생성
       const discounts: Array<{ rate: number; type: string; description?: string }> = [];
@@ -112,6 +133,7 @@ export class ElevenStreetParser extends BaseParser {
       console.log(`[ElevenStreetParser] 📌 Title: ${title}`);
       console.log(`[ElevenStreetParser] 🎁 총 포인트: ${totalPointAmount.toLocaleString()}P`);
       console.log(`[ElevenStreetParser] 💳 카드 혜택 수: ${cardBenefits.length}`);
+      console.log(`[ElevenStreetParser] 🏦 무이자 할부 카드 수: ${installments.length}, 최대 ${maxInstallmentMonths}개월`);
 
       return {
         price: amount,
@@ -130,7 +152,9 @@ export class ElevenStreetParser extends BaseParser {
         elevenst: {
           maxDiscountPrice,
           maxDiscountRate,
+          maxInstallmentMonths,
           points,
+          installments,
           coupons,
           totalPointAmount,
           totalCardBenefitAmount,

@@ -17,6 +17,8 @@ interface CardBenefitItem {
 	discountAmount?: number; // 계산된 할인 금액
 	finalPrice?: number;     // 최종 결제 예상 금액
 	imageUrl?: string;       // 카드 이미지 URL
+	condition?: string;      // 조건 (결제 시 등)
+	benefitType?: string;    // 혜택 타입 (installment, discount, point 등)
 }
 
 /**
@@ -201,7 +203,14 @@ const createCardItem = (
 	const amountArea = document.createElement('div');
 	amountArea.className = 'picsel-card-amount';
 
-	if (typeof benefit.discountAmount === 'number' && benefit.discountAmount > 0) {
+	// 무이자 할부는 별도 표시
+	const benefitItem = benefit as CardBenefitItem;
+	if (benefitItem.benefitType === 'installment') {
+		const installmentEl = document.createElement('div');
+		installmentEl.className = 'picsel-card-installment';
+		installmentEl.textContent = benefit.benefit || '무이자';
+		amountArea.appendChild(installmentEl);
+	} else if (typeof benefit.discountAmount === 'number' && benefit.discountAmount > 0) {
 		// 최종 가격을 위에 표시 (더 중요한 정보)
 		if (typeof benefit.finalPrice === 'number') {
 			const finalEl = document.createElement('div');
@@ -217,7 +226,7 @@ const createCardItem = (
 		const formatted = formatCurrency(benefit.discountAmount, currency);
 		discountEl.textContent = `-${formatted}`;
 		amountArea.appendChild(discountEl);
-	} else if (typeof benefit.rate === 'number') {
+	} else if (typeof benefit.rate === 'number' && benefit.rate > 0) {
 		const rateEl = document.createElement('div');
 		rateEl.className = 'picsel-card-rate';
 		rateEl.textContent = `${benefit.rate}%`;
@@ -259,6 +268,18 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 	const enrichedBenefits: CardBenefitItem[] = benefits
 		.map((b) => {
 			const item = b as CardBenefitItem;
+			
+			// 무이자 할부는 할인 계산하지 않음
+			if (item.benefitType === 'installment') {
+				return {
+					...item,
+					cardName: item.cardName ?? item.card,
+					rate: 0,
+					discountAmount: 0,
+					finalPrice: basePrice,
+				};
+			}
+			
 			const rate = item.rate ?? item.discount;
 			const discountAmount = calculateDiscountAmount(basePrice, rate);
 			const finalPrice = calculateFinalPrice(basePrice, discountAmount);

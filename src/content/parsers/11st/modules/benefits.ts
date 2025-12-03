@@ -86,55 +86,84 @@ export const extractBenefits = (doc: Document): BenefitsInfo => {
 
 /**
  * 포인트 정보 추출
+ * 11번가의 #max_saveing_point_layer 구조에서 파싱
  */
 export const extractPoints = (doc: Document): PointInfo[] => {
   const points: PointInfo[] = [];
-  const selectors = ELEVEN_ST_SELECTORS.benefits;
+  const selectors = ELEVEN_ST_SELECTORS.pointDetail;
 
   try {
     // 최대 적립 포인트 레이어
-    const pointLayer = doc.querySelector(selectors.pointLayer);
+    const pointLayer = doc.querySelector(selectors.container);
     if (pointLayer) {
-      // 메인 포인트 금액
-      const pointEl = pointLayer.querySelector(selectors.pointAmount);
-      if (pointEl?.textContent) {
-        const amount = extractNumber(pointEl.textContent);
+      // 메인 포인트 금액 (총 최대 적립)
+      const totalPointEl = pointLayer.querySelector(selectors.totalPoint);
+      if (totalPointEl?.textContent) {
+        const amount = extractNumber(totalPointEl.textContent);
         if (amount) {
           points.push({
             amount,
-            type: '적립포인트',
+            type: '최대적립포인트',
             description: '최대 적립 가능 포인트',
           });
           console.log('[11stParser][Points] 최대 적립 포인트:', amount);
         }
       }
 
-      // 11pay 포인트
-      const elevenPayEl = pointLayer.querySelector(selectors.elevenPayPoint);
-      if (elevenPayEl?.textContent) {
-        const amount = extractNumber(elevenPayEl.textContent);
-        if (amount) {
-          points.push({
-            amount,
-            type: '11pay포인트',
-            description: '11pay 결제 시 적립',
-          });
-          console.log('[11stParser][Points] 11pay 포인트:', amount);
+      // 11pay 포인트 영역
+      const elevenPaySection = pointLayer.querySelector(selectors.elevenPaySection);
+      if (elevenPaySection) {
+        const elevenPayTotal = elevenPaySection.querySelector('.total .value');
+        if (elevenPayTotal?.textContent) {
+          const amount = extractNumber(elevenPayTotal.textContent);
+          // 중복 체크 (총 최대 포인트와 같은 경우 스킵)
+          if (amount && !points.find(p => p.amount === amount && p.type === '최대적립포인트')) {
+            points.push({
+              amount,
+              type: '11pay포인트',
+              description: '11pay 결제 시 적립',
+            });
+            console.log('[11stParser][Points] 11pay 포인트 총액:', amount);
+          }
         }
+
+        // 개별 포인트 항목들 (.desc li)
+        const pointItems = elevenPaySection.querySelectorAll('.desc li');
+        pointItems.forEach((item: Element) => {
+          const button = item.querySelector('.c_layer_expand button.c_product_btn');
+          const valueEl = item.querySelector('.value');
+          
+          if (button && valueEl) {
+            const type = button.textContent?.trim() || '';
+            const amount = extractNumber(valueEl.textContent || '');
+            
+            // 이미 추가된 경우 스킵, 카드 혜택은 cardBenefits에서 처리
+            if (amount && type && !type.includes('카드')) {
+              points.push({
+                amount,
+                type,
+                description: type,
+              });
+              console.log('[11stParser][Points]', type, ':', amount);
+            }
+          }
+        });
       }
     }
 
-    // 기본 포인트 표시 영역
-    const basicPointEl = doc.querySelector(selectors.basicPoint);
-    if (basicPointEl?.textContent && points.length === 0) {
-      const amount = extractNumber(basicPointEl.textContent);
-      if (amount) {
-        points.push({
-          amount,
-          type: '기본적립',
-          description: '기본 적립 포인트',
-        });
-        console.log('[11stParser][Points] 기본 포인트:', amount);
+    // 기본 포인트 표시 영역 (레이어가 없는 경우)
+    if (points.length === 0) {
+      const basicPointEl = doc.querySelector('.max_saveing_point .point, [class*="point_value"]');
+      if (basicPointEl?.textContent) {
+        const amount = extractNumber(basicPointEl.textContent);
+        if (amount) {
+          points.push({
+            amount,
+            type: '기본적립',
+            description: '기본 적립 포인트',
+          });
+          console.log('[11stParser][Points] 기본 포인트:', amount);
+        }
       }
     }
   } catch (error) {
@@ -146,59 +175,83 @@ export const extractPoints = (doc: Document): PointInfo[] => {
 
 /**
  * 카드 혜택 정보 추출
+ * 11번가의 other_benefits 섹션에서 신한카드 등의 혜택 파싱
  */
 export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
   const benefits: CardBenefitInfo[] = [];
-  const selectors = ELEVEN_ST_SELECTORS.cardBenefits;
+  const selectors = ELEVEN_ST_SELECTORS.cardDiscount;
 
   try {
-    // 카드 혜택 레이어
-    const benefitLayer = doc.querySelector(selectors.layer);
-    if (benefitLayer) {
-      // 혜택 버튼들에서 정보 추출
-      const buttons = benefitLayer.querySelectorAll(selectors.benefitButton);
+    // other_benefits 컨테이너에서 카드 혜택 추출
+    const container = doc.querySelector(selectors.container);
+    if (container) {
+      const benefitBlocks = container.querySelectorAll('.benefit');
       
-      buttons.forEach((btn: Element) => {
-        const text = btn.textContent?.trim() || '';
-        const benefit = parseCardBenefitText(text);
-        if (benefit) {
-          benefits.push(benefit);
+      benefitBlocks.forEach((block: Element) => {
+        const titleEl = block.querySelector('dt');
+        const title = titleEl?.textContent?.trim() || '';
+        
+        if (!title) return;
+        
+        // 제목에서 카드명과 혜택 정보 추출
+        // 예: "11번가 신한카드 첫 결제할인 + 최대 5% 적립"
+        const parsed = parseCardDiscountTitle(title);
+        if (parsed) {
+          benefits.push(parsed);
+        }
+        
+        // 상세 혜택 추출 (서브타이틀과 리스트)
+        const subTitles = block.querySelectorAll('.tit_sub');
+        const lists = block.querySelectorAll('dd ul');
+        
+        subTitles.forEach((subEl: Element, idx: number) => {
+          const subTitle = subEl.textContent?.trim() || '';
+          const list = lists[idx];
+          
+          if (list) {
+            const items = list.querySelectorAll('li');
+            items.forEach((li: Element) => {
+              const itemText = li.textContent?.trim() || '';
+              const subBenefit = parseCardBenefitDetailItem(subTitle, itemText);
+              if (subBenefit && !benefits.find(b => 
+                b.cardName === subBenefit.cardName && 
+                b.condition === subBenefit.condition
+              )) {
+                benefits.push(subBenefit);
+              }
+            });
+          }
+        });
+      });
+    }
+
+    // 포인트 적립 레이어에서도 카드 혜택 찾기
+    const pointLayer = doc.querySelector('#max_saveing_point_layer');
+    if (pointLayer) {
+      const cardButtons = pointLayer.querySelectorAll('.c_layer_expand button.c_product_btn');
+      cardButtons.forEach((btn: Element) => {
+        const btnText = btn.textContent?.trim() || '';
+        if (btnText.includes('카드') || btnText.includes('신한')) {
+          const valueEl = btn.closest('li')?.querySelector('.value');
+          const value = valueEl?.textContent?.trim() || '';
+          const amount = extractNumber(value);
+          
+          if (amount) {
+            const cardName = btnText.replace(' 결제 시', '').trim();
+            if (!benefits.find(b => b.cardName === cardName)) {
+              benefits.push({
+                cardName,
+                benefitAmount: amount,
+                benefitType: '포인트',
+                condition: '결제 시',
+              });
+            }
+          }
         }
       });
     }
 
-    // 대체 방법: 카드혜택 섹션에서 직접 추출
-    const cardItems = doc.querySelectorAll(selectors.cardItem);
-    cardItems.forEach((item) => {
-      const titleEl = item.querySelector(selectors.cardTitle);
-      const amountEl = item.querySelector(selectors.cardAmount);
-      
-      if (titleEl && amountEl) {
-        const cardName = titleEl.textContent?.trim() || '';
-        const amount = extractNumber(amountEl.textContent || '');
-        
-        if (cardName && amount) {
-          benefits.push({
-            cardName,
-            benefitAmount: amount,
-            benefitType: '포인트',
-            condition: '결제 시',
-          });
-          console.log('[11stParser][CardBenefit]', cardName, amount);
-        }
-      }
-    });
-
-    // 텍스트 패턴 매칭으로 추가 혜택 찾기
-    const benefitTexts = doc.querySelectorAll('.card_benefit, [class*="card_benefit"]');
-    benefitTexts.forEach((el) => {
-      const text = el.textContent?.trim() || '';
-      const benefit = parseCardBenefitText(text);
-      if (benefit && !benefits.find(b => b.cardName === benefit.cardName)) {
-        benefits.push(benefit);
-      }
-    });
-
+    console.log('[11stParser][CardBenefit] 추출된 카드 혜택:', benefits.length);
   } catch (error) {
     console.error('[11stParser][CardBenefit] 카드 혜택 추출 오류:', error);
   }
@@ -207,79 +260,197 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
 };
 
 /**
- * 카드 혜택 텍스트 파싱
- * 예: "11번가 신한카드 결제 시 1,000P 적립"
+ * 카드 할인 타이틀 파싱
+ * 예: "11번가 신한카드 첫 결제할인 + 최대 5% 적립"
  */
-function parseCardBenefitText(text: string): CardBenefitInfo | null {
-  if (!text) return null;
+function parseCardDiscountTitle(title: string): CardBenefitInfo | null {
+  if (!title) return null;
 
-  // 패턴: {카드명} 결제 시 {금액}P|원 {혜택유형}
-  const patterns = [
-    /(.+?(?:카드|페이))\s*결제\s*시\s*([\d,]+)\s*[P포인트]/i,
-    /(.+?(?:카드|페이)).*?([\d,]+)\s*[P포인트]/i,
-    /(.+?(?:카드|페이))\s*최대\s*([\d,]+)\s*[P포인트]/i,
+  // 카드명 추출 (신한카드, KB국민, 현대카드 등)
+  const cardPatterns = [
+    /(11번가\s*신한카드)/,
+    /(신한카드)/,
+    /(KB국민)/,
+    /(국민카드)/,
+    /(현대카드)/,
+    /(삼성카드)/,
+    /(롯데카드)/,
+    /(하나카드)/,
+    /(우리카드)/,
+    /(비씨카드)/,
+    /(농협카드)/,
   ];
 
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
+  let cardName = '';
+  for (const pattern of cardPatterns) {
+    const match = title.match(pattern);
     if (match) {
-      const cardName = match[1].trim();
-      const amount = extractNumber(match[2]);
-      
-      if (cardName && amount) {
-        return {
-          cardName,
-          benefitAmount: amount,
-          benefitType: text.includes('할인') ? '할인' : '포인트',
-          condition: text.includes('결제 시') ? '결제 시' : '',
-        };
-      }
+      cardName = match[1];
+      break;
     }
   }
 
-  return null;
+  if (!cardName) return null;
+
+  // 혜택 금액 추출
+  let benefitAmount = 0;
+  let benefitType = '';
+  let condition = '';
+
+  // 퍼센트 적립 (최대 5% 적립)
+  const percentMatch = title.match(/최대\s*(\d+)%\s*적립/);
+  if (percentMatch) {
+    benefitAmount = parseInt(percentMatch[1], 10);
+    benefitType = '적립';
+    condition = '결제 시';
+  }
+
+  // 금액 할인 (30,000원 할인)
+  const amountMatch = title.match(/([\d,]+)원\s*할인/);
+  if (amountMatch) {
+    benefitAmount = extractNumber(amountMatch[1]) || 0;
+    benefitType = '할인';
+  }
+
+  // 조건 추출
+  if (title.includes('첫 결제')) {
+    condition = '첫 결제 시';
+  } else if (title.includes('결제 시')) {
+    condition = '결제 시';
+  }
+
+  return {
+    cardName,
+    benefitAmount,
+    benefitType: benefitType || (title.includes('할인') ? '할인' : '적립'),
+    condition,
+  };
+}
+
+/**
+ * 카드 혜택 상세 아이템 파싱
+ * 예: subTitle="11번가 신한카드 11pay 첫 결제 할인", itemText="신용카드 30,000원 할인"
+ */
+function parseCardBenefitDetailItem(subTitle: string, itemText: string): CardBenefitInfo | null {
+  if (!itemText) return null;
+
+  let cardName = '';
+  let benefitAmount = 0;
+  let benefitType = '';
+  let condition = '';
+
+  // 카드 종류 (신용카드, 체크카드)
+  if (itemText.includes('신용카드')) {
+    cardName = '신용카드';
+  } else if (itemText.includes('체크카드')) {
+    cardName = '체크카드';
+  }
+
+  // subTitle에서 카드명 추가
+  if (subTitle.includes('신한카드')) {
+    cardName = cardName ? `11번가 신한 ${cardName}` : '11번가 신한카드';
+  }
+
+  // 금액 할인 (30,000원 할인)
+  const amountMatch = itemText.match(/([\d,]+)원\s*할인/);
+  if (amountMatch) {
+    benefitAmount = extractNumber(amountMatch[1]) || 0;
+    benefitType = '할인';
+  }
+
+  // 퍼센트 적립 (최대 5% 적립, 기본 0.5% 적립)
+  const percentMatch = itemText.match(/(?:최대\s*)?(\d+(?:\.\d+)?)%\s*적립/);
+  if (percentMatch) {
+    benefitAmount = parseFloat(percentMatch[1]);
+    benefitType = '적립';
+  }
+
+  // 조건 추출
+  if (subTitle.includes('첫 결제')) {
+    condition = '첫 결제 시';
+  } else if (subTitle.includes('결제 시')) {
+    condition = '결제 시';
+  }
+
+  if (!cardName || (!benefitAmount && benefitType)) return null;
+
+  return {
+    cardName,
+    benefitAmount,
+    benefitType,
+    condition,
+  };
 }
 
 /**
  * 무이자 할부 정보 추출
- * 11번가 카드 무이자 할부 텍스트 파싱
+ * 11번가의 .card_benefits .card_box 구조에서 파싱
  */
 export const extractInstallments = (doc: Document): InstallmentInfo[] => {
   const installments: InstallmentInfo[] = [];
   const selectors = ELEVEN_ST_SELECTORS.installment;
 
   try {
-    // 무이자 할부 컨테이너 찾기
-    const container = doc.querySelector(selectors.container);
+    // .dialog_cont .card_benefits 컨테이너에서 추출
+    const cardBenefitsContainer = doc.querySelector(selectors.dialogContainer);
     
-    // 컨테이너 내 카드별 항목
-    const cardItems = container 
-      ? container.querySelectorAll(selectors.cardItem)
-      : doc.querySelectorAll(selectors.cardItem);
-
-    cardItems.forEach((item) => {
-      const cardNameEl = item.querySelector(selectors.cardName);
-      const infoEl = item.querySelector(selectors.installmentInfo);
+    if (cardBenefitsContainer) {
+      // 카드별 무이자 박스 (.card_box)
+      const cardBoxes = cardBenefitsContainer.querySelectorAll('.card_box');
       
-      if (cardNameEl && infoEl) {
-        const cardName = cardNameEl.textContent?.trim() || '';
-        const infoText = infoEl.textContent?.trim() || '';
+      cardBoxes.forEach((box: Element) => {
+        const cardNameEl = box.querySelector('dt');
+        const cardName = cardNameEl?.textContent?.trim() || '';
         
-        // 무이자 정보 파싱
-        const parsed = parseInstallmentText(cardName, infoText);
-        if (parsed) {
-          installments.push(parsed);
-        }
-      }
-    });
+        if (!cardName) return;
+        
+        // 여러 dd가 있을 수 있음 (조건별로 다른 무이자 옵션)
+        const conditions = box.querySelectorAll('dd');
+        
+        conditions.forEach((dd: Element) => {
+          const conditionText = dd.textContent?.trim() || '';
+          if (!conditionText) return;
+          
+          const parsed = parseInstallmentCondition(cardName, conditionText);
+          if (parsed) {
+            installments.push(parsed);
+          }
+        });
+      });
+      
+      console.log('[11stParser][Installment] card_box에서 추출:', installments.length);
+    }
 
     // DOM에서 직접 텍스트 패턴 검색 (레이어 팝업이 열리지 않은 경우)
     if (installments.length === 0) {
+      // 추가 혜택 버튼에서 요약 정보 추출
+      const triggerBtn = doc.querySelector(selectors.triggerButton);
+      if (triggerBtn) {
+        const btnText = triggerBtn.textContent?.trim() || '';
+        // "최대 22개월 무이자 할부 외 1건"
+        const maxMonthMatch = btnText.match(/최대\s*(\d+)개월\s*무이자/);
+        if (maxMonthMatch) {
+          // '카드사' 대신 '무이자할부' 타입으로 표시 (필터링용)
+          installments.push({
+            cardName: '__INSTALLMENT_SUMMARY__',
+            maxMonths: parseInt(maxMonthMatch[1], 10),
+            minAmount: null,
+            months: `최대 ${maxMonthMatch[1]}개월`,
+            condition: '무이자 할부',
+          });
+        }
+      }
+      
+      // 추가로 페이지 텍스트에서 검색
       const installmentFromText = extractInstallmentFromPageText(doc);
-      installments.push(...installmentFromText);
+      installmentFromText.forEach(item => {
+        if (!installments.find(i => i.cardName === item.cardName)) {
+          installments.push(item);
+        }
+      });
     }
 
-    console.log('[11stParser][Installment] 무이자 할부 카드 수:', installments.length);
+    console.log('[11stParser][Installment] 총 무이자 할부 카드 수:', installments.length);
   } catch (error) {
     console.error('[11stParser][Installment] 무이자 할부 추출 오류:', error);
   }
@@ -288,29 +459,31 @@ export const extractInstallments = (doc: Document): InstallmentInfo[] => {
 };
 
 /**
- * 무이자 할부 텍스트 파싱
- * 예: "2,3개월(5만원 ↑)" → { months: "2,3개월", maxMonths: 3, minAmount: 50000 }
+ * 무이자 할부 조건 텍스트 파싱
+ * 예: "2,3개월(5만원 ↑)" 또는 "7,8,9,10,11,12,13,14,15,16개월(100만원 ↑, 11pay 결제 시)"
  */
-function parseInstallmentText(cardName: string, text: string): InstallmentInfo | null {
-  if (!cardName || !text) return null;
-
-  // 패턴: "2,3,4,5개월(5만원 ↑)"
-  const monthPattern = /([\d,]+)개월/;
-  const amountPattern = /\((\d+)만원/;
-
-  const monthMatch = text.match(monthPattern);
-  if (!monthMatch) return null;
-
-  // 개월수 추출 (최대값)
-  const monthsStr = monthMatch[1];
-  const monthNumbers = monthsStr.split(',').map(m => parseInt(m.trim(), 10));
-  const maxMonths = Math.max(...monthNumbers.filter(n => !isNaN(n)));
-
-  // 최소 금액 추출
-  const amountMatch = text.match(amountPattern);
-  const minAmount = amountMatch ? parseInt(amountMatch[1], 10) * 10000 : null;
-
-  // 조건 추출
+function parseInstallmentCondition(cardName: string, text: string): InstallmentInfo | null {
+  if (!text) return null;
+  
+  // 개월수 추출 (예: "2,3,4,5개월")
+  const monthsMatch = text.match(/([\d,]+)개월/);
+  if (!monthsMatch) return null;
+  
+  const monthsStr = monthsMatch[1];
+  const monthNumbers = monthsStr.split(',').map((m: string) => parseInt(m.trim(), 10));
+  const validMonths = monthNumbers.filter((n: number) => !isNaN(n));
+  const maxMonths = validMonths.length > 0 ? Math.max(...validMonths) : 0;
+  
+  if (maxMonths === 0) return null;
+  
+  // 최소 금액 추출 (예: "5만원 ↑" 또는 "100만원 ↑")
+  let minAmount: number | null = null;
+  const amountMatch = text.match(/(\d+)만원/);
+  if (amountMatch) {
+    minAmount = parseInt(amountMatch[1], 10) * 10000;
+  }
+  
+  // 결제 조건 추출
   let condition = '';
   if (text.includes('11pay')) {
     condition = '11pay 결제 시';
@@ -319,15 +492,17 @@ function parseInstallmentText(cardName: string, text: string): InstallmentInfo |
   } else if (minAmount) {
     condition = `${minAmount / 10000}만원 이상`;
   }
-
+  
   return {
-    cardName: cardName.replace('카드', '').trim() + '카드',
+    cardName,
     maxMonths,
     minAmount,
     months: monthsStr + '개월',
     condition,
   };
 }
+
+
 
 /**
  * 페이지 텍스트에서 무이자 할부 정보 추출
