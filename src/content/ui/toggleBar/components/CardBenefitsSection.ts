@@ -3,8 +3,11 @@
  * 카드별 혜택을 비교하여 보여주는 메인 콘텐츠
  * 
  * PRD 핵심: "어떤 카드로 결제하면 가장 이득인지 한눈에 알 수 있다"
+ * 
+ * 🔒 보안: DOMPurify 적용으로 XSS 공격 방지
  */
 
+import DOMPurify from 'dompurify';
 import type { ToggleProductData } from '../types';
 import { formatCurrency } from '../utils';
 
@@ -145,21 +148,26 @@ const createCardItem = (
 		img.alt = cardNameText;
 		img.className = 'picsel-card-image';
 		img.onerror = (): void => {
-			// 이미지 로드 실패 시 이니셜로 대체
+			// 이미지 로드 실패 시 이니셜로 대체 (DOM API 사용 - XSS 방지)
 			const initial = getCardInitial(cardNameText);
-			imageWrapper.innerHTML = `
-				<div class="picsel-card-initial">${initial}</div>
-			`;
+			imageWrapper.textContent = ''; // 기존 내용 제거
+			const initialDiv = document.createElement('div');
+			initialDiv.className = 'picsel-card-initial';
+			initialDiv.textContent = DOMPurify.sanitize(initial, { ALLOWED_TAGS: [] });
+			imageWrapper.appendChild(initialDiv);
 		};
 		
 		imageWrapper.appendChild(img);
 		item.appendChild(imageWrapper);
 	} else {
-		// SVG도 없고 외부 이미지도 없으면 이니셜 표시
+		// SVG도 없고 외부 이미지도 없으면 이니셜 표시 (DOM API 사용 - XSS 방지)
 		const initial = getCardInitial(cardNameText);
 		const imageWrapper = document.createElement('div');
 		imageWrapper.className = 'picsel-card-image-wrapper';
-		imageWrapper.innerHTML = `<div class="picsel-card-initial">${initial}</div>`;
+		const initialDiv = document.createElement('div');
+		initialDiv.className = 'picsel-card-initial';
+		initialDiv.textContent = DOMPurify.sanitize(initial, { ALLOWED_TAGS: [] });
+		imageWrapper.appendChild(initialDiv);
 		item.appendChild(imageWrapper);
 	}
 

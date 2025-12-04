@@ -9,7 +9,7 @@
  */
 
 import { domLog } from '../shared/utils/logger';
-import { debounce } from '../shared/utils/debounce';
+import { debounce } from '../shared/utils/timing';
 
 export type ReparseCallback = (source: string) => boolean;
 

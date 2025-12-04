@@ -10,7 +10,7 @@
  */
 
 import { domLog } from '../shared/utils/logger';
-import { debounce } from '../shared/utils/debounce';
+import { debounce } from '../shared/utils/timing';
 
 export type BenefitRefreshHandler = (source: string) => void;
 

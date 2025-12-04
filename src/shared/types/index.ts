@@ -1,12 +1,17 @@
 /**
  * Central type exports
- * Re-exports all types from modular files for backward compatibility
  */
+
+// Result 타입 (에러 핸들링)
+export { type Result, Ok, Err, isOk, isErr, Result as ResultUtils } from './result';
+
+// Type Guards
+export { isNotNull, isString, isNumber, isFiniteNumber, isObject, exhaustiveCheck } from './guards';
 
 // Payment types
 export type { PaymentMethod, CustomPaymentMethod } from './payment';
 
-// Store types (re-exported from slices)
+// Store types
 export type {
   RecommendationStore,
   UISlice,
@@ -17,7 +22,6 @@ export type {
   SubPopupUISlice,
   SubPopupPaymentSlice,
   PersistedSubPopupState,
-  // Legacy aliases
   RecommendationState,
   SubPopupState,
 } from './store';
@@ -29,13 +33,10 @@ export type { ParserConfig, ParsedProductInfo, ParserResult } from './parser';
 export type { ChromeMessage, RecommendationRequest, RecommendationResponse, SubPopupMessage } from './message';
 
 // Product types
-export type { CheckoutInfo, ProductInfo } from './product';
+export type { CheckoutInfo, ProductInfo, CardBenefit, ProductData } from './product';
 
 // Notification types
 export type { AutoNotificationData } from './notification';
 
 // Constants
 export { CARD_NAME_MAPPING, WINDOW_CONFIG } from './constants';
-
-// Re-export domain types
-export type { CardBenefit, ProductData } from './product';
