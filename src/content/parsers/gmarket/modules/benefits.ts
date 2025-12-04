@@ -59,7 +59,7 @@ export const extractPartnerCards = (doc: Document): CardBenefitDetail[] => {
 
       benefits.push({
         card: cardName,
-        cardName: cardName,
+        cardName,
         benefit: 'G마켓 제휴카드 혜택',
         imageUrl: src,
       });
@@ -142,10 +142,10 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
       if (!benefits.some((b) => b.cardName === cardName)) {
         benefits.push({
           card: cardName,
-          cardName: cardName,
+          cardName,
           benefit: discount.title,
           discount: rate,
-          rate: rate,
+          rate,
         });
       }
     }
@@ -167,7 +167,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
           cardName: 'G마켓 삼성카드',
           benefit: `G마켓 삼성카드 결제 시 ${rate}% 할인`,
           discount: rate,
-          rate: rate,
+          rate,
         });
       }
     }

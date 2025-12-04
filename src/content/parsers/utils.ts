@@ -57,9 +57,7 @@ export const extractCurrency = (text: string): string => {
  * 가격 검증 (합리적인 범위)
  * 100원 ~ 1억원
  */
-export const isValidPrice = (price: number | null | undefined): price is number => {
-  return typeof price === 'number' && price > 100 && price < 100_000_000;
-};
+export const isValidPrice = (price: number | null | undefined): price is number => typeof price === 'number' && price > 100 && price < 100_000_000;
 
 // ============================================
 // 가격 계산 유틸리티
@@ -137,27 +135,21 @@ export const calculateCardDiscount = (
  */
 export const formatBenefitDetails = (
   details: Array<{ label: string; value: string }>
-): string => {
-  return details
+): string => details
     .map((d) => `${d.label}: ${d.value}`)
     .join('\n');
-};
 
 /**
  * 금액을 원화 형식으로 포맷팅
  * 1234567 → "1,234,567원"
  */
-export const formatPrice = (price: number): string => {
-  return `${price.toLocaleString('ko-KR')}원`;
-};
+export const formatPrice = (price: number): string => `${price.toLocaleString('ko-KR')}원`;
 
 /**
  * 할인율을 포맷팅
  * 20 → "20%"
  */
-export const formatDiscountRate = (rate: number): string => {
-  return `${rate}%`;
-};
+export const formatDiscountRate = (rate: number): string => `${rate}%`;
 
 // ============================================
 // DOM 유틸리티
@@ -166,16 +158,12 @@ export const formatDiscountRate = (rate: number): string => {
 /**
  * 안전하게 요소의 텍스트 가져오기
  */
-export const safeGetText = (element: Element | null): string => {
-  return element?.textContent?.trim() || '';
-};
+export const safeGetText = (element: Element | null): string => element?.textContent?.trim() || '';
 
 /**
  * 안전하게 속성 가져오기
  */
-export const safeGetAttr = (element: Element | null, attr: string): string => {
-  return element?.getAttribute(attr)?.trim() || '';
-};
+export const safeGetAttr = (element: Element | null, attr: string): string => element?.getAttribute(attr)?.trim() || '';
 
 /**
  * 첫 번째 매칭 요소의 텍스트 가져오기

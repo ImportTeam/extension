@@ -23,29 +23,23 @@ export interface ChromeStorageAdapter {
  * chrome.storage.local을 Zustand persist storage로 사용
  */
 export const chromeStorageAdapter: ChromeStorageAdapter = {
-  getItem: async (name: string): Promise<string | null> => {
-    return new Promise((resolve) => {
+  getItem: async (name: string): Promise<string | null> => new Promise((resolve) => {
       chrome.storage.local.get([name], (result) => {
         resolve((result[name] as string) ?? null);
       });
-    });
-  },
+    }),
 
-  setItem: async (name: string, value: string): Promise<void> => {
-    return new Promise((resolve) => {
+  setItem: async (name: string, value: string): Promise<void> => new Promise((resolve) => {
       chrome.storage.local.set({ [name]: value }, () => {
         resolve();
       });
-    });
-  },
+    }),
 
-  removeItem: async (name: string): Promise<void> => {
-    return new Promise((resolve) => {
+  removeItem: async (name: string): Promise<void> => new Promise((resolve) => {
       chrome.storage.local.remove([name], () => {
         resolve();
       });
-    });
-  },
+    }),
 };
 
 /**

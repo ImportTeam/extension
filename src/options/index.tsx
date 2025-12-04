@@ -7,8 +7,7 @@ import '../popup/styles/globals.css';
  * TODO: Implement settings UI in future
  */
 
-export const Options: React.FC = () => {
-  return (
+export const Options: React.FC = () => (
     <div className="min-h-screen bg-background text-foreground p-6">
       <h1 className="text-2xl font-bold mb-4 text-primary">PicSel 설정</h1>
       <p className="text-gray-600 dark:text-gray-400">
@@ -16,7 +15,6 @@ export const Options: React.FC = () => {
       </p>
     </div>
   );
-};
 
 const root = document.getElementById('root');
 if (root) {

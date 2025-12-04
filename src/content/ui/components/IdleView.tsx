@@ -1,8 +1,7 @@
 import React from 'react';
 import { idleViewStyles as styles } from '../../../popup/styles/popup/idleViewStyles';
 
-export const IdleView: React.FC = () => {
-  return (
+export const IdleView: React.FC = () => (
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.label} className="idle-label">
@@ -17,5 +16,4 @@ export const IdleView: React.FC = () => {
       </div>
     </div>
   );
-};
 

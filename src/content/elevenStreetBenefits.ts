@@ -23,9 +23,7 @@ const autoClickSelectors = [
 
 const closeButtonSelector = '.dialog_cont .btn_close, .layer_pop .btn_close, [class*="popup"] .close';
 
-const hasBenefitContent = (): boolean => {
-	return Boolean(document.querySelector('.other_benefits .benefit dt'));
-};
+const hasBenefitContent = (): boolean => Boolean(document.querySelector('.other_benefits .benefit dt'));
 
 export function setupElevenStreetBenefitWatcher(onBenefitRefresh: BenefitRefreshHandler): void {
 	if (!window.location.hostname.includes('11st.co.kr')) return;

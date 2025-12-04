@@ -592,7 +592,7 @@ function parseInstallmentCondition(cardName: string, text: string): InstallmentI
     cardName,
     maxMonths,
     minAmount,
-    months: monthsStr + '개월',
+    months: `${monthsStr  }개월`,
     condition,
   };
 }
@@ -640,10 +640,10 @@ function extractInstallmentFromPageText(doc: Document): InstallmentInfo[] {
             const maxMonths = Math.max(...monthNumbers.filter((n: number) => !isNaN(n)));
             
             results.push({
-              cardName: keyword + '카드',
+              cardName: `${keyword  }카드`,
               maxMonths,
               minAmount: null,
-              months: monthsStr + '개월',
+              months: `${monthsStr  }개월`,
               condition: '',
             });
           }

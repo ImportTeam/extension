@@ -34,9 +34,6 @@ export type { CheckoutInfo, ProductInfo } from './product';
 // Notification types
 export type { AutoNotificationData } from './notification';
 
-// Utility types
-export type { Optional, PartialBy, RequiredBy } from './utility';
-
 // Constants
 export { CARD_NAME_MAPPING, WINDOW_CONFIG } from './constants';
 

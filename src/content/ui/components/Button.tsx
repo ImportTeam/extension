@@ -32,8 +32,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ...props
     },
     ref
-  ) => {
-    return (
+  ) => (
       <button
         ref={ref}
         disabled={loading || disabled}
@@ -74,8 +73,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           props.children
         )}
       </button>
-    );
-  }
+    )
 );
 
 Button.displayName = 'Button';

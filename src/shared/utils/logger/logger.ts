@@ -152,7 +152,7 @@ class Logger {
 
     // 시간 포맷 (HH:mm:ss.mmm)
     const date = new Date(entry.timestamp);
-    const time = date.toTimeString().split(' ')[0] + '.' + String(date.getMilliseconds()).padStart(3, '0');
+    const time = `${date.toTimeString().split(' ')[0]  }.${  String(date.getMilliseconds()).padStart(3, '0')}`;
 
     // 위치 정보
     const loc = entry.location
@@ -163,7 +163,7 @@ class Logger {
     const code = entry.code ? `[${entry.code}]` : '';
 
     // 프리픽스 구성: [시간] [환경/도메인] [레벨] [코드] [위치]
-    const prefix = `${emoji} [${time}] [${envShort}/${domainShort}] ${levelName}${code ? ' ' + code : ''}${loc ? ' @ ' + loc : ''}`;
+    const prefix = `${emoji} [${time}] [${envShort}/${domainShort}] ${levelName}${code ? ` ${  code}` : ''}${loc ? ` @ ${  loc}` : ''}`;
 
     return {
       prefix,

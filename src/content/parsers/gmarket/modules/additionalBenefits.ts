@@ -87,14 +87,12 @@ export const extractAdditionalBenefits = (doc: Document): AdditionalBenefit[] =>
  * 추가 혜택을 포맷팅된 문자열로 변환
  * 예: "신세계포인트 적립\n적립률: 1천원 당 1포인트\n적립한도: 최대 1천점"
  */
-export const formatAdditionalBenefits = (benefits: AdditionalBenefit[]): string => {
-  return benefits
+export const formatAdditionalBenefits = (benefits: AdditionalBenefit[]): string => benefits
     .map((benefit) => {
       const detailsStr = formatBenefitDetails(benefit.details);
       return `${benefit.title}\n${detailsStr}`;
     })
     .join('\n\n');
-};
 
 /**
  * 신세계포인트 정보만 추출 (간단 버전)

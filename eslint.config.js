@@ -10,7 +10,6 @@ export default tseslint.config(
   // 1. 기본 설정 및 환경 설정
   // ----------------------------------------------------
   {
-    // ignorePatterns 대신 Flat Config의 'ignores' 사용
     ignores: [
       "**/node_modules/**",
       "**/dist/**",
@@ -23,18 +22,14 @@ export default tseslint.config(
       "vite.config.ts.timestamp-*"
     ],
     
-    // 환경 (env) 및 파서 설정
     languageOptions: {
-      // browser: true 및 es2020: true를 globals 및 parserOptions로 설정
       globals: {
         ...globals.browser,
       },
-      parser: tseslint.parser, // TypeScript 파서 사용
+      parser: tseslint.parser,
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: "module",
-        // TypeScript 프로젝트를 위한 tsconfig 경로 지정 (필수 권장)
-        // project: ['./tsconfig.json'], 
       },
     }
   },
@@ -42,52 +37,141 @@ export default tseslint.config(
   // ----------------------------------------------------
   // 2. extends 정책 반영
   // ----------------------------------------------------
-  
-  // "eslint:recommended"
   pluginJs.configs.recommended,
-  
-  // "plugin:@typescript-eslint/recommended"
   ...tseslint.configs.recommended, 
   
-  // "plugin:react-hooks/recommended"
   {
     plugins: {
       'react-hooks': pluginReactHooks,
     },
-    // 추천 규칙을 배열 요소의 rules로 직접 적용
     rules: pluginReactHooks.configs.recommended.rules, 
   },
   
   // ----------------------------------------------------
-  // 3. 사용자 지정 규칙 (엄격한 정책) 반영
+  // 3. 엄격하고 실용적인 규칙
   // ----------------------------------------------------
   {
-    // react-refresh 플러그인 등록
     plugins: {
-        'react-refresh': pluginReactRefresh,
+      'react-refresh': pluginReactRefresh,
     },
     rules: {
-      // TypeScript ESLint 규칙
+      // ═══════════════════════════════════════════════════
+      // TypeScript 규칙 - 타입 안전성 강화
+      // ═══════════════════════════════════════════════════
+      
+      // 사용하지 않는 변수 금지 (언더스코어로 시작하는 인자는 허용)
       "@typescript-eslint/no-unused-vars": [
         "error",
-        { "argsIgnorePattern": "^_" }
+        { 
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "destructuredArrayIgnorePattern": "^_"
+        }
       ],
+      
+      // any 타입 금지 - 타입 안전성 핵심
       "@typescript-eslint/no-explicit-any": "error",
-      // (기존: warn)
-      "@typescript-eslint/explicit-function-return-type": "warn",
+      
+      // 함수 반환 타입 명시 - 코드 가독성/문서화
+      "@typescript-eslint/explicit-function-return-type": ["warn", {
+        "allowExpressions": true,           // 콜백에서는 허용
+        "allowTypedFunctionExpressions": true,
+        "allowHigherOrderFunctions": true,
+      }],
+      
+      // non-null assertion (!) 금지 - 런타임 에러 방지
       "@typescript-eslint/no-non-null-assertion": "error",
+      
+      // interface vs type - 일관성
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
       
-      // 기본 ESLint/JS 규칙
+      // 사용하지 않는 import 제거
+      "@typescript-eslint/no-unused-expressions": "error",
+      
+      // 빈 함수 금지 (의도적인 경우 주석 필요)
+      "@typescript-eslint/no-empty-function": ["error", {
+        "allow": ["arrowFunctions"] // 빈 화살표 함수는 허용 (noop 패턴)
+      }],
+      
+      // ═══════════════════════════════════════════════════
+      // 코드 품질 규칙 - 버그 방지
+      // ═══════════════════════════════════════════════════
+      
+      // === 사용 강제 (타입 강제 변환 버그 방지)
       "eqeqeq": ["error", "always"],
+      
+      // const 선호 (재할당 없으면 const)
       "prefer-const": "error",
+      
+      // var 금지
       "no-var": "error",
       
-      // React-refresh 플러그인 규칙
+      // console 금지 (Logger 사용 강제) - logger.ts 제외
+      "no-console": ["error", { 
+        "allow": ["warn", "error"] // warn, error는 개발 중 허용
+      }],
+      
+      // debugger 금지
+      "no-debugger": "error",
+      
+      // 도달할 수 없는 코드 금지
+      "no-unreachable": "error",
+      
+      // 중복 케이스 금지
+      "no-duplicate-case": "error",
+      
+      // 빈 블록 금지
+      "no-empty": ["error", { "allowEmptyCatch": true }],
+      
+      // ═══════════════════════════════════════════════════
+      // 코드 스타일 규칙 - 가독성/일관성
+      // ═══════════════════════════════════════════════════
+      
+      // 화살표 함수 본문 스타일
+      "arrow-body-style": ["warn", "as-needed"],
+      
+      // 객체 단축 속성
+      "object-shorthand": ["warn", "always"],
+      
+      // 템플릿 리터럴 선호
+      "prefer-template": "warn",
+      
+      // 스프레드 연산자 선호
+      "prefer-spread": "warn",
+      
+      // rest 파라미터 선호 (arguments 대신)
+      "prefer-rest-params": "error",
+      
+      // throw는 Error 객체만
+      "no-throw-literal": "error",
+      
+      // ═══════════════════════════════════════════════════
+      // React 규칙
+      // ═══════════════════════════════════════════════════
+      
+      // React-refresh (HMR 호환성)
       "react-refresh/only-export-components": [
         "warn",
         { "allowConstantExport": true }
       ],
+    }
+  },
+  
+  // ----------------------------------------------------
+  // 4. 파일별 예외 규칙
+  // ----------------------------------------------------
+  {
+    // Logger 시스템은 console 사용 허용
+    files: ["**/logger/**/*.ts"],
+    rules: {
+      "no-console": "off",
+    }
+  },
+  {
+    // 설정 파일들은 일부 규칙 완화
+    files: ["*.config.ts", "*.config.js"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
     }
   }
 );

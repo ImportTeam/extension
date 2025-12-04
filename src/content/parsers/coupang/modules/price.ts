@@ -5,9 +5,9 @@ import { parseLog } from '../../../../shared/utils/logger';
 /**
  * 가격 유효성 검증 - 쿠팡 가격 범위 내인지 확인
  */
-const isValidCoupangPrice = (value: number): boolean => {
-  return value >= 100 && value <= 100_000_000; // 100원 ~ 1억원
-};
+const isValidCoupangPrice = (value: number): boolean => 
+   value >= 100 && value <= 100_000_000 // 100원 ~ 1억원
+;
 
 export const extractPrices = (doc: Document): {
   amount: number | null;

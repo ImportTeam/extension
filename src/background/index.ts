@@ -103,7 +103,7 @@ chrome.runtime.onMessage.addListener(
       };   storeLog.info('💾 Saving product data', {
           amount: data.amount,
           currency: data.currency,
-          title: data.title?.substring(0, 50) + '...',
+          title: `${data.title?.substring(0, 50)  }...`,
           url,
           timestamp: new Date(timestamp).toISOString(),
         });
@@ -126,7 +126,7 @@ chrome.runtime.onMessage.addListener(
             storeLog.debug('📊 Stored product', {
               amount: productData.amount,
               currency: productData.currency,
-              title: productData.title?.substring(0, 50) + '...',
+              title: `${productData.title?.substring(0, 50)  }...`,
             });
 
             // Popup 자동 표시 (선택적)
@@ -155,7 +155,7 @@ chrome.runtime.onMessage.addListener(
           storeLog.debug('📦 Retrieved product data', {
             exists: !!currentProduct,
             amount: currentProduct?.amount,
-            title: currentProduct?.title?.substring(0, 50) + '...',
+            title: `${currentProduct?.title?.substring(0, 50)  }...`,
           });
           sendResponse({
             success: true,
@@ -265,7 +265,7 @@ chrome.runtime.onMessage.addListener(
         storeLog.info('🔄 Updating product data (dynamic content)', {
           amount: data.amount,
           currency: data.currency,
-          title: data.title?.substring(0, 50) + '...',
+          title: `${data.title?.substring(0, 50)  }...`,
           source,
           timestamp: new Date(timestamp).toISOString(),
         });

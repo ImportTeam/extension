@@ -18,7 +18,7 @@ export const extractProductImage = (doc: Document): string | null => {
 
     if (mainImage?.src) {
       let src = mainImage.src;
-      if (src.startsWith('//')) src = 'https:' + src;
+      if (src.startsWith('//')) src = `https:${  src}`;
       src = src.split('?')[0];
       return src;
     }
@@ -34,7 +34,7 @@ export const extractProductImage = (doc: Document): string | null => {
 
         if (src) {
           if (src.startsWith('//')) {
-            src = 'https:' + src;
+            src = `https:${  src}`;
           }
 
           if (src.includes('thumbnails/remote/')) {
@@ -74,7 +74,7 @@ export const extractAllProductImages = (doc: Document): string[] => {
         if (seen.has(src)) continue;
 
         if (src.startsWith('//')) {
-          src = 'https:' + src;
+          src = `https:${  src}`;
         }
 
         if (src.includes('thumbnails/remote/')) {

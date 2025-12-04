@@ -24,7 +24,7 @@ export const openSubPopup = (): void => {
 export const sendToMainPopup = (message: SubPopupMessage): void => {
   if (window.opener && !window.opener.closed) {
     // Chrome extension의 경우 chrome-extension:// 프로토콜 사용
-    const targetOrigin = window.opener.location.origin || 'chrome-extension://' + chrome.runtime.id;
+    const targetOrigin = window.opener.location.origin || `chrome-extension://${  chrome.runtime.id}`;
     window.opener.postMessage(message, targetOrigin);
   }
 };

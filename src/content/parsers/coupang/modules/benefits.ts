@@ -191,10 +191,10 @@ const parseCardBenefitsFromDocument = (doc: Document): CardBenefitDetail[] => {
       const rate = extractPercentage(rateText || descText) ?? undefined;
       benefits.push({
         card: cardName,
-        cardName: cardName,
+        cardName,
         benefit: descText || rateText || '혜택 제공',
         discount: rate,
-        rate: rate,
+        rate,
       });
     }
   });
@@ -225,10 +225,10 @@ const parseCardBenefitsFromElement = (element: HTMLElement): CardBenefitDetail[]
       if (!benefits.some(b => b.card === cardName)) {
         benefits.push({
           card: cardName,
-          cardName: cardName,
+          cardName,
           benefit: `최대 ${rate}% 할인/적립`,
           discount: rate,
-          rate: rate,
+          rate,
         });
       }
     }
@@ -270,10 +270,10 @@ const scanPageForCardBenefits = (doc: Document): CardBenefitDetail[] => {
 
         benefits.push({
           card: cardName,
-          cardName: cardName,
+          cardName,
           benefit: benefitDesc,
           discount: rate,
-          rate: rate,
+          rate,
         });
       }
     }
