@@ -6,8 +6,21 @@
 // Payment types
 export type { PaymentMethod, CustomPaymentMethod } from './payment';
 
-// Store types
-export type { RecommendationState, SubPopupState } from './store';
+// Store types (re-exported from slices)
+export type {
+  RecommendationStore,
+  UISlice,
+  DataSlice,
+  MetaSlice,
+  PersistedRecommendationState,
+  SubPopupStore,
+  SubPopupUISlice,
+  SubPopupPaymentSlice,
+  PersistedSubPopupState,
+  // Legacy aliases
+  RecommendationState,
+  SubPopupState,
+} from './store';
 
 // Parser types
 export type { ParserConfig, ParsedProductInfo, ParserResult } from './parser';
@@ -26,9 +39,6 @@ export type { Optional, PartialBy, RequiredBy } from './utility';
 
 // Constants
 export { CARD_NAME_MAPPING, WINDOW_CONFIG } from './constants';
-
-// Re-export persisted state types
-export type { PersistedRecommendationState, PersistedSubPopupState } from './store';
 
 // Re-export domain types
 export type { CardBenefit, ProductData } from './product';

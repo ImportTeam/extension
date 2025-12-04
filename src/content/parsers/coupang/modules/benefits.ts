@@ -1,5 +1,5 @@
 import { COUPANG_SELECTORS } from '../constants';
-import { extractNumber } from '../../utils';
+import { extractNumber, normalizeCardName, extractPercentage } from '../../utils';
 import { CARD_NAME_MAPPING } from '../../../../shared/types';
 
 interface CardBenefitDetail {
@@ -18,17 +18,6 @@ interface CardImageInfo {
   cardName: string;
 }
 
-/**
- * 카드명 정규화 - 비교를 위한 표준화
- */
-const normalizeCardName = (name: string): string => {
-  return name
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/card$/i, '카드')
-    .trim();
-};
-
 const extractCardNameFromUrl = (url: string): string | null => {
   for (const [key, value] of Object.entries(CARD_NAME_MAPPING)) {
     if (url.includes(key)) {
@@ -37,11 +26,6 @@ const extractCardNameFromUrl = (url: string): string | null => {
   }
 
   return null;
-};
-
-const extractPercentage = (text: string): number | undefined => {
-  const match = text.match(/(\d+(?:\.\d+)?)\s*%/);
-  return match ? parseFloat(match[1]) : undefined;
 };
 
 /**
@@ -203,7 +187,7 @@ const parseCardBenefitsFromDocument = (doc: Document): CardBenefitDetail[] => {
     const descText = descEl?.textContent?.trim() || item.textContent?.trim() || '';
 
     if (cardName) {
-      const rate = extractPercentage(rateText || descText);
+      const rate = extractPercentage(rateText || descText) ?? undefined;
       benefits.push({
         card: cardName,
         cardName: cardName,
@@ -346,13 +330,14 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
           ? `${cardNames.slice(0, 3).join(', ')}${cardNames.length > 3 ? ' 외' : ''}`
           : '쿠팡 파트너 카드';
 
+        const rateValue = rate ?? undefined;
         benefits.push({
           card: displayCards,
           cardName: displayCards,
           benefit: `${benefitText}${woowonOnly ? ` (${woowonOnly})` : ''}`,
-          discount: rate,
-          rate: rate,
-          imageUrl: cardImageUrls[0], // 첫 번째 카드 이미지
+          discount: rateValue,
+          rate: rateValue,
+          imageUrl: cardImageUrls[0], // 첨 번째 카드 이미지
         });
       }
     }
