@@ -12,6 +12,7 @@ import * as Benefits from './modules/benefits';
 import * as AdditionalBenefits from './modules/additionalBenefits';
 import * as Shipping from './modules/shipping';
 import { normalizeAndSortCardBenefits, deduplicateCardBenefits } from '../cardBenefitCalculator';
+import { parserLog, ErrorCode } from '../../../shared/utils/logger';
 
 export class GmarketParser extends BaseParser {
   readonly siteName = 'Gmarket';
@@ -34,7 +35,7 @@ export class GmarketParser extends BaseParser {
       patterns.vipPage.test(url) ||
       patterns.generalProduct.test(url);
 
-    console.log(`[GmarketParser] isCheckoutPage("${url}") = ${isCheckout}`);
+    parserLog.debug(`isCheckoutPage check`, { url, isCheckout });
     return isCheckout;
   }
 
@@ -43,7 +44,7 @@ export class GmarketParser extends BaseParser {
    */
   parse(doc: Document): ParsedProductInfo | null {
     try {
-      console.log('[GmarketParser] 🔍 Parsing Gmarket page...');
+      parserLog.info('Parsing Gmarket page...');
 
       // 1. 상품명 & 이미지
       const title = Product.extractTitle(doc);
@@ -60,7 +61,7 @@ export class GmarketParser extends BaseParser {
       }
 
       if (!amount) {
-        console.debug('[GmarketParser] ❌ No price found');
+        parserLog.warn('No price found in Gmarket page');
         return null;
       }
 
@@ -76,7 +77,7 @@ export class GmarketParser extends BaseParser {
       // 5. 배송 정보
       const shippingInfo = Shipping.extractShippingInfo(doc);
 
-      console.log(`[GmarketParser] ✅ Found: ${amount} KRW, Cards: ${cardBenefits.length}`);
+      parserLog.info('Parse successful', { amount, cardCount: cardBenefits.length });
 
       return {
         price: amount,
@@ -96,7 +97,9 @@ export class GmarketParser extends BaseParser {
         discounts: [],
       };
     } catch (error) {
-      console.error('[GmarketParser] ❌ Parse error:', error);
+      parserLog.error(ErrorCode.PAR_E002, 'Gmarket parse error', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       return null;
     }
   }

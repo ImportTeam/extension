@@ -10,6 +10,7 @@ import { createParser, createFallbackParser } from './parserFactory';
 import { saveProductData, type MessageSource } from './backgroundMessaging';
 import { setupDynamicContentObserver } from './dynamicObserver';
 import { setupElevenStreetBenefitWatcher } from './elevenStreetBenefits';
+import { logger, LogDomain, ErrorCode } from '../shared/utils/logger';
 
 const isMainFrame = window.self === window.top;
 let hasRun = false;
@@ -24,27 +25,30 @@ export function extractPaymentInfo(): ExtractionResult | null {
   const siteInfo = detectSite(url);
 
   if (!siteInfo) {
-    console.log('[Content] ❌ Not a supported page');
+    logger.debug(LogDomain.PARSER, 'Not a supported page', { url });
     return null;
   }
 
-  console.log(`[Content] ✅ Site detected: ${siteInfo.site}`);
+  logger.info(LogDomain.PARSER, `Site detected: ${siteInfo.site}`, { url });
 
   const parser = createParser(siteInfo.site);
   let result = parser.parse(document);
 
   if (!result) {
-    console.warn('[Content] ⚠️ Primary parser failed, trying fallback');
+    logger.warn(LogDomain.PARSER, 'Primary parser failed, trying fallback', { site: siteInfo.site });
     result = createFallbackParser().parse(document);
     if (!result) {
-      console.warn('[Content] ❌ Fallback parser also failed');
+      logger.error(LogDomain.PARSER, ErrorCode.PAR_E002, 'Fallback parser also failed', {
+        data: { site: siteInfo.site, url },
+      });
       return null;
     }
   }
 
-  console.log('[Content] ✅ Parse successful:', {
+  logger.info(LogDomain.PARSER, 'Parse successful', {
     title: result.title?.substring(0, 50),
     amount: result.amount,
+    cardBenefitsCount: result.cardBenefits?.length ?? 0,
   });
 
   return { paymentInfo: result, site: siteInfo.site };
@@ -66,7 +70,7 @@ function reparseAndNotify(source: MessageSource): boolean {
 function init(): void {
   const result = extractPaymentInfo();
   if (!result) {
-    console.warn('[ContentScript] ❌ Failed to extract payment info');
+    logger.warn(LogDomain.BOOTSTRAP, 'Failed to extract payment info on init');
     return;
   }
 
@@ -78,6 +82,7 @@ export function runContentScript(): void {
   if (!isMainFrame || hasRun) return;
   hasRun = true;
 
+  logger.info(LogDomain.BOOTSTRAP, 'Content script starting');
   init();
   setupDynamicContentObserver((source) => reparseAndNotify(source as MessageSource));
   setupElevenStreetBenefitWatcher((source) => {
