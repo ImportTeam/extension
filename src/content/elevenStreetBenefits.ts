@@ -1,12 +1,20 @@
 /**
  * 11번가 카드 혜택 관련 유틸
- * - 추가 혜택 버튼 자동 클릭
- * - 버튼 클릭 감지 및 콜백 호출
+ * - 추가 혜택 버튼 클릭 감지 및 콜백 호출
+ * - 자동 클릭은 기본 비활성화 (성능 및 UX 고려)
+ * 
+ * 최적화:
+ * - debounce로 연속 호출 방지
+ * - 자동 클릭 비활성화
+ * - Observer 최소화
  */
 
 import { domLog } from '../shared/utils/logger';
+import { debounce } from '../shared/utils/debounce';
 
 export type BenefitRefreshHandler = (source: string) => void;
+
+const DEBOUNCE_MS = 500;
 
 const buttonSelectors = [
 	'.additional_benefits button',
@@ -16,13 +24,6 @@ const buttonSelectors = [
 	'button[class*="benefit"]',
 ];
 
-const autoClickSelectors = [
-	...buttonSelectors,
-	'.max_saveing_point .c_layer_expand button',
-];
-
-const closeButtonSelector = '.dialog_cont .btn_close, .layer_pop .btn_close, [class*="popup"] .close';
-
 const hasBenefitContent = (): boolean => Boolean(document.querySelector('.other_benefits .benefit dt'));
 
 export function setupElevenStreetBenefitWatcher(onBenefitRefresh: BenefitRefreshHandler): void {
@@ -30,23 +31,28 @@ export function setupElevenStreetBenefitWatcher(onBenefitRefresh: BenefitRefresh
 
 	domLog.info('Setting up 11번가 benefit watcher');
 
-	attemptAutoClickBenefitButton(onBenefitRefresh);
+	// debounce된 콜백
+	const debouncedRefresh = debounce((source: string) => {
+		if (hasBenefitContent()) {
+			domLog.info('Benefit content found', { source });
+			onBenefitRefresh(source);
+		}
+	}, DEBOUNCE_MS);
+
+	// 버튼 클릭 리스너 설정 (한 번만)
+	const watchedButtons = new WeakSet<Element>();
 
 	const setupClickListeners = (): void => {
 		buttonSelectors.forEach((selector) => {
 			const buttons = document.querySelectorAll(selector);
 			buttons.forEach((btn) => {
-				if (btn.getAttribute('data-picsel-watched')) return;
-				btn.setAttribute('data-picsel-watched', 'true');
+				if (watchedButtons.has(btn)) return;
+				watchedButtons.add(btn);
 
 				btn.addEventListener('click', () => {
-					domLog.debug('Benefit button clicked, waiting for content...');
-					setTimeout(() => {
-						if (hasBenefitContent()) {
-							domLog.info('Benefit content found after click');
-							onBenefitRefresh('benefit-click');
-						}
-					}, 1000);
+					domLog.debug('Benefit button clicked');
+					// 클릭 후 콘텐츠 로드 대기
+					setTimeout(() => debouncedRefresh('benefit-click'), 800);
 				});
 			});
 		});
@@ -54,6 +60,9 @@ export function setupElevenStreetBenefitWatcher(onBenefitRefresh: BenefitRefresh
 
 	setupClickListeners();
 
+	// Observer는 초기 로드 시에만 짧게 실행
+	let observerTimeout: ReturnType<typeof setTimeout> | null = null;
+	
 	const buttonObserver = new MutationObserver(() => {
 		setupClickListeners();
 	});
@@ -63,55 +72,30 @@ export function setupElevenStreetBenefitWatcher(onBenefitRefresh: BenefitRefresh
 		subtree: true,
 	});
 
-	setTimeout(setupClickListeners, 3000);
+	// 5초 후 Observer disconnect (초기 로드 완료 추정)
+	observerTimeout = setTimeout(() => {
+		buttonObserver.disconnect();
+		domLog.debug('Benefit button observer disconnected (timeout)');
+	}, 5000);
+
+	// 페이지 언로드 시 정리
+	window.addEventListener('beforeunload', () => {
+		if (observerTimeout) clearTimeout(observerTimeout);
+		buttonObserver.disconnect();
+	}, { once: true });
 }
 
+/**
+ * 자동 클릭 기능 (기본 비활성화)
+ * 필요시 명시적으로 호출
+ */
 export function attemptAutoClickBenefitButton(onBenefitRefresh: BenefitRefreshHandler): void {
+	// 성능 및 UX 고려하여 기본 비활성화
+	// 이 함수는 필요시 옵션에서 활성화할 수 있도록 export만 유지
+	domLog.debug('Auto-click is disabled for performance');
+	
+	// 이미 혜택 정보가 있으면 콜백만 호출
 	if (hasBenefitContent()) {
-		domLog.debug('Benefit content already exists, skip auto-click');
-		return;
+		onBenefitRefresh('existing-benefit');
 	}
-
-	let targetButton: Element | null = null;
-	for (const selector of autoClickSelectors) {
-		const btn = document.querySelector(selector);
-		if (!btn) continue;
-		const text = btn.textContent || '';
-		if (text.includes('무이자') || text.includes('할인') || text.includes('추가') || text.includes('혜택')) {
-			targetButton = btn;
-			domLog.debug('Found benefit button', { selector, text: text.substring(0, 30) });
-			break;
-		}
-	}
-
-	if (!targetButton) {
-		domLog.debug('No benefit button found for auto-click');
-		setTimeout(() => {
-			if (document.querySelector('.additional_benefits button') && !hasBenefitContent()) {
-				domLog.debug('Retry auto-click benefit button');
-				attemptAutoClickBenefitButton(onBenefitRefresh);
-			}
-		}, 3000);
-		return;
-	}
-
-	domLog.info('Auto-clicking benefit button to load content');
-	(targetButton as HTMLElement).click();
-
-	setTimeout(() => {
-		const closeButton = document.querySelector(closeButtonSelector);
-		if (closeButton) {
-			domLog.debug('Closing benefit dialog after load');
-			(closeButton as HTMLElement).click();
-		}
-
-		setTimeout(() => {
-			if (hasBenefitContent()) {
-				domLog.info('Benefit content loaded via auto-click');
-				onBenefitRefresh('auto-click-benefit');
-			} else {
-				domLog.warn('Benefit content not found after auto-click');
-			}
-		}, 500);
-	}, 1000);
 }

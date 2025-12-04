@@ -55,16 +55,40 @@ export abstract class BaseParser {
   }
 
   protected searchPriceInDOM(doc: Document, pattern: RegExp): string | null {
-    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null);
-    let node;
-    while ((node = walker.nextNode())) {
-      const text = node.textContent || '';
+    // 성능 최적화: 가격 관련 요소만 검색 (전체 body 순회 방지)
+    const priceContainers = doc.querySelectorAll(
+      '[class*="price"], [class*="Price"], [class*="cost"], [class*="amount"], [id*="price"], [id*="Price"]'
+    );
+
+    for (const container of priceContainers) {
+      const text = container.textContent || '';
       const match = text.match(pattern);
       if (match) {
-        parserLog.debug(`Found price via TreeWalker`, { siteName: this.siteName, price: match[0] });
+        parserLog.debug('Found price in container', { siteName: this.siteName, price: match[0] });
         return match[0];
       }
     }
+
+    // 폴백: 제한된 깊이의 TreeWalker (최대 1000 노드)
+    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null);
+    let node;
+    let nodeCount = 0;
+    const MAX_NODES = 1000;
+
+    while ((node = walker.nextNode()) && nodeCount < MAX_NODES) {
+      nodeCount++;
+      const text = node.textContent || '';
+      const match = text.match(pattern);
+      if (match) {
+        parserLog.debug('Found price via TreeWalker', { siteName: this.siteName, price: match[0], nodesScanned: nodeCount });
+        return match[0];
+      }
+    }
+
+    if (nodeCount >= MAX_NODES) {
+      parserLog.warn('TreeWalker hit node limit', { siteName: this.siteName, limit: MAX_NODES });
+    }
+
     return null;
   }
 
