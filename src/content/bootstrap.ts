@@ -3,11 +3,13 @@
  * 책임: iframe 체크 및 DOMContentLoaded 대기
  */
 
+import { bootstrapLog } from '../shared/utils/logger';
+
 export const isMainFrame = window.self === window.top;
 
 export function bootstrap(runner: () => void): void {
   if (!isMainFrame) {
-    console.debug('[ContentScript] Skipping iframe context');
+    bootstrapLog.debug('Skipping iframe context');
     return;
   }
 

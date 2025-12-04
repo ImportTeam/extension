@@ -5,6 +5,7 @@
 
 import { GMARKET_SELECTORS } from '../constants';
 import { ShippingInfo } from '../../../../shared/types/parser';
+import { parseLog } from '../../../../shared/utils/logger';
 
 // Re-export type for convenience
 export type { ShippingInfo };
@@ -46,7 +47,7 @@ export const extractShippingInfo = (doc: Document): ShippingInfo | null => {
     }
   }
 
-  console.log('[GmarketParser] 배송 정보:', { method, isStarDelivery, fee });
+  parseLog.debug('배송 정보', { method, isStarDelivery, fee });
 
   return {
     method,

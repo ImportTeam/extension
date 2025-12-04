@@ -1,4 +1,5 @@
 import { COUPANG_SELECTORS } from '../constants';
+import { parseLog, ErrorCode } from '../../../../shared/utils/logger';
 
 export const extractVariants = (doc: Document): Array<{ name: string; price: number; discount?: string }> => {
   try {
@@ -51,14 +52,16 @@ export const extractVariants = (doc: Document): Array<{ name: string; price: num
 
         if (variants.length >= 15) break;
       } catch (err) {
-        console.warn('[CoupangParser] Error parsing list item:', err);
+        parseLog.warn('Error parsing list item', { error: err });
         continue;
       }
     }
 
     return variants;
   } catch (err) {
-    console.error('[CoupangParser] Error extracting variants:', err);
+    parseLog.error(ErrorCode.PAR_E001, 'Error extracting variants', {
+      error: err instanceof Error ? err : new Error(String(err)),
+    });
     return [];
   }
 };

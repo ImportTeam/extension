@@ -1,5 +1,6 @@
 import { extractNumber } from '../../utils';
 import { COUPANG_SELECTORS } from '../constants';
+import { parseLog } from '../../../../shared/utils/logger';
 
 /**
  * 가격 유효성 검증 - 쿠팡 가격 범위 내인지 확인
@@ -32,7 +33,7 @@ export const extractPrices = (doc: Document): {
       const value = extractNumber(text);
       if (!value || !isValidCoupangPrice(value)) continue;
       
-      console.log(`[CoupangParser][Price] Found via selector "${selector}": ${value}`);
+      parseLog.debug(`Found via selector "${selector}"`, { value });
       
       // final/discount/sale 키워드를 포함한 셀렉터는 할인된 가격(최종 가격)으로 처리
       if (/final|discount|final-price|deal|sale|coupon/i.test(selector)) {
@@ -45,7 +46,7 @@ export const extractPrices = (doc: Document): {
       if (!amount) amount = value;
     } catch (e) {
       // ignore selector errors
-      console.debug(`[CoupangParser][Price] Selector ${selector} failed`, e);
+      parseLog.debug(`Selector ${selector} failed`, { error: e });
     }
   }
 
@@ -58,7 +59,7 @@ export const extractPrices = (doc: Document): {
       if (match) {
         const value = extractNumber(match[1]);
         if (value && isValidCoupangPrice(value)) {
-          console.log(`[CoupangParser][Price] Found via regex in element: ${value}`);
+          parseLog.debug('Found via regex in element', { value });
           amount = value;
           break;
         }
@@ -91,7 +92,7 @@ export const findPriceInDOM = (doc: Document): number | null => {
       if (match && match[1]) {
         const value = extractNumber(match[1]);
         if (value) {
-          console.log(`[CoupangParser][findPriceInDOM] Found price via text walker: ${value}`);
+          parseLog.debug('Found price via text walker', { value });
           return value;
         }
       }
@@ -114,13 +115,13 @@ export const findPriceByElementScan = (doc: Document): number | null => {
       if (match && match[1]) {
         const value = extractNumber(match[1]);
         if (value) {
-          console.log(`[CoupangParser][findPriceByElementScan] Found price by element scan: ${value}`);
+          parseLog.debug('Found price by element scan', { value });
           return value;
         }
       }
     }
   } catch (e) {
-    console.debug('[CoupangParser][findPriceByElementScan] error', e);
+    parseLog.debug('findPriceByElementScan error', { error: e });
   }
   return null;
 };

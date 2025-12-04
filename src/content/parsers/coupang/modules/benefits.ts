@@ -1,6 +1,7 @@
 import { COUPANG_SELECTORS } from '../constants';
 import { extractNumber, normalizeCardName, extractPercentage } from '../../utils';
 import { CARD_NAME_MAPPING } from '../../../../shared/types';
+import { parseLog } from '../../../../shared/utils/logger';
 
 interface CardBenefitDetail {
   card: string;        // 카드사명
@@ -63,7 +64,7 @@ const extractCardImages = (doc: Document): CardImageInfo[] => {
       // 중복 체크
       if (!cardImages.some(c => c.cardName === cardName)) {
         cardImages.push({ src, alt, cardName });
-        console.log('[CoupangParser] 카드 이미지 발견:', { cardName, src: src.substring(0, 80) });
+        parseLog.debug('카드 이미지 발견', { cardName, src: src.substring(0, 80) });
       }
     }
   });
@@ -124,7 +125,7 @@ const extractCardImages = (doc: Document): CardImageInfo[] => {
     }
   });
 
-  console.log('[CoupangParser] 추출된 카드 이미지 총:', cardImages.length);
+  parseLog.debug('추출된 카드 이미지 총', { count: cardImages.length });
   return cardImages;
 };
 
@@ -139,7 +140,7 @@ const extractCardBenefitsFromPopup = (doc: Document): CardBenefitDetail[] => {
   // 팝업 컨테이너 찾기
   const popup = doc.querySelector(selectors.container);
   if (!popup) {
-    console.log('[CoupangParser] 카드 혜택 팝업을 찾을 수 없음');
+    parseLog.debug('카드 혜택 팝업을 찾을 수 없음');
     return benefits;
   }
 
@@ -154,7 +155,7 @@ const extractCardBenefitsFromPopup = (doc: Document): CardBenefitDetail[] => {
       }
     } catch {
       // Cross-origin이면 접근 불가
-      console.log('[CoupangParser] iframe 접근 불가 (cross-origin)');
+      parseLog.warn('iframe 접근 불가 (cross-origin)');
     }
   }
 
@@ -290,7 +291,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
   // 1. creditCardBenefitPopup iframe에서 상세 정보 파싱 시도
   const popupBenefits = extractCardBenefitsFromPopup(doc);
   if (popupBenefits.length > 0) {
-    console.log('[CoupangParser] ✅ 팝업에서 카드 혜택 파싱:', popupBenefits.length);
+    parseLog.info('팝업에서 카드 혜택 파싱', { count: popupBenefits.length });
     benefits = popupBenefits;
   }
 
@@ -367,7 +368,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
       // 3차: 인덱스 기반 매칭 (배열 순서가 동일할 경우)
       if (!matchedImage && index < cardImages.length) {
         matchedImage = cardImages[index];
-        console.log(`[CoupangParser] 인덱스 기반 매칭: ${cardName} -> ${matchedImage.cardName}`);
+        parseLog.debug('인덱스 기반 매칭', { cardName, matchedCardName: matchedImage.cardName });
       }
       
       if (matchedImage) {
@@ -380,7 +381,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
   // 할인율 기준 내림차순 정렬
   benefits.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0));
 
-  console.log('[CoupangParser] 최종 카드 혜택:', benefits);
+  parseLog.debug('최종 카드 혜택', { benefits });
   return benefits;
 };
 

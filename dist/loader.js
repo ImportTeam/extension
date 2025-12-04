@@ -1,1 +1,1 @@
-(async()=>{const o=chrome.runtime.getURL("content.js");try{await import(o),console.log("[Loader] ✅ Content script loaded via ESM")}catch(t){console.error("[Loader] ❌ Failed to load content script:",t)}})();
+import{b as o,E as e}from"./assets/index-Dt1PdjWI.js";(async()=>{const t=chrome.runtime.getURL("content.js");try{await import(t),o.info("Content script loaded via ESM")}catch(r){o.error(e.BST_E001,"Failed to load content script",{error:r instanceof Error?r:new Error(String(r))})}})();

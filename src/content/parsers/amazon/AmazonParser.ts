@@ -6,6 +6,7 @@
 import { BaseParser } from '../base/index';
 import { ParsedProductInfo } from '../../../shared/types';
 import { AMAZON_SELECTORS } from './constants';
+import { parseLog, ErrorCode } from '../../../shared/utils/logger';
 
 export class AmazonParser extends BaseParser {
   readonly siteName = 'Amazon';
@@ -26,30 +27,30 @@ export class AmazonParser extends BaseParser {
    */
   parse(doc: Document): ParsedProductInfo | null {
     try {
-      console.log('[AmazonParser] 🔍 Parsing Amazon page...');
+      parseLog.info('🔍 Parsing Amazon page...');
 
       let amountText = this.getTextBySelectors(doc, this.selectors.amount);
 
       if (!amountText) {
-        console.log('[AmazonParser] Trying full DOM search...');
+        parseLog.debug('Trying full DOM search...');
         amountText = this.searchPriceInDOM(doc, /\$[\d,]+\.?\d*/);
       }
 
       if (!amountText) {
-        console.debug('[AmazonParser] ❌ Amount not found');
+        parseLog.debug('❌ Amount not found');
         return null;
       }
 
       const amount = this.extractNumber(amountText);
       if (!amount || !this.isValidPrice(amount)) {
-        console.debug('[AmazonParser] ❌ Invalid amount:', amount);
+        parseLog.debug('❌ Invalid amount', { amount });
         return null;
       }
 
       const currency = this.extractCurrency(amountText);
       const { title, imageUrl } = this.extractCommonInfo(doc);
 
-      console.log(`[AmazonParser] ✅ Found: ${amount} ${currency}`);
+      parseLog.info(`✅ Found: ${amount} ${currency}`);
 
       return {
         price: amount,
@@ -60,7 +61,9 @@ export class AmazonParser extends BaseParser {
         discounts: [],
       };
     } catch (error) {
-      console.error('[AmazonParser] ❌ Parse error:', error);
+      parseLog.error(ErrorCode.PAR_E001, 'Amazon parse error', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       return null;
     }
   }

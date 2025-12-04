@@ -4,6 +4,7 @@
 
 import { extractNumber } from '../../utils';
 import { ELEVEN_ST_SELECTORS } from '../constants';
+import { parseLog, ErrorCode } from '../../../../shared/utils/logger';
 
 export interface PriceInfo {
   amount: number | null;           // 현재 판매가
@@ -34,7 +35,7 @@ export const extractPrices = (doc: Document): PriceInfo => {
     const originalPriceEl = doc.querySelector(selectors.originalPrice);
     if (originalPriceEl?.textContent) {
       result.originalPrice = extractNumber(originalPriceEl.textContent);
-      console.log('[11stParser][Price] 정가:', result.originalPrice);
+      parseLog.debug('정가', { price: result.originalPrice });
     }
 
     // 2. 현재 판매가 (할인가)
@@ -43,28 +44,28 @@ export const extractPrices = (doc: Document): PriceInfo => {
     if (salePriceEl?.textContent) {
       result.discountPrice = extractNumber(salePriceEl.textContent);
       result.amount = result.discountPrice;
-      console.log('[11stParser][Price] 판매가:', result.discountPrice);
+      parseLog.debug('판매가', { price: result.discountPrice });
     }
 
     // 3. 할인율
     const discountRateEl = doc.querySelector(selectors.discountRate);
     if (discountRateEl?.textContent) {
       result.discountRate = extractNumber(discountRateEl.textContent);
-      console.log('[11stParser][Price] 할인율:', result.discountRate);
+      parseLog.debug('할인율', { rate: result.discountRate });
     }
 
     // 4. 최대할인가
     const maxDiscountPriceEl = doc.querySelector(selectors.maxDiscountPrice);
     if (maxDiscountPriceEl?.textContent) {
       result.maxDiscountPrice = extractNumber(maxDiscountPriceEl.textContent);
-      console.log('[11stParser][Price] 최대할인가:', result.maxDiscountPrice);
+      parseLog.debug('최대할인가', { price: result.maxDiscountPrice });
     }
 
     // 5. 최대할인율
     const maxDiscountRateEl = doc.querySelector(selectors.maxDiscountRate);
     if (maxDiscountRateEl?.textContent) {
       result.maxDiscountRate = extractNumber(maxDiscountRateEl.textContent);
-      console.log('[11stParser][Price] 최대할인율:', result.maxDiscountRate);
+      parseLog.debug('최대할인율', { rate: result.maxDiscountRate });
     }
 
     // amount가 없으면 다른 가격으로 대체
@@ -73,7 +74,9 @@ export const extractPrices = (doc: Document): PriceInfo => {
     }
 
   } catch (error) {
-    console.error('[11stParser][Price] 가격 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E002, '가격 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return result;
@@ -98,7 +101,7 @@ export const findPriceInDOM = (doc: Document): number | null => {
       if (match?.[1]) {
         const value = extractNumber(match[1]);
         if (value && value > 100 && value < 100_000_000) {
-          console.log('[11stParser][findPriceInDOM] 가격 발견:', value);
+          parseLog.debug('가격 발견', { value });
           return value;
         }
       }
@@ -137,12 +140,14 @@ export const extractDiscountDetails = (doc: Document): DiscountDetail[] => {
         
         if (type && amount && type !== '판매가') {
           details.push({ type, amount });
-          console.log('[11stParser][DiscountDetail]', type, amount);
+          parseLog.debug('DiscountDetail', { type, amount });
         }
       }
     });
   } catch (error) {
-    console.error('[11stParser][DiscountDetail] 오류:', error);
+    parseLog.error(ErrorCode.PAR_E002, 'DiscountDetail 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return details;

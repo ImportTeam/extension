@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ParsedProductInfo, CardBenefit } from '../types';
+import { storeLog, ErrorCode } from '../utils/logger';
 
 interface UseProductDataReturn {
   product: ParsedProductInfo | null;
@@ -21,7 +22,7 @@ export const useProductData = (): UseProductDataReturn => {
         if (result.currentProduct) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const p = result.currentProduct as any;
-          console.log('[useProductData] Loaded product:', {
+          storeLog.debug('Loaded product', {
             title: p.title?.substring(0, 50),
             imageUrl: p.imageUrl?.substring(0, 80) || 'none',
             imagesCount: p.images?.length || 0,
@@ -47,10 +48,12 @@ export const useProductData = (): UseProductDataReturn => {
           }
 
           setImageSlides(slides);
-          console.log('[useProductData] Images loaded:', slides.length);
+          storeLog.debug('Images loaded', { count: slides.length });
         }
       } catch (err) {
-        console.error('[useProductData] Error:', err);
+        storeLog.error(ErrorCode.STO_E001, 'Error loading product data', {
+          error: err instanceof Error ? err : new Error(String(err)),
+        });
       } finally {
         setLoading(false);
       }

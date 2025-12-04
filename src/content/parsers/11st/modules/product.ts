@@ -3,6 +3,7 @@
  */
 
 import { ELEVEN_ST_SELECTORS } from '../constants';
+import { parseLog, ErrorCode } from '../../../../shared/utils/logger';
 
 export interface ProductInfo {
   title: string | null;
@@ -23,7 +24,7 @@ export const extractTitle = (doc: Document): string | null => {
     const titleEl = doc.querySelector(selectors.title);
     if (titleEl?.textContent) {
       const title = titleEl.textContent.trim();
-      console.log('[11stParser][Product] 제목:', title);
+      parseLog.debug('제목 추출', { title });
       return title;
     }
 
@@ -31,11 +32,13 @@ export const extractTitle = (doc: Document): string | null => {
     const altTitleEl = doc.querySelector(selectors.titleAlt);
     if (altTitleEl?.textContent) {
       const title = altTitleEl.textContent.trim();
-      console.log('[11stParser][Product] 제목 (alt):', title);
+      parseLog.debug('제목 추출 (alt)', { title });
       return title;
     }
   } catch (error) {
-    console.error('[11stParser][Product] 제목 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E001, '제목 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return null;
@@ -49,11 +52,13 @@ export const extractSubtitle = (doc: Document): string | null => {
     const subtitleEl = doc.querySelector(ELEVEN_ST_SELECTORS.product.subtitle);
     if (subtitleEl?.textContent) {
       const subtitle = subtitleEl.textContent.trim();
-      console.log('[11stParser][Product] 부제목:', subtitle);
+      parseLog.debug('부제목 추출', { subtitle });
       return subtitle;
     }
   } catch (error) {
-    console.error('[11stParser][Product] 부제목 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E001, '부제목 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return null;
@@ -74,12 +79,14 @@ export const extractProductId = (url: string): string | null => {
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match?.[1]) {
-        console.log('[11stParser][Product] 상품ID:', match[1]);
+        parseLog.debug('상품ID 추출', { productId: match[1] });
         return match[1];
       }
     }
   } catch (error) {
-    console.error('[11stParser][Product] 상품ID 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E001, '상품ID 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return null;
@@ -96,7 +103,7 @@ export const extractProductImage = (doc: Document): string | null => {
     const mainImgEl = doc.querySelector(selectors.main) as HTMLImageElement;
     if (mainImgEl?.src) {
       const src = normalizeImageUrl(mainImgEl.src);
-      console.log('[11stParser][Image] 메인 이미지:', src);
+      parseLog.debug('메인 이미지 추출', { src });
       return src;
     }
 
@@ -104,7 +111,7 @@ export const extractProductImage = (doc: Document): string | null => {
     const altImgEl = doc.querySelector(selectors.mainAlt) as HTMLImageElement;
     if (altImgEl?.src) {
       const src = normalizeImageUrl(altImgEl.src);
-      console.log('[11stParser][Image] 메인 이미지 (alt):', src);
+      parseLog.debug('메인 이미지 추출 (alt)', { src });
       return src;
     }
 
@@ -112,11 +119,13 @@ export const extractProductImage = (doc: Document): string | null => {
     const lazyImgEl = doc.querySelector(`${selectors.main}[data-src]`) as HTMLElement;
     if (lazyImgEl?.dataset?.src) {
       const src = normalizeImageUrl(lazyImgEl.dataset.src);
-      console.log('[11stParser][Image] 메인 이미지 (lazy):', src);
+      parseLog.debug('메인 이미지 추출 (lazy)', { src });
       return src;
     }
   } catch (error) {
-    console.error('[11stParser][Image] 이미지 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E001, '이미지 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return null;
@@ -169,9 +178,11 @@ export const extractAllProductImages = (doc: Document): string[] => {
       }
     });
 
-    console.log('[11stParser][Image] 전체 이미지 수:', images.length);
+    parseLog.debug('전체 이미지 추출', { count: images.length });
   } catch (error) {
-    console.error('[11stParser][Image] 전체 이미지 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E001, '전체 이미지 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return images;
@@ -189,17 +200,19 @@ export const extractSellerInfo = (doc: Document): { seller: string | null; ratin
     const sellerEl = doc.querySelector(selectors.name);
     if (sellerEl?.textContent) {
       result.seller = sellerEl.textContent.trim();
-      console.log('[11stParser][Seller] 판매자:', result.seller);
+      parseLog.debug('판매자 추출', { seller: result.seller });
     }
 
     // 판매자 등급
     const ratingEl = doc.querySelector(selectors.rating);
     if (ratingEl?.textContent) {
       result.rating = ratingEl.textContent.trim();
-      console.log('[11stParser][Seller] 등급:', result.rating);
+      parseLog.debug('판매자 등급 추출', { rating: result.rating });
     }
   } catch (error) {
-    console.error('[11stParser][Seller] 판매자 정보 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E001, '판매자 정보 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return result;

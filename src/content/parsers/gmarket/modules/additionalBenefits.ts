@@ -6,6 +6,7 @@
 import { GMARKET_SELECTORS } from '../constants';
 import { AdditionalBenefit, BenefitDetail } from '../../../../shared/types/parser';
 import { formatBenefitDetails } from '../../utils';
+import { parseLog } from '../../../../shared/utils/logger';
 
 // Re-export types for convenience
 export type { AdditionalBenefit, BenefitDetail };
@@ -50,7 +51,7 @@ const parseBenefitItem = (item: Element): AdditionalBenefit | null => {
     }
   });
 
-  console.log('[GmarketParser] 추가 혜택:', type, titleText);
+  parseLog.debug('추가 혜택', { type, title: titleText });
 
   return {
     type,
@@ -63,7 +64,7 @@ const parseBenefitItem = (item: Element): AdditionalBenefit | null => {
  * 모든 추가 혜택 추출
  */
 export const extractAdditionalBenefits = (doc: Document): AdditionalBenefit[] => {
-  console.log('[GmarketParser] 추가 혜택 추출 시작...');
+  parseLog.debug('추가 혜택 추출 시작...');
 
   const benefits: AdditionalBenefit[] = [];
   const selectors = GMARKET_SELECTORS.additionalBenefits;
@@ -78,7 +79,7 @@ export const extractAdditionalBenefits = (doc: Document): AdditionalBenefit[] =>
     }
   });
 
-  console.log('[GmarketParser] 총 추가 혜택:', benefits.length);
+  parseLog.debug('총 추가 혜택', { count: benefits.length });
   return benefits;
 };
 

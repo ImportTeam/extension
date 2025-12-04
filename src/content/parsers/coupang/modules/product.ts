@@ -1,4 +1,5 @@
 import { COUPANG_SELECTORS } from '../constants';
+import { parseLog, ErrorCode } from '../../../../shared/utils/logger';
 
 export const extractTitle = (doc: Document): string | null => {
   for (const selector of COUPANG_SELECTORS.title) {
@@ -48,7 +49,9 @@ export const extractProductImage = (doc: Document): string | null => {
 
     return null;
   } catch (err) {
-    console.error('[CoupangParser] Error extracting main image:', err);
+    parseLog.error(ErrorCode.PAR_E001, 'Error extracting main image', {
+      error: err instanceof Error ? err : new Error(String(err)),
+    });
     return null;
   }
 };
@@ -91,7 +94,9 @@ export const extractAllProductImages = (doc: Document): string[] => {
 
     return images;
   } catch (err) {
-    console.error('[CoupangParser] Error extracting all images:', err);
+    parseLog.error(ErrorCode.PAR_E001, 'Error extracting all images', {
+      error: err instanceof Error ? err : new Error(String(err)),
+    });
     return [];
   }
 };

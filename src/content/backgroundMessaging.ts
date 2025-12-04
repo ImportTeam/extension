@@ -4,6 +4,7 @@
  */
 
 import { ParsedProductInfo } from '../shared/types';
+import { networkLog } from '../shared/utils/logger';
 
 export type MessageSource = 'initial' | 'benefit-click' | 'auto-click-benefit' | `dynamic-${string}`;
 
@@ -27,7 +28,7 @@ export function saveProductData(
     },
     (response: SaveResponse) => {
       if (response?.success) {
-        console.log(`[ContentScript] ✅ Product data saved (source: ${source})`);
+        networkLog.debug(`Product data saved`, { source, messageType });
       }
     }
   );

@@ -12,6 +12,7 @@ import * as Benefits from './modules/benefits';
 import * as Variants from './modules/variants';
 import * as Shipping from './modules/shipping';
 import { normalizeAndSortCardBenefits, deduplicateCardBenefits } from '../cardBenefitCalculator';
+import { parseLog, ErrorCode } from '../../../shared/utils/logger';
 
 export class CoupangParser extends BaseParser {
   readonly siteName = 'Coupang';
@@ -25,7 +26,7 @@ export class CoupangParser extends BaseParser {
    */
   static isCheckoutPage(url: string): boolean {
     const isCheckout = /coupang\.com\/vp\//.test(url) || /coupang\.com\/n\//.test(url) || /coupang\.com\/products\//.test(url);
-    console.log(`[CoupangParser] isCheckoutPage("${url}") = ${isCheckout}`);
+    parseLog.debug(`isCheckoutPage("${url}") = ${isCheckout}`);
     return isCheckout;
   }
 
@@ -34,7 +35,7 @@ export class CoupangParser extends BaseParser {
    */
   parse(doc: Document): ParsedProductInfo | null {
     try {
-      console.log('[CoupangParser] 🔍 Parsing Coupang page...');
+      parseLog.info('🔍 Parsing Coupang page...');
 
       // 1. 상품명 & 이미지
       const title = Product.extractTitle(doc);
@@ -55,7 +56,7 @@ export class CoupangParser extends BaseParser {
       }
 
       if (!amount) {
-        console.debug('[CoupangParser] ❌ No price found');
+        parseLog.debug('❌ No price found');
         return null;
       }
 
@@ -71,7 +72,7 @@ export class CoupangParser extends BaseParser {
       const shippingInfo = Shipping.extractShippingInfo(doc);
       const variants = Variants.extractVariants(doc);
 
-      console.log(`[CoupangParser] ✅ Found: ${amount} KRW, Cards: ${cardBenefits.length}`);
+      parseLog.info(`✅ Found: ${amount} KRW, Cards: ${cardBenefits.length}`);
 
       return {
         price: amount,
@@ -90,7 +91,9 @@ export class CoupangParser extends BaseParser {
         discounts: [],
       };
     } catch (error) {
-      console.error('[CoupangParser] ❌ Parse error:', error);
+      parseLog.error(ErrorCode.PAR_E001, 'Coupang parse error', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       return null;
     }
   }

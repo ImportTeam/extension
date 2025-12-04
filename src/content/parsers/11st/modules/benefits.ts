@@ -4,6 +4,7 @@
 
 import { extractNumber } from '../../utils';
 import { ELEVEN_ST_SELECTORS } from '../constants';
+import { parseLog, ErrorCode } from '../../../../shared/utils/logger';
 
 export interface PointInfo {
   amount: number;        // 포인트 금액
@@ -74,11 +75,15 @@ export const extractBenefits = (doc: Document): BenefitsInfo => {
     // 쿠폰 추출
     result.coupons = extractCoupons(doc);
 
-    console.log('[11stParser][Benefits] 총 포인트:', result.totalPointAmount);
-    console.log('[11stParser][Benefits] 총 카드혜택:', result.totalCardBenefitAmount);
-    console.log('[11stParser][Benefits] 최대 무이자:', result.maxInstallmentMonths, '개월');
+    parseLog.debug('혜택 정보', {
+      totalPointAmount: result.totalPointAmount,
+      totalCardBenefitAmount: result.totalCardBenefitAmount,
+      maxInstallmentMonths: result.maxInstallmentMonths,
+    });
   } catch (error) {
-    console.error('[11stParser][Benefits] 혜택 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E003, '혜택 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return result;
@@ -106,7 +111,7 @@ export const extractPoints = (doc: Document): PointInfo[] => {
             type: '최대적립포인트',
             description: '최대 적립 가능 포인트',
           });
-          console.log('[11stParser][Points] 최대 적립 포인트:', amount);
+          parseLog.debug('최대 적립 포인트', { amount });
         }
       }
 
@@ -123,7 +128,7 @@ export const extractPoints = (doc: Document): PointInfo[] => {
               type: '11pay포인트',
               description: '11pay 결제 시 적립',
             });
-            console.log('[11stParser][Points] 11pay 포인트 총액:', amount);
+            parseLog.debug('11pay 포인트 총액', { amount });
           }
         }
 
@@ -144,7 +149,7 @@ export const extractPoints = (doc: Document): PointInfo[] => {
                 type,
                 description: type,
               });
-              console.log('[11stParser][Points]', type, ':', amount);
+              parseLog.debug('포인트 항목', { type, amount });
             }
           }
         });
@@ -162,12 +167,14 @@ export const extractPoints = (doc: Document): PointInfo[] => {
             type: '기본적립',
             description: '기본 적립 포인트',
           });
-          console.log('[11stParser][Points] 기본 포인트:', amount);
+          parseLog.debug('기본 포인트', { amount });
         }
       }
     }
   } catch (error) {
-    console.error('[11stParser][Points] 포인트 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E003, '포인트 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return points;
@@ -196,12 +203,12 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
     for (const sel of containerSelectors) {
       container = doc.querySelector(sel);
       if (container) {
-        console.log('[11stParser][CardBenefit] 컨테이너 찾음:', sel);
+        parseLog.debug('카드 혜택 컨테이너 찾음', { selector: sel });
         break;
       }
     }
     
-    console.log('[11stParser][CardBenefit] other_benefits 컨테이너:', container ? '찾음' : '없음');
+    parseLog.debug('other_benefits 컨테이너', { found: !!container });
     
     if (container) {
       // .benefit 블록 찾기 - 다양한 셀렉터 시도
@@ -218,24 +225,21 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
       for (const sel of benefitSelectors) {
         benefitBlocks = container.querySelectorAll(sel);
         if (benefitBlocks.length > 0) {
-          console.log('[11stParser][CardBenefit] benefit 찾음:', sel, benefitBlocks.length);
+          parseLog.debug('benefit 블록 찾음', { selector: sel, count: benefitBlocks.length });
           break;
         }
       }
       
-      console.log('[11stParser][CardBenefit] benefit 블록 수:', benefitBlocks?.length || 0);
+      parseLog.debug('benefit 블록 수', { count: benefitBlocks?.length || 0 });
       
       // benefit 블록이 없으면 dl 내부 직접 확인
       if (!benefitBlocks || benefitBlocks.length === 0) {
         const dlElement = container.querySelector('dl');
-        console.log('[11stParser][CardBenefit] dl 요소:', dlElement ? '찾음' : '없음');
+        parseLog.debug('dl 요소', { found: !!dlElement });
         if (dlElement) {
           // dl 직접 children 확인
           const children = dlElement.children;
-          console.log('[11stParser][CardBenefit] dl children 수:', children.length);
-          for (let i = 0; i < Math.min(children.length, 3); i++) {
-            console.log(`[11stParser][CardBenefit] dl child[${i}]:`, children[i].tagName, children[i].className);
-          }
+          parseLog.debug('dl children', { count: children.length });
         }
       }
       
@@ -244,7 +248,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
           const titleEl = block.querySelector('dt');
           const mainTitle = titleEl?.textContent?.trim() || '';
           
-          console.log('[11stParser][CardBenefit] 메인 타이틀:', mainTitle);
+          parseLog.debug('메인 타이틀', { mainTitle });
           
           if (!mainTitle) return;
           
@@ -252,7 +256,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
           const mainParsed = parseCardDiscountTitle(mainTitle);
           if (mainParsed && mainParsed.benefitAmount > 0) {
             benefits.push(mainParsed);
-            console.log('[11stParser][CardBenefit] 메인 혜택 추가:', mainParsed);
+            parseLog.debug('메인 혜택 추가', { mainParsed });
           }
           
           // dd 안의 서브타이틀과 리스트 항목 추출
@@ -260,12 +264,12 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
           if (dd) {
             // 서브타이틀들 (.tit_sub)과 그 뒤의 ul 매칭
             const subTitles = dd.querySelectorAll('.tit_sub');
-            console.log('[11stParser][CardBenefit] 서브타이틀 수:', subTitles.length);
+            parseLog.debug('서브타이틀 수', { count: subTitles.length });
             
             subTitles.forEach((subTitleEl: Element) => {
               const subTitle = subTitleEl.textContent?.trim() || '';
               
-              console.log('[11stParser][CardBenefit] 서브타이틀:', subTitle);
+              parseLog.debug('서브타이틀', { subTitle });
               
               // '적립 안내사항', '포인트 적립제외' 등은 스킵
               if (subTitle.includes('안내사항') || subTitle.includes('적립제외')) {
@@ -280,11 +284,11 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
               
               if (nextEl && nextEl.tagName === 'UL') {
                 const items = nextEl.querySelectorAll('li');
-                console.log('[11stParser][CardBenefit] 리스트 아이템 수:', items.length);
+                parseLog.debug('리스트 아이템 수', { count: items.length });
                 
                 items.forEach((li: Element) => {
                   const itemText = li.textContent?.trim() || '';
-                  console.log('[11stParser][CardBenefit] 아이템:', itemText);
+                  parseLog.debug('아이템', { itemText });
                   
                   const subBenefit = parseCardBenefitDetailItem(subTitle, itemText);
                   if (subBenefit) {
@@ -296,7 +300,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
                     );
                     if (!isDuplicate) {
                       benefits.push(subBenefit);
-                      console.log('[11stParser][CardBenefit] 서브 혜택 추가:', subBenefit);
+                      parseLog.debug('서브 혜택 추가', { subBenefit });
                     }
                   }
                 });
@@ -306,7 +310,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
         });
       }
     } else {
-      console.log('[11stParser][CardBenefit] ⚠️ other_benefits 컨테이너를 찾을 수 없음');
+      parseLog.warn('other_benefits 컨테이너를 찾을 수 없음');
     }
 
     // 포인트 적립 레이어에서도 카드 혜택 찾기
@@ -336,12 +340,11 @@ export const extractCardBenefits = (doc: Document): CardBenefitInfo[] => {
       });
     }
 
-    console.log('[11stParser][CardBenefit] 추출된 카드 혜택:', benefits.length);
-    benefits.forEach((b, i) => {
-      console.log(`  [${i + 1}] ${b.cardName}: ${b.benefitAmount}${b.benefitType === '적립' ? '%' : b.benefitType === '할인' ? '원' : ''} ${b.benefitType}`);
-    });
+    parseLog.info('추출된 카드 혜택', { count: benefits.length, benefits });
   } catch (error) {
-    console.error('[11stParser][CardBenefit] 카드 혜택 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E003, '카드 혜택 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return benefits;
@@ -508,7 +511,7 @@ export const extractInstallments = (doc: Document): InstallmentInfo[] => {
         });
       });
       
-      console.log('[11stParser][Installment] card_box에서 추출:', installments.length);
+      parseLog.debug('card_box에서 할부 추출', { count: installments.length });
     }
 
     // DOM에서 직접 텍스트 패턴 검색 (레이어 팝업이 열리지 않은 경우)
@@ -540,9 +543,11 @@ export const extractInstallments = (doc: Document): InstallmentInfo[] => {
       });
     }
 
-    console.log('[11stParser][Installment] 총 무이자 할부 카드 수:', installments.length);
+    parseLog.info('총 무이자 할부 카드', { count: installments.length });
   } catch (error) {
-    console.error('[11stParser][Installment] 무이자 할부 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E003, '무이자 할부 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return installments;
@@ -665,7 +670,7 @@ export const extractCoupons = (doc: Document): CouponInfo[] => {
       const coupon = parseCouponText(text);
       if (coupon) {
         coupons.push(coupon);
-        console.log('[11stParser][Coupon]', coupon);
+        parseLog.debug('쿠폰 추출', { coupon });
       }
     }
 
@@ -694,7 +699,9 @@ export const extractCoupons = (doc: Document): CouponInfo[] => {
       }
     });
   } catch (error) {
-    console.error('[11stParser][Coupon] 쿠폰 추출 오류:', error);
+    parseLog.error(ErrorCode.PAR_E003, '쿠폰 추출 오류', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   return coupons;

@@ -4,6 +4,7 @@
  */
 
 import { GMARKET_SELECTORS } from '../constants';
+import { parseLog } from '../../../../shared/utils/logger';
 
 /**
  * 상품명 추출
@@ -12,11 +13,11 @@ export const extractTitle = (doc: Document): string | null => {
   const titleEl = doc.querySelector(GMARKET_SELECTORS.product.title);
   if (titleEl?.textContent) {
     const title = titleEl.textContent.trim();
-    console.log('[GmarketParser] 상품명:', title);
+    parseLog.debug('상품명', { title });
     return title;
   }
 
-  console.warn('[GmarketParser] 상품명을 찾을 수 없음');
+  parseLog.warn('상품명을 찾을 수 없음');
   return null;
 };
 
@@ -34,7 +35,7 @@ export const extractProductImage = (doc: Document): string | null => {
     
     // 600px 이미지 우선
     if (src.includes('/still/600')) {
-      console.log('[GmarketParser] 메인 이미지 (600px):', src);
+      parseLog.debug('메인 이미지 (600px)', { src });
       return src;
     }
   }
@@ -45,7 +46,7 @@ export const extractProductImage = (doc: Document): string | null => {
     const src = imgEl.src;
     
     if (src.includes('/still/')) {
-      console.log('[GmarketParser] 메인 이미지:', src);
+      parseLog.debug('메인 이미지', { src });
       return src;
     }
   }
@@ -53,11 +54,11 @@ export const extractProductImage = (doc: Document): string | null => {
   // 3. 대체 선택자
   const altImage = doc.querySelector(GMARKET_SELECTORS.product.mainImage) as HTMLImageElement;
   if (altImage?.src) {
-    console.log('[GmarketParser] 대체 이미지:', altImage.src);
+    parseLog.debug('대체 이미지', { src: altImage.src });
     return altImage.src;
   }
 
-  console.warn('[GmarketParser] 상품 이미지를 찾을 수 없음');
+  parseLog.warn('상품 이미지를 찾을 수 없음');
   return null;
 };
 
@@ -83,7 +84,7 @@ export const extractAllProductImages = (doc: Document): string[] => {
     }
   });
 
-  console.log('[GmarketParser] 총 이미지:', images.length);
+  parseLog.debug('총 이미지', { count: images.length });
   return images;
 };
 

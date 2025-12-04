@@ -13,16 +13,19 @@ import {
   LogLevel,
   LogEnvironment,
   LogDomain,
-  ErrorCode,
   ERROR_MESSAGES,
   LOG_LEVEL_NAMES,
   LOG_LEVEL_COLORS,
   LOG_LEVEL_EMOJI,
   DEFAULT_CONFIG,
-  type LoggerConfig,
-  type LogEntry,
-  type SourceLocation,
-  type FormattedLogEntry,
+  type ErrorCodeType,
+} from './constants';
+
+import type {
+  LoggerConfig,
+  LogEntry,
+  SourceLocation,
+  FormattedLogEntry,
 } from './types';
 
 // ─────────────────────────────────────────────────────────────
@@ -118,7 +121,7 @@ class Logger {
     domain: LogDomain,
     message: string,
     options: {
-      code?: ErrorCode;
+      code?: ErrorCodeType;
       data?: unknown;
       error?: Error;
     } = {}
@@ -290,7 +293,7 @@ class Logger {
    */
   public error(
     domain: LogDomain,
-    code: ErrorCode,
+    code: ErrorCodeType,
     message?: string,
     options?: { data?: unknown; error?: Error }
   ): void {
@@ -309,7 +312,7 @@ class Logger {
    */
   public fatal(
     domain: LogDomain,
-    code: ErrorCode,
+    code: ErrorCodeType,
     message?: string,
     options?: { data?: unknown; error?: Error }
   ): void {
@@ -334,13 +337,15 @@ class Logger {
     let logs = [...this.storedLogs];
 
     if (filter?.level !== undefined) {
-      logs = logs.filter((l) => l.level >= filter.level!);
+      const minLevel = filter.level;
+      logs = logs.filter((l) => l.level >= minLevel);
     }
     if (filter?.domain) {
       logs = logs.filter((l) => l.domain === filter.domain);
     }
-    if (filter?.since) {
-      logs = logs.filter((l) => l.timestamp >= filter.since!);
+    if (filter?.since !== undefined) {
+      const sinceTime = filter.since;
+      logs = logs.filter((l) => l.timestamp >= sinceTime);
     }
 
     return logs;

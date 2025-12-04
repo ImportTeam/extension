@@ -4,6 +4,7 @@
  */
 
 import { GMARKET_SELECTORS } from '../constants';
+import { parseLog } from '../../../../shared/utils/logger';
 
 interface CardBenefitDetail {
   card: string;
@@ -31,7 +32,7 @@ export const extractPartnerCards = (doc: Document): CardBenefitDetail[] => {
   // 제휴카드 컨테이너 찾기
   const container = doc.querySelector(selectors.container);
   if (!container) {
-    console.log('[GmarketParser] 제휴카드 컨테이너를 찾을 수 없음');
+    parseLog.debug('제휴카드 컨테이너를 찾을 수 없음');
     return benefits;
   }
 
@@ -63,7 +64,7 @@ export const extractPartnerCards = (doc: Document): CardBenefitDetail[] => {
         imageUrl: src,
       });
 
-      console.log('[GmarketParser] 제휴카드:', cardName, src);
+      parseLog.debug('제휴카드', { cardName, src });
     }
   });
 
@@ -103,7 +104,7 @@ export const extractPaymentDiscounts = (doc: Document): PaymentDiscount[] => {
         discountPrice,
       });
 
-      console.log('[GmarketParser] 결제 할인:', title, description);
+      parseLog.debug('결제 할인', { title, description });
     }
   });
 
@@ -115,7 +116,7 @@ export const extractPaymentDiscounts = (doc: Document): PaymentDiscount[] => {
  * 제휴카드 + 결제 할인 정보 통합
  */
 export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
-  console.log('[GmarketParser] 카드 혜택 추출 시작...');
+  parseLog.debug('카드 혜택 추출 시작...');
 
   const benefits: CardBenefitDetail[] = [];
 
@@ -175,6 +176,6 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
   // 할인율 기준 내림차순 정렬
   benefits.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0));
 
-  console.log('[GmarketParser] 최종 카드 혜택:', benefits);
+  parseLog.debug('최종 카드 혜택', { count: benefits.length, benefits });
   return benefits;
 };

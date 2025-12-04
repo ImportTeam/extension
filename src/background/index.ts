@@ -9,7 +9,9 @@
  * 5. 가격 비교 API 호출
  */
 
-console.log('[Background] 🟢 Service Worker initialized');
+import { extLog, networkLog, storeLog, ErrorCode } from '../shared/utils/logger';
+
+extLog.info('🟢 Service Worker initialized');
 
 // 가격 비교 서버 URL
 const COMPARISON_SERVER_URL = 'http://localhost:8000';
@@ -86,7 +88,7 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void
   ) => {
-    console.log('[Background] 📨 Message received', {
+    networkLog.info('📨 Message received', {
       type: message.type,
       senderUrl: sender.url,
       senderTab: sender.tab?.id,
@@ -98,7 +100,7 @@ chrome.runtime.onMessage.addListener(
         data: ProductData;
         url: string;
         timestamp: number;
-      };   console.log('[Background] 💾 Saving product data:', {
+      };   storeLog.info('💾 Saving product data', {
           amount: data.amount,
           currency: data.currency,
           title: data.title?.substring(0, 50) + '...',
@@ -120,8 +122,8 @@ chrome.runtime.onMessage.addListener(
             lastUpdated: timestamp,
           },
           () => {
-            console.log('[Background] ✅ Data saved to chrome.storage.local');
-            console.log('[Background] 📊 Stored product:', {
+            storeLog.info('✅ Data saved to chrome.storage.local');
+            storeLog.debug('📊 Stored product', {
               amount: productData.amount,
               currency: productData.currency,
               title: productData.title?.substring(0, 50) + '...',
@@ -146,11 +148,11 @@ chrome.runtime.onMessage.addListener(
       }
 
       if (message.type === 'GET_PRODUCT_DATA') {
-        console.log('[Background] 🔍 GET_PRODUCT_DATA request');
+        storeLog.debug('🔍 GET_PRODUCT_DATA request');
         chrome.storage.local.get(['currentProduct'], (result) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const currentProduct = result.currentProduct as any;
-          console.log('[Background] 📦 Retrieved product data:', {
+          storeLog.debug('📦 Retrieved product data', {
             exists: !!currentProduct,
             amount: currentProduct?.amount,
             title: currentProduct?.title?.substring(0, 50) + '...',
@@ -165,7 +167,7 @@ chrome.runtime.onMessage.addListener(
       }
 
       if (message.type === 'OPEN_AUTO_POPUP') {
-        console.log('[Background] 🎪 Opening Auto Popup (SubPopup window)');
+        extLog.info('🎪 Opening Auto Popup (SubPopup window)');
         chrome.windows.create({
           url: chrome.runtime.getURL('src/subpopup/index.html?auto=true'),
           type: 'popup',
@@ -173,13 +175,15 @@ chrome.runtime.onMessage.addListener(
           height: 300,
         }, (window) => {
           if (chrome.runtime.lastError) {
-            console.error('[Background] ❌ Failed to open Auto Popup:', chrome.runtime.lastError);
+            extLog.error(ErrorCode.EXT_E002, 'Failed to open Auto Popup', {
+              error: new Error(chrome.runtime.lastError.message || 'Unknown error'),
+            });
             sendResponse({
               success: false,
               error: chrome.runtime.lastError.message,
             });
           } else {
-            console.log('[Background] ✅ Auto Popup window created:', {
+            extLog.info('✅ Auto Popup window created', {
               windowId: window?.id,
               width: window?.width,
               height: window?.height,
@@ -198,14 +202,14 @@ chrome.runtime.onMessage.addListener(
       if (message.type === 'COMPARE_PRICES') {
         const { query, providers: targetProviders } = message as unknown as PriceComparisonMessage;
         
-        console.log('[Background] 💰 Price comparison request:', {
+        networkLog.info('💰 Price comparison request', {
           query,
           providers: targetProviders || 'all',
         });
 
         fetchPriceComparison(query, targetProviders)
           .then((result) => {
-            console.log('[Background] ✅ Price comparison completed:', {
+            networkLog.info('✅ Price comparison completed', {
               success: result.success,
               resultCount: result.results.length,
               totalDuration: result.totalDuration,
@@ -217,7 +221,9 @@ chrome.runtime.onMessage.addListener(
             });
           })
           .catch((error) => {
-            console.error('[Background] ❌ Price comparison failed:', error);
+            networkLog.error(ErrorCode.NET_E002, 'Price comparison failed', {
+              error: error instanceof Error ? error : new Error(String(error)),
+            });
             sendResponse({
               success: false,
               error: error instanceof Error ? error.message : '가격 비교 실패',
@@ -229,19 +235,21 @@ chrome.runtime.onMessage.addListener(
 
       // 가격 비교 서버 상태 확인
       if (message.type === 'CHECK_COMPARISON_SERVER') {
-        console.log('[Background] 🔍 Checking comparison server status');
+        networkLog.debug('🔍 Checking comparison server status');
         
         fetch(`${COMPARISON_SERVER_URL}/api/health`)
           .then((response) => response.json())
           .then((data) => {
-            console.log('[Background] ✅ Comparison server is healthy:', data);
+            networkLog.info('✅ Comparison server is healthy', data);
             sendResponse({
               success: true,
               data,
             });
           })
           .catch((error) => {
-            console.error('[Background] ❌ Comparison server is down:', error);
+            networkLog.error(ErrorCode.NET_E001, 'Comparison server is down', {
+              error: error instanceof Error ? error : new Error(String(error)),
+            });
             sendResponse({
               success: false,
               error: '가격 비교 서버에 연결할 수 없습니다',
@@ -254,7 +262,7 @@ chrome.runtime.onMessage.addListener(
       if (message.type === 'UPDATE_PRODUCT_DATA') {
         const { data, timestamp, source } = message as unknown as { data: ProductData; timestamp: number; source: string };
 
-        console.log('[Background] 🔄 Updating product data (dynamic content):', {
+        storeLog.info('🔄 Updating product data (dynamic content)', {
           amount: data.amount,
           currency: data.currency,
           title: data.title?.substring(0, 50) + '...',
@@ -283,7 +291,7 @@ chrome.runtime.onMessage.addListener(
               lastUpdated: timestamp,
             },
             () => {
-              console.log('[Background] ✅ Product data updated:', {
+              storeLog.info('✅ Product data updated', {
                 amount: mergedData.amount,
                 cardBenefits: mergedData.cardBenefits?.length || 0,
                 hasCashback: !!mergedData.cashback,
@@ -304,13 +312,15 @@ chrome.runtime.onMessage.addListener(
         return true;
       }
 
-      console.warn('[Background] ⚠️ Unknown message type:', message.type);
+      networkLog.warn('⚠️ Unknown message type', { type: message.type });
       sendResponse({
         success: false,
         error: 'Unknown message type',
       });
     } catch (error) {
-      console.error('[Background] ❌ Error:', error);
+      networkLog.error(ErrorCode.NET_E001, 'Message handling error', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       sendResponse({
         success: false,
         error: String(error),

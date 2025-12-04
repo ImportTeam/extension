@@ -10,6 +10,7 @@ import * as Product from './modules/product';
 import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
 import { formatCardBenefits } from './helpers/formatCardBenefits';
+import { parseLog, ErrorCode } from '../../../shared/utils/logger';
 
 export class ElevenStreetParser extends BaseParser {
   readonly siteName = ELEVEN_ST_CONSTANTS.siteName;
@@ -35,7 +36,7 @@ export class ElevenStreetParser extends BaseParser {
    */
   static isProductPage(url: string): boolean {
     const isProduct = ELEVEN_ST_URL_PATTERNS.some(pattern => pattern.test(url));
-    console.log(`[ElevenStreetParser] isProductPage("${url}") = ${isProduct}`);
+    parseLog.debug(`isProductPage("${url}") = ${isProduct}`);
     return isProduct;
   }
 
@@ -51,7 +52,7 @@ export class ElevenStreetParser extends BaseParser {
    */
   parse(doc: Document): ParsedProductInfo | null {
     try {
-      console.log('[ElevenStreetParser] 🔍 Parsing 11번가 page...');
+      parseLog.info('🔍 Parsing 11번가 page...');
 
       // 1. 상품명 & 이미지
       const title = Product.extractTitle(doc);
@@ -71,7 +72,7 @@ export class ElevenStreetParser extends BaseParser {
       }
 
       if (!amount) {
-        console.debug('[ElevenStreetParser] ❌ No price found');
+        parseLog.debug('❌ No price found');
         return null;
       }
 
@@ -104,11 +105,14 @@ export class ElevenStreetParser extends BaseParser {
         });
       });
 
-      console.log(`[ElevenStreetParser] ✅ Found: ${amount.toLocaleString()} ${ELEVEN_ST_CONSTANTS.currency}`);
-      console.log(`[ElevenStreetParser] 📌 Title: ${title}`);
-      console.log(`[ElevenStreetParser] 🎁 총 포인트: ${totalPointAmount.toLocaleString()}P`);
-      console.log(`[ElevenStreetParser] 💳 카드 혜택 수: ${cardBenefits.length}`);
-      console.log(`[ElevenStreetParser] 🏦 무이자 할부 카드 수: ${installments.length}, 최대 ${maxInstallmentMonths}개월`);
+      parseLog.info(`✅ Found: ${amount.toLocaleString()} ${ELEVEN_ST_CONSTANTS.currency}`);
+      parseLog.debug('파싱 결과', {
+        title,
+        totalPointAmount,
+        cardBenefitsCount: cardBenefits.length,
+        installmentsCount: installments.length,
+        maxInstallmentMonths,
+      });
 
       return {
         price: amount,
@@ -138,7 +142,9 @@ export class ElevenStreetParser extends BaseParser {
         },
       };
     } catch (error) {
-      console.error('[ElevenStreetParser] ❌ Parse error:', error);
+      parseLog.error(ErrorCode.PAR_E001, '11st parse error', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       return null;
     }
   }

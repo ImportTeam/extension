@@ -3,6 +3,8 @@
  * 책임: DOM 변경 감지 및 재파싱 트리거
  */
 
+import { domLog } from '../shared/utils/logger';
+
 export type ReparseCallback = (source: string) => boolean;
 
 export function setupDynamicContentObserver(onReparse: ReparseCallback): void {
@@ -41,11 +43,11 @@ export function setupDynamicContentObserver(onReparse: ReparseCallback): void {
     }
 
     const reason = hasNewIframe ? 'iframe' : 'benefit-content';
-    console.log(`[ContentScript] 🔄 Dynamic content detected (${reason})`);
+    domLog.info(`Dynamic content detected`, { reason });
 
     setTimeout(() => {
       if (!onReparse(`dynamic-${reason}`)) {
-        console.warn('[ContentScript] ❌ Dynamic reparse produced no result');
+        domLog.warn('Dynamic reparse produced no result');
       }
     }, 500);
 

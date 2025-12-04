@@ -4,6 +4,7 @@
  */
 
 import { ParsedProductInfo } from '../../../shared/types';
+import { parserLog, ErrorCode } from '../../../shared/utils/logger';
 
 export abstract class BaseParser {
   abstract readonly siteName: string;
@@ -40,7 +41,10 @@ export abstract class BaseParser {
         const text = this.getTextBySelector(doc, selector);
         if (text) return text;
       } catch (err) {
-        console.debug(`[${this.siteName}] Selector error: ${selector}`, err);
+        parserLog.error(ErrorCode.PAR_E004, `Selector error: ${selector}`, {
+          data: { siteName: this.siteName, selector },
+          error: err instanceof Error ? err : undefined,
+        });
       }
     }
     return null;
@@ -57,7 +61,7 @@ export abstract class BaseParser {
       const text = node.textContent || '';
       const match = text.match(pattern);
       if (match) {
-        console.log(`[${this.siteName}] Found price via TreeWalker: "${match[0]}"`);
+        parserLog.debug(`Found price via TreeWalker`, { siteName: this.siteName, price: match[0] });
         return match[0];
       }
     }

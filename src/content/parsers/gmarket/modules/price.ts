@@ -5,6 +5,7 @@
 
 import { GMARKET_SELECTORS } from '../constants';
 import { extractNumber } from '../../utils';
+import { parseLog } from '../../../../shared/utils/logger';
 
 interface PriceResult {
   amount: number | null;           // 최종 결제 금액
@@ -36,7 +37,7 @@ const extractDiscountPrice = (doc: Document): number | null => {
   if (discountPriceEl?.textContent) {
     const price = parsePrice(discountPriceEl.textContent);
     if (price) {
-      console.log('[GmarketParser] 결제할인가:', price);
+      parseLog.debug('결제할인가', { price });
       return price;
     }
   }
@@ -46,7 +47,7 @@ const extractDiscountPrice = (doc: Document): number | null => {
   if (altEl?.textContent) {
     const price = parsePrice(altEl.textContent);
     if (price) {
-      console.log('[GmarketParser] 결제할인가 (alt):', price);
+      parseLog.debug('결제할인가 (alt)', { price });
       return price;
     }
   }
@@ -65,7 +66,7 @@ const extractSalePrice = (doc: Document): number | null => {
   if (salePriceEl?.textContent) {
     const price = parsePrice(salePriceEl.textContent);
     if (price) {
-      console.log('[GmarketParser] 판매가:', price);
+      parseLog.debug('판매가', { price });
       return price;
     }
   }
@@ -83,7 +84,7 @@ const extractOriginalPrice = (doc: Document): number | null => {
   if (originalEl?.textContent) {
     const price = parsePrice(originalEl.textContent);
     if (price) {
-      console.log('[GmarketParser] 정가:', price);
+      parseLog.debug('정가', { price });
       return price;
     }
   }
@@ -102,7 +103,7 @@ const extractDiscountRate = (doc: Document): number | null => {
     const match = rateEl.textContent.match(/(\d+)\s*%/);
     if (match) {
       const rate = parseInt(match[1], 10);
-      console.log('[GmarketParser] 할인율:', rate, '%');
+      parseLog.debug('할인율', { rate });
       return rate;
     }
   }
@@ -114,7 +115,7 @@ const extractDiscountRate = (doc: Document): number | null => {
  * 전체 가격 정보 추출
  */
 export const extractPrices = (doc: Document): PriceResult => {
-  console.log('[GmarketParser] 가격 정보 추출 시작...');
+  parseLog.debug('가격 정보 추출 시작...');
 
   const originalPrice = extractOriginalPrice(doc);
   const salePrice = extractSalePrice(doc);
@@ -124,7 +125,7 @@ export const extractPrices = (doc: Document): PriceResult => {
   // 최종 금액 결정: 결제할인가 > 판매가 > 정가
   const amount = discountPrice || salePrice || originalPrice;
 
-  console.log('[GmarketParser] 가격 결과:', {
+  parseLog.debug('가격 결과', {
     amount,
     originalPrice,
     salePrice,
@@ -158,7 +159,7 @@ export const findPriceInDOM = (doc: Document): number | null => {
       if (match) {
         const price = extractNumber(match[1]);
         if (price && price >= 1000) {
-          console.log('[GmarketParser] DOM 스캔 가격:', price);
+          parseLog.debug('DOM 스캔 가격', { price });
           return price;
         }
       }

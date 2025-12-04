@@ -6,6 +6,7 @@
 import { BaseParser } from '../base/index';
 import { ParsedProductInfo } from '../../../shared/types';
 import { EBAY_SELECTORS } from './constants';
+import { parseLog, ErrorCode } from '../../../shared/utils/logger';
 
 export class EbayParser extends BaseParser {
   readonly siteName = 'eBay';
@@ -26,30 +27,30 @@ export class EbayParser extends BaseParser {
    */
   parse(doc: Document): ParsedProductInfo | null {
     try {
-      console.log('[EbayParser] 🔍 Parsing eBay page...');
+      parseLog.info('🔍 Parsing eBay page...');
 
       let amountText = this.getTextBySelectors(doc, this.selectors.amount);
 
       if (!amountText) {
-        console.log('[EbayParser] Trying full DOM search...');
+        parseLog.debug('Trying full DOM search...');
         amountText = this.searchPriceInDOM(doc, /\$[\d,]+\.?\d*/);
       }
 
       if (!amountText) {
-        console.debug('[EbayParser] ❌ Amount not found');
+        parseLog.debug('❌ Amount not found');
         return null;
       }
 
       const amount = this.extractNumber(amountText);
       if (!amount || !this.isValidPrice(amount)) {
-        console.debug('[EbayParser] ❌ Invalid amount:', amount);
+        parseLog.debug('❌ Invalid amount', { amount });
         return null;
       }
 
       const currency = this.extractCurrency(amountText);
       const { title, imageUrl } = this.extractCommonInfo(doc);
 
-      console.log(`[EbayParser] ✅ Found: ${amount} ${currency}`);
+      parseLog.info(`✅ Found: ${amount} ${currency}`);
 
       return {
         price: amount,
@@ -60,7 +61,9 @@ export class EbayParser extends BaseParser {
         discounts: [],
       };
     } catch (error) {
-      console.error('[EbayParser] ❌ Parse error:', error);
+      parseLog.error(ErrorCode.PAR_E001, 'eBay parse error', {
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       return null;
     }
   }

@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { networkLog, ErrorCode } from '../../../shared/utils/logger';
 
 interface ComparedProduct {
   id: string;
@@ -115,7 +116,9 @@ export const PriceComparisonPanel: React.FC<PriceComparisonPanelProps> = ({
           setError(result.error || '가격 비교 검색 실패');
         }
       } catch (err) {
-        console.error('[PriceComparison] Error:', err);
+        networkLog.error(ErrorCode.NET_E002, 'Price comparison error', {
+          error: err instanceof Error ? err : new Error(String(err)),
+        });
         setError(err instanceof Error ? err.message : '알 수 없는 오류');
       } finally {
         setLoading(false);

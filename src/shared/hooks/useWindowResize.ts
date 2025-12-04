@@ -1,4 +1,5 @@
 import { useEffect, RefObject } from 'react';
+import { logger, LogDomain } from '../utils/logger';
 
 interface UseWindowResizeOptions {
   enabled: boolean;
@@ -16,7 +17,7 @@ export const useWindowResize = ({
       if (!contentRef.current) return;
 
       const contentHeight = contentRef.current.scrollHeight;
-      console.log('[useWindowResize] Content scroll height:', contentHeight);
+      logger.debug(LogDomain.UI, 'Content scroll height', { contentHeight });
 
       // Header height measurement
       const headerEl = document.querySelector('[style*="flexShrink"]');
@@ -25,7 +26,7 @@ export const useWindowResize = ({
       // Total height = header + content + padding
       const totalHeight = Math.min(headerHeight + contentHeight + 24, 900);
 
-      console.log('[useWindowResize] Calculated total height:', {
+      logger.debug(LogDomain.UI, 'Calculated total height', {
         headerHeight,
         contentHeight,
         totalHeight,
@@ -33,9 +34,9 @@ export const useWindowResize = ({
 
       try {
         window.resizeTo(420, totalHeight);
-        console.log('[useWindowResize] Window resized to:', { width: 420, height: totalHeight });
+        logger.debug(LogDomain.UI, 'Window resized', { width: 420, height: totalHeight });
       } catch (err) {
-        console.warn('[useWindowResize] Cannot resize window:', err);
+        logger.warn(LogDomain.UI, 'Cannot resize window', { error: err });
       }
     };
 

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import SubPopup from './components/SubPopup';
 import AutoNotification from './components/AutoNotification';
 import '../popup/styles/subpopup.css';
+import { extLog } from '../shared/utils/logger';
 
 /**
  * SubPopup Entry Point
@@ -16,7 +17,7 @@ import '../popup/styles/subpopup.css';
 const params = new URLSearchParams(window.location.search);
 const isAutoMode = params.get('auto') === 'true';
 
-console.log(`🎪 [SubPopup] Mode: ${isAutoMode ? 'Auto' : 'Manual'}`);
+extLog.info(`🎪 SubPopup Mode: ${isAutoMode ? 'Auto' : 'Manual'}`);
 
 const rootElement = document.getElementById('root');
 if (rootElement) {

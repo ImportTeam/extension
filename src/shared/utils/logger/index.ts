@@ -49,70 +49,75 @@ export type {
 // ─────────────────────────────────────────────────────────────
 
 import { logger } from './logger';
-import { LogDomain, ErrorCode } from './types';
+import { LogDomain, ErrorCode, type ErrorCodeType } from './types';
+
+// ─────────────────────────────────────────────────────────────
+// Domain Logger Type
+// ─────────────────────────────────────────────────────────────
+
+interface ErrorOptions {
+  data?: unknown;
+  error?: Error;
+}
+
+interface DomainLogger {
+  debug: (msg: string, data?: unknown) => void;
+  info: (msg: string, data?: unknown) => void;
+  warn: (msg: string, data?: unknown) => void;
+  error: (code: ErrorCodeType, msg?: string, options?: ErrorOptions) => void;
+  fatal: (code: ErrorCodeType, msg?: string, options?: ErrorOptions) => void;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Domain Logger Factory
+// ─────────────────────────────────────────────────────────────
+
+function createDomainLogger(domain: LogDomain, defaultErrorCode: ErrorCodeType): DomainLogger {
+  return {
+    debug: (msg: string, data?: unknown): void => logger.debug(domain, msg, data),
+    info: (msg: string, data?: unknown): void => logger.info(domain, msg, data),
+    warn: (msg: string, data?: unknown): void => logger.warn(domain, msg, data),
+    error: (code: ErrorCodeType, msg?: string, options?: ErrorOptions): void =>
+      logger.error(domain, code || defaultErrorCode, msg, options),
+    fatal: (code: ErrorCodeType, msg?: string, options?: ErrorOptions): void =>
+      logger.fatal(domain, code || defaultErrorCode, msg, options),
+  };
+}
 
 /**
  * Parser 도메인 전용 로거
  */
-export const parserLog = {
-  debug: (msg: string, data?: unknown): void => logger.debug(LogDomain.PARSER, msg, data),
-  info: (msg: string, data?: unknown): void => logger.info(LogDomain.PARSER, msg, data),
-  warn: (msg: string, data?: unknown): void => logger.warn(LogDomain.PARSER, msg, data),
-  error: (code: ErrorCode, msg?: string, opts?: { data?: unknown; error?: Error }): void =>
-    logger.error(LogDomain.PARSER, code, msg, opts),
-};
+export const parserLog = createDomainLogger(LogDomain.PARSER, ErrorCode.PAR_E001);
+
+// Alias for parseLog (backward compatibility)
+export const parseLog = parserLog;
 
 /**
  * Store 도메인 전용 로거
  */
-export const storeLog = {
-  debug: (msg: string, data?: unknown): void => logger.debug(LogDomain.STORE, msg, data),
-  info: (msg: string, data?: unknown): void => logger.info(LogDomain.STORE, msg, data),
-  warn: (msg: string, data?: unknown): void => logger.warn(LogDomain.STORE, msg, data),
-  error: (code: ErrorCode, msg?: string, opts?: { data?: unknown; error?: Error }): void =>
-    logger.error(LogDomain.STORE, code, msg, opts),
-};
+export const storeLog = createDomainLogger(LogDomain.STORE, ErrorCode.STO_E001);
 
 /**
  * UI 도메인 전용 로거
  */
-export const uiLog = {
-  debug: (msg: string, data?: unknown): void => logger.debug(LogDomain.UI, msg, data),
-  info: (msg: string, data?: unknown): void => logger.info(LogDomain.UI, msg, data),
-  warn: (msg: string, data?: unknown): void => logger.warn(LogDomain.UI, msg, data),
-  error: (code: ErrorCode, msg?: string, opts?: { data?: unknown; error?: Error }): void =>
-    logger.error(LogDomain.UI, code, msg, opts),
-};
+export const uiLog = createDomainLogger(LogDomain.UI, ErrorCode.UI_E001);
 
 /**
  * Network 도메인 전용 로거
  */
-export const networkLog = {
-  debug: (msg: string, data?: unknown): void => logger.debug(LogDomain.NETWORK, msg, data),
-  info: (msg: string, data?: unknown): void => logger.info(LogDomain.NETWORK, msg, data),
-  warn: (msg: string, data?: unknown): void => logger.warn(LogDomain.NETWORK, msg, data),
-  error: (code: ErrorCode, msg?: string, opts?: { data?: unknown; error?: Error }): void =>
-    logger.error(LogDomain.NETWORK, code, msg, opts),
-};
+export const networkLog = createDomainLogger(LogDomain.NETWORK, ErrorCode.NET_E001);
 
 /**
  * DOM 도메인 전용 로거
  */
-export const domLog = {
-  debug: (msg: string, data?: unknown): void => logger.debug(LogDomain.DOM, msg, data),
-  info: (msg: string, data?: unknown): void => logger.info(LogDomain.DOM, msg, data),
-  warn: (msg: string, data?: unknown): void => logger.warn(LogDomain.DOM, msg, data),
-  error: (code: ErrorCode, msg?: string, opts?: { data?: unknown; error?: Error }): void =>
-    logger.error(LogDomain.DOM, code, msg, opts),
-};
+export const domLog = createDomainLogger(LogDomain.DOM, ErrorCode.DOM_E001);
 
 /**
  * Bootstrap 도메인 전용 로거
  */
-export const bootstrapLog = {
-  debug: (msg: string, data?: unknown): void => logger.debug(LogDomain.BOOTSTRAP, msg, data),
-  info: (msg: string, data?: unknown): void => logger.info(LogDomain.BOOTSTRAP, msg, data),
-  warn: (msg: string, data?: unknown): void => logger.warn(LogDomain.BOOTSTRAP, msg, data),
-  error: (code: ErrorCode, msg?: string, opts?: { data?: unknown; error?: Error }): void =>
-    logger.error(LogDomain.BOOTSTRAP, code, msg, opts),
-};
+export const bootstrapLog = createDomainLogger(LogDomain.BOOTSTRAP, ErrorCode.BST_E001);
+
+/**
+ * Extension 도메인 전용 로거
+ */
+export const extLog = createDomainLogger(LogDomain.EXTENSION, ErrorCode.EXT_E001);
