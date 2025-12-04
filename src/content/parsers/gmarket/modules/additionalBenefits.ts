@@ -4,17 +4,11 @@
  */
 
 import { GMARKET_SELECTORS } from '../constants';
+import { AdditionalBenefit, BenefitDetail } from '../../../../shared/types/parser';
+import { formatBenefitDetails } from '../../utils';
 
-interface AdditionalBenefit {
-  type: string;           // 혜택 종류 (신세계포인트, 스마일페이 등)
-  title: string;          // 혜택 제목
-  details: BenefitDetail[];
-}
-
-interface BenefitDetail {
-  label: string;          // 항목명 (적립률, 적립한도 등)
-  value: string;          // 값
-}
+// Re-export types for convenience
+export type { AdditionalBenefit, BenefitDetail };
 
 /**
  * 추가 혜택 아이템 파싱
@@ -89,12 +83,26 @@ export const extractAdditionalBenefits = (doc: Document): AdditionalBenefit[] =>
 };
 
 /**
+ * 추가 혜택을 포맷팅된 문자열로 변환
+ * 예: "신세계포인트 적립\n적립률: 1천원 당 1포인트\n적립한도: 최대 1천점"
+ */
+export const formatAdditionalBenefits = (benefits: AdditionalBenefit[]): string => {
+  return benefits
+    .map((benefit) => {
+      const detailsStr = formatBenefitDetails(benefit.details);
+      return `${benefit.title}\n${detailsStr}`;
+    })
+    .join('\n\n');
+};
+
+/**
  * 신세계포인트 정보만 추출 (간단 버전)
  */
 export const extractShinsegaePoint = (doc: Document): {
   rate: string;
   limit: string;
   condition: string;
+  formatted: string;  // 포맷팅된 전체 문자열
 } | null => {
   const benefits = extractAdditionalBenefits(doc);
   const shinsegae = benefits.find((b) => b.type === 'shinsegae_point');
@@ -115,7 +123,10 @@ export const extractShinsegaePoint = (doc: Document): {
     }
   });
 
-  return { rate, limit, condition };
+  // 포맷팅된 문자열 생성
+  const formatted = formatBenefitDetails(shinsegae.details);
+
+  return { rate, limit, condition, formatted };
 };
 
 /**

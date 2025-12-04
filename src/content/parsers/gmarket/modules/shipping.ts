@@ -4,13 +4,10 @@
  */
 
 import { GMARKET_SELECTORS } from '../constants';
+import { ShippingInfo } from '../../../../shared/types/parser';
 
-interface ShippingInfo {
-  method: string;         // 배송 방법
-  isStarDelivery: boolean; // 스타배송 여부
-  fee?: string;           // 배송비
-  estimatedDate?: string; // 예상 배송일
-}
+// Re-export type for convenience
+export type { ShippingInfo };
 
 /**
  * 배송 정보 추출
@@ -28,6 +25,7 @@ export const extractShippingInfo = (doc: Document): ShippingInfo | null => {
   const method = isStarDelivery ? '스타배송' : '일반배송';
   let fee: string | undefined;
   let estimatedDate: string | undefined;
+  let isFree = false;
 
   if (shippingBox) {
     const text = shippingBox.textContent || '';
@@ -38,6 +36,7 @@ export const extractShippingInfo = (doc: Document): ShippingInfo | null => {
       fee = `${feeMatch[1]}원`;
     } else if (text.includes('무료')) {
       fee = '무료';
+      isFree = true;
     }
 
     // 예상 배송일 추출
@@ -52,6 +51,7 @@ export const extractShippingInfo = (doc: Document): ShippingInfo | null => {
   return {
     method,
     isStarDelivery,
+    isFree,
     fee,
     estimatedDate,
   };
