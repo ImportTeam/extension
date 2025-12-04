@@ -1,4 +1,4 @@
-import type { ParsedProductInfo } from '../../../shared/types';
+import type { ParsedProductInfo, ElevenStreetExtendedInfo } from '../../../shared/types';
 
 type Optional<T> = {
 	[K in keyof T]?: T[K] | null;
@@ -34,4 +34,5 @@ export type ToggleProductData = (ParsedProductInfo & Record<string, unknown>) &
 			discount?: string;
 		}>;
 		site?: string; // e.g. 'coupang', 'amazon'
+		elevenst?: ElevenStreetExtendedInfo; // 11번가 전용 확장 필드
 	}>;

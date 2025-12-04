@@ -43,3 +43,55 @@ export interface ProductData {
   url?: string;
   imageUrl?: string;
 }
+
+/**
+ * Chrome Storage에 저장되는 상품 데이터
+ * ParsedProductInfo + 메타데이터
+ */
+export interface StoredProductData {
+  // 필수 필드
+  amount: number;
+  currency: string;
+  
+  // 상품 정보
+  title?: string;
+  price?: number;
+  url?: string;
+  imageUrl?: string;
+  images?: string[];
+  
+  // 가격 정보
+  originalPrice?: number;
+  discountPrice?: number;
+  discountRate?: number;
+  
+  // 혜택 정보
+  cardBenefits?: CardBenefit[];
+  cashback?: {
+    amount?: number;
+    description?: string;
+  } | boolean;
+  giftCardDiscount?: {
+    rate?: number;
+    description?: string;
+  };
+  
+  // 기타
+  variants?: Array<{
+    name: string;
+    price?: number;
+    discount?: string;
+  }>;
+  shippingInfo?: string | {
+    method: string;
+    fee?: string;
+    estimatedDate?: string;
+    isFree?: boolean;
+  };
+  
+  // 메타데이터
+  timestamp?: number;
+  savedAt?: string;
+  updatedAt?: string;
+  updateSource?: string;
+}

@@ -10,6 +10,7 @@
  */
 
 import { extLog, networkLog, storeLog, ErrorCode } from '../shared/utils/logger';
+import type { StoredProductData } from '../shared/types';
 
 extLog.info('🟢 Service Worker initialized');
 
@@ -150,12 +151,11 @@ chrome.runtime.onMessage.addListener(
       if (message.type === 'GET_PRODUCT_DATA') {
         storeLog.debug('🔍 GET_PRODUCT_DATA request');
         chrome.storage.local.get(['currentProduct'], (result) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const currentProduct = result.currentProduct as any;
+          const currentProduct = result.currentProduct as StoredProductData | undefined;
           storeLog.debug('📦 Retrieved product data', {
             exists: !!currentProduct,
             amount: currentProduct?.amount,
-            title: `${currentProduct?.title?.substring(0, 50)  }...`,
+            title: currentProduct?.title ? `${currentProduct.title.substring(0, 50)}...` : 'N/A',
           });
           sendResponse({
             success: true,
@@ -272,8 +272,7 @@ chrome.runtime.onMessage.addListener(
 
         // 기존 데이터 조회
         chrome.storage.local.get(['currentProduct'], (result) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const existingData = (result.currentProduct || {}) as any;
+          const existingData = (result.currentProduct || {}) as Partial<StoredProductData>;
 
           // 기존 데이터와 새로운 데이터 병합
           const mergedData = {

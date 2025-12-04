@@ -3,7 +3,7 @@ import { logger, LogDomain } from '../utils/logger';
 
 interface UseWindowResizeOptions {
   enabled: boolean;
-  contentRef: RefObject<HTMLDivElement>;
+  contentRef: RefObject<HTMLDivElement | null>;
 }
 
 export const useWindowResize = ({

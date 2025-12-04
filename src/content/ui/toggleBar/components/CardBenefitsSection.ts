@@ -360,7 +360,6 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 	const extras: string[] = [];
 	
 	// 최대 적립 포인트 표시 (11번가: elevenst.totalPointAmount, 쿠팡: 등)
-	// @ts-expect-error: Extended field for 11st
 	const totalPointAmount = data.elevenst?.totalPointAmount ?? 0;
 	if (totalPointAmount > 0) {
 		extras.push(`최대 적립 포인트 ${totalPointAmount.toLocaleString()}P`);

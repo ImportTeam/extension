@@ -27,13 +27,13 @@ export type {
 } from './store';
 
 // Parser types
-export type { ParserConfig, ParsedProductInfo, ParserResult } from './parser';
+export type { ParserConfig, ParsedProductInfo, ParserResult, ElevenStreetExtendedInfo } from './parser';
 
 // Message types
 export type { ChromeMessage, RecommendationRequest, RecommendationResponse, SubPopupMessage } from './message';
 
 // Product types
-export type { CheckoutInfo, ProductInfo, CardBenefit, ProductData } from './product';
+export type { CheckoutInfo, ProductInfo, CardBenefit, ProductData, StoredProductData } from './product';
 
 // Notification types
 export type { AutoNotificationData } from './notification';

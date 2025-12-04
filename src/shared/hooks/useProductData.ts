@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { ParsedProductInfo, CardBenefit } from '../types';
+import type { ParsedProductInfo, CardBenefit, StoredProductData } from '../types';
 import { storeLog, ErrorCode } from '../utils/logger';
 
 interface UseProductDataReturn {
@@ -20,15 +20,14 @@ export const useProductData = (): UseProductDataReturn => {
       try {
         const result = await chrome.storage.local.get(['currentProduct']);
         if (result.currentProduct) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const p = result.currentProduct as any;
+          const p = result.currentProduct as StoredProductData;
           storeLog.debug('Loaded product', {
             title: p.title?.substring(0, 50),
             imageUrl: p.imageUrl?.substring(0, 80) || 'none',
             imagesCount: p.images?.length || 0,
             variantsCount: p.variants?.length || 0,
           });
-          setProduct(p);
+          setProduct(p as ParsedProductInfo);
 
           // Sort and get top 3 benefits
           if (Array.isArray(p.cardBenefits)) {

@@ -126,7 +126,6 @@ export class ElevenStreetParser extends BaseParser {
         discountRate: discountRate || undefined,
         cardBenefits: formattedCardBenefits,
         discounts,
-        // @ts-expect-error: Extended fields for 11st
         elevenst: {
           maxDiscountPrice,
           maxDiscountRate,

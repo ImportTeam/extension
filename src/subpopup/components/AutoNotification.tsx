@@ -14,7 +14,7 @@ interface RankedBenefit {
 }
 
 export const AutoNotification: React.FC = () => {
-  const contentRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
+  const contentRef = useRef<HTMLDivElement>(null);
   
   // Load product data from Chrome storage
   const { product, topBenefits, loading } = useProductData();

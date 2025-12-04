@@ -132,6 +132,44 @@ export interface ParsedProductInfo {
   
   // 할부 정보
   installmentInfo?: string;
+  
+  // 11번가 전용 필드
+  elevenst?: ElevenStreetExtendedInfo;
+}
+
+/**
+ * 11번가 전용 확장 정보
+ */
+export interface ElevenStreetExtendedInfo {
+  maxDiscountPrice?: number | null;
+  maxDiscountRate?: number | null;
+  maxInstallmentMonths?: number;
+  points?: Array<{
+    type: string;
+    amount: number;
+    description: string;
+  }>;
+  installments?: Array<{
+    cardName: string;
+    maxMonths: number;
+    minAmount: number | null;
+    months: string;
+    condition: string;
+  }>;
+  coupons?: Array<{
+    name: string;
+    discountAmount: number | null;
+    discountRate: number | null;
+  }>;
+  totalPointAmount?: number;
+  totalCardBenefitAmount?: number;
+  seller?: string | null;
+  sellerRating?: number | string | null;
+  discountDetails?: Array<{
+    type: string;
+    amount: number;
+    description?: string;
+  }>;
 }
 
 /**
