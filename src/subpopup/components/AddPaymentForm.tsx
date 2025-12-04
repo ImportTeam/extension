@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSubPopupActions } from '../../shared/store/subpopupStore';
+import { useSubPopupActions } from '../../shared/store';
 import type { CustomPaymentMethod } from '../../shared/types';
 
 /**

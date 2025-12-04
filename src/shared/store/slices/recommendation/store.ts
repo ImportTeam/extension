@@ -46,17 +46,13 @@ export const useRecommendationStore = create<RecommendationStore>()(
       ...createMetaSlice(...args),
 
       // Combined reset action
-      reset: () => {
+      reset: (): void => {
         const [set] = args;
-        set(
-          {
-            ...initialUIState,
-            ...initialDataState,
-            ...initialMetaState,
-          },
-          undefined,
-          'store/reset'
-        );
+        set({
+          ...initialUIState,
+          ...initialDataState,
+          ...initialMetaState,
+        });
       },
     }),
     {
@@ -74,7 +70,7 @@ export const useRecommendationStore = create<RecommendationStore>()(
       }),
 
       // onRehydrateStorage: stale data 처리
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: (): ((state: PersistedRecommendationState | undefined) => void) => (state): void => {
         if (state && state.timestamp) {
           const age = Date.now() - state.timestamp;
 

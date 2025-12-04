@@ -2,7 +2,7 @@ import React from 'react';
 import {
   useAlternatives,
   useRecommendationActions,
-} from '../../../shared/store/recommendationStore';
+} from '../../../shared/store';
 
 /**
  * AlternativesList (Layer 2)

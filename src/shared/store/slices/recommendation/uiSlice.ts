@@ -18,31 +18,27 @@ export const createUISlice: UISliceCreator = (set) => ({
   ...initialUIState,
 
   // Actions
-  setLoading: (loading: boolean) => {
-    set({ isLoading: loading }, undefined, 'ui/setLoading');
+  setLoading: (loading: boolean): void => {
+    set({ isLoading: loading });
   },
 
-  toggleExpanded: () => {
-    set(
-      (state) => ({ isExpanded: !state.isExpanded }),
-      undefined,
-      'ui/toggleExpanded'
-    );
+  toggleExpanded: (): void => {
+    set((state) => ({ isExpanded: !state.isExpanded }));
   },
 
-  setShowPaymentMethod: (show: boolean) => {
-    set({ showPaymentMethod: show }, undefined, 'ui/setShowPaymentMethod');
+  setShowPaymentMethod: (show: boolean): void => {
+    set({ showPaymentMethod: show });
   },
 
-  setSelectedTab: (tab: 'recommendation' | 'alternatives' | 'settings') => {
-    set({ selectedTab: tab }, undefined, 'ui/setSelectedTab');
+  setSelectedTab: (tab: 'recommendation' | 'alternatives' | 'settings'): void => {
+    set({ selectedTab: tab });
   },
 
-  setError: (error: string | null) => {
-    set({ error }, undefined, 'ui/setError');
+  setError: (error: string | null): void => {
+    set({ error });
   },
 
-  resetUI: () => {
-    set(initialUIState, undefined, 'ui/reset');
+  resetUI: (): void => {
+    set(initialUIState);
   },
 });

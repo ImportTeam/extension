@@ -60,7 +60,10 @@ export const useCustomMethodById = (id: string): CustomPaymentMethod | undefined
 /**
  * UI Actions selector
  */
-export const useSubPopupUIActions = () =>
+export const useSubPopupUIActions = (): Pick<
+  SubPopupStore,
+  'setIsOpen' | 'setActiveTab' | 'setIsLoading' | 'setError' | 'resetUI'
+> =>
   useSubPopupStore((state) => ({
     setIsOpen: state.setIsOpen,
     setActiveTab: state.setActiveTab,
@@ -72,7 +75,10 @@ export const useSubPopupUIActions = () =>
 /**
  * Payment Actions selector
  */
-export const useSubPopupPaymentActions = () =>
+export const useSubPopupPaymentActions = (): Pick<
+  SubPopupStore,
+  'addPaymentMethod' | 'updatePaymentMethod' | 'deletePaymentMethod' | 'setCustomMethods' | 'resetPayment'
+> =>
   useSubPopupStore((state) => ({
     addPaymentMethod: state.addPaymentMethod,
     updatePaymentMethod: state.updatePaymentMethod,

@@ -5,7 +5,7 @@ import {
   useRecommendationError,
   useIsIdle,
   useIsRecommended,
-} from '../shared/store/recommendationStore';
+} from '../shared/store';
 import { IdleView } from '../content/ui/components/IdleView';
 import { RecommendedView } from '../content/ui/components/RecommendedView';
 import { FooterButtons } from '../content/ui/components/FooterButtons';

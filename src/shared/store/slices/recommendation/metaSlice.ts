@@ -18,23 +18,15 @@ export const createMetaSlice: MetaSliceCreator = (set) => ({
   ...initialMetaState,
 
   // Actions
-  updateTimestamp: () => {
-    set(
-      { timestamp: Date.now() },
-      undefined,
-      'meta/updateTimestamp'
-    );
+  updateTimestamp: (): void => {
+    set({ timestamp: Date.now() });
   },
 
-  setSiteId: (siteId?: string) => {
-    set(
-      { siteId },
-      undefined,
-      'meta/setSiteId'
-    );
+  setSiteId: (siteId?: string): void => {
+    set({ siteId });
   },
 
-  resetMeta: () => {
-    set(initialMetaState, undefined, 'meta/reset');
+  resetMeta: (): void => {
+    set(initialMetaState);
   },
 });

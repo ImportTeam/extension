@@ -2,7 +2,7 @@ import React from 'react';
 import {
   useCustomPaymentMethods,
   useSubPopupActions,
-} from '../../shared/store/subpopupStore';
+} from '../../shared/store';
 
 /**
  * PaymentMethodsList Component

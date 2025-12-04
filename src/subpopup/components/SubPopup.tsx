@@ -2,7 +2,7 @@ import React from 'react';
 import {
   useSubPopupActiveTab,
   useSubPopupActions,
-} from '../../shared/store/subpopupStore';
+} from '../../shared/store';
 import { AddPaymentForm } from './AddPaymentForm';
 import { PaymentMethodsList } from './PaymentMethodsList';
 

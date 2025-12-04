@@ -131,7 +131,10 @@ export const useIsRecommended = (): boolean => {
 /**
  * UI Actions selector
  */
-export const useUIActions = () =>
+export const useUIActions = (): Pick<
+  RecommendationStore,
+  'setLoading' | 'toggleExpanded' | 'setShowPaymentMethod' | 'setSelectedTab' | 'setError' | 'resetUI'
+> =>
   useRecommendationStore((state) => ({
     setLoading: state.setLoading,
     toggleExpanded: state.toggleExpanded,
@@ -144,7 +147,10 @@ export const useUIActions = () =>
 /**
  * Data Actions selector
  */
-export const useDataActions = () =>
+export const useDataActions = (): Pick<
+  RecommendationStore,
+  'setRecommendation' | 'setAlternatives' | 'setDiscounts' | 'setCardBenefits' | 'resetData'
+> =>
   useRecommendationStore((state) => ({
     setRecommendation: state.setRecommendation,
     setAlternatives: state.setAlternatives,
@@ -156,7 +162,10 @@ export const useDataActions = () =>
 /**
  * Meta Actions selector
  */
-export const useMetaActions = () =>
+export const useMetaActions = (): Pick<
+  RecommendationStore,
+  'updateTimestamp' | 'setSiteId' | 'resetMeta'
+> =>
   useRecommendationStore((state) => ({
     updateTimestamp: state.updateTimestamp,
     setSiteId: state.setSiteId,

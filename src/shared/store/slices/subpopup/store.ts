@@ -30,16 +30,12 @@ export const useSubPopupStore = create<SubPopupStore>()(
       ...createSubPopupPaymentSlice(...args),
 
       // Combined reset action
-      reset: () => {
+      reset: (): void => {
         const [set] = args;
-        set(
-          {
-            ...initialSubPopupUIState,
-            ...initialSubPopupPaymentState,
-          },
-          undefined,
-          'subpopup/store/reset'
-        );
+        set({
+          ...initialSubPopupUIState,
+          ...initialSubPopupPaymentState,
+        });
       },
     }),
     {

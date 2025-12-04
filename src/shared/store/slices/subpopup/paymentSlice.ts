@@ -18,7 +18,7 @@ export const createSubPopupPaymentSlice: SubPopupPaymentSliceCreator = (set) => 
   // Actions
   addPaymentMethod: (
     method: Omit<CustomPaymentMethod, 'createdAt' | 'updatedAt' | 'isCustom'>
-  ) => {
+  ): void => {
     const now = Date.now();
     const newMethod: CustomPaymentMethod = {
       ...method,
@@ -27,48 +27,36 @@ export const createSubPopupPaymentSlice: SubPopupPaymentSliceCreator = (set) => 
       isCustom: true,
     };
 
-    set(
-      (state) => ({
-        customMethods: [...state.customMethods, newMethod],
-      }),
-      undefined,
-      'subpopup/payment/add'
-    );
+    set((state) => ({
+      customMethods: [...state.customMethods, newMethod],
+    }));
   },
 
-  updatePaymentMethod: (id: string, updates: Partial<CustomPaymentMethod>) => {
-    set(
-      (state) => ({
-        customMethods: state.customMethods.map((method) =>
-          method.id === id
-            ? {
-                ...method,
-                ...updates,
-                updatedAt: Date.now(),
-              }
-            : method
-        ),
-      }),
-      undefined,
-      'subpopup/payment/update'
-    );
+  updatePaymentMethod: (id: string, updates: Partial<CustomPaymentMethod>): void => {
+    set((state) => ({
+      customMethods: state.customMethods.map((method) =>
+        method.id === id
+          ? {
+              ...method,
+              ...updates,
+              updatedAt: Date.now(),
+            }
+          : method
+      ),
+    }));
   },
 
-  deletePaymentMethod: (id: string) => {
-    set(
-      (state) => ({
-        customMethods: state.customMethods.filter((method) => method.id !== id),
-      }),
-      undefined,
-      'subpopup/payment/delete'
-    );
+  deletePaymentMethod: (id: string): void => {
+    set((state) => ({
+      customMethods: state.customMethods.filter((method) => method.id !== id),
+    }));
   },
 
-  setCustomMethods: (methods: CustomPaymentMethod[]) => {
-    set({ customMethods: methods }, undefined, 'subpopup/payment/setAll');
+  setCustomMethods: (methods: CustomPaymentMethod[]): void => {
+    set({ customMethods: methods });
   },
 
-  resetPayment: () => {
-    set(initialSubPopupPaymentState, undefined, 'subpopup/payment/reset');
+  resetPayment: (): void => {
+    set(initialSubPopupPaymentState);
   },
 });

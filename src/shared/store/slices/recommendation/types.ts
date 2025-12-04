@@ -6,7 +6,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { PaymentMethod } from '../../types/payment';
+import type { PaymentMethod } from '../../../types/payment';
 
 // ─────────────────────────────────────────────────────────────
 // Slice Types

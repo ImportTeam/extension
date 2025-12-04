@@ -5,7 +5,7 @@ import {
   useRecommendationActions,
   useDiscounts,
   useCardBenefits,
-} from '../../../shared/store/recommendationStore';
+} from '../../../shared/store';
 import { AlternativesList } from './AlternativesList';
 
 /**

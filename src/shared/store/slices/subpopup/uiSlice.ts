@@ -15,23 +15,23 @@ export const createSubPopupUISlice: SubPopupUISliceCreator = (set) => ({
   ...initialSubPopupUIState,
 
   // Actions
-  setIsOpen: (open: boolean) => {
-    set({ isOpen: open }, undefined, 'subpopup/ui/setIsOpen');
+  setIsOpen: (open: boolean): void => {
+    set({ isOpen: open });
   },
 
-  setActiveTab: (tab: 'add' | 'list') => {
-    set({ activeTab: tab }, undefined, 'subpopup/ui/setActiveTab');
+  setActiveTab: (tab: 'add' | 'list'): void => {
+    set({ activeTab: tab });
   },
 
-  setIsLoading: (loading: boolean) => {
-    set({ isLoading: loading }, undefined, 'subpopup/ui/setIsLoading');
+  setIsLoading: (loading: boolean): void => {
+    set({ isLoading: loading });
   },
 
-  setError: (error: string | null) => {
-    set({ error }, undefined, 'subpopup/ui/setError');
+  setError: (error: string | null): void => {
+    set({ error });
   },
 
-  resetUI: () => {
-    set(initialSubPopupUIState, undefined, 'subpopup/ui/reset');
+  resetUI: (): void => {
+    set(initialSubPopupUIState);
   },
 });

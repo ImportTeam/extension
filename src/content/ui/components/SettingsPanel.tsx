@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { useRecommendation } from '../../../shared/store/recommendationStore';
+import { useRecommendation } from '../../../shared/store';
 
 export const SettingsPanel: React.FC = () => {
   const recommendation = useRecommendation();

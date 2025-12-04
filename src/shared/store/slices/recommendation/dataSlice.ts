@@ -19,39 +19,23 @@ export const createDataSlice: DataSliceCreator = (set) => ({
   ...initialDataState,
 
   // Actions
-  setRecommendation: (method: PaymentMethod | null) => {
-    set(
-      { recommendation: method },
-      undefined,
-      'data/setRecommendation'
-    );
+  setRecommendation: (method: PaymentMethod | null): void => {
+    set({ recommendation: method });
   },
 
-  setAlternatives: (methods: PaymentMethod[]) => {
-    set(
-      { alternatives: methods },
-      undefined,
-      'data/setAlternatives'
-    );
+  setAlternatives: (methods: PaymentMethod[]): void => {
+    set({ alternatives: methods });
   },
 
-  setDiscounts: (discounts: Array<{ rate: number; type: string }> | null) => {
-    set(
-      { discounts },
-      undefined,
-      'data/setDiscounts'
-    );
+  setDiscounts: (discounts: Array<{ rate: number; type: string }> | null): void => {
+    set({ discounts });
   },
 
-  setCardBenefits: (benefits: Array<{ card: string; benefit: string }> | null) => {
-    set(
-      { cardBenefits: benefits },
-      undefined,
-      'data/setCardBenefits'
-    );
+  setCardBenefits: (benefits: Array<{ card: string; benefit: string }> | null): void => {
+    set({ cardBenefits: benefits });
   },
 
-  resetData: () => {
-    set(initialDataState, undefined, 'data/reset');
+  resetData: (): void => {
+    set(initialDataState);
   },
 });
