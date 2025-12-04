@@ -11,6 +11,7 @@ import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
 import * as Variants from './modules/variants';
 import * as Shipping from './modules/shipping';
+import { normalizeAndSortCardBenefits, deduplicateCardBenefits } from '../cardBenefitCalculator';
 
 export class CoupangParser extends BaseParser {
   readonly siteName = 'Coupang';
@@ -58,18 +59,10 @@ export class CoupangParser extends BaseParser {
         return null;
       }
 
-      // 3. 혜택
-      const cardBenefits = Benefits.extractCardBenefits(doc).map((b) => {
-        const rate = b.rate ?? b.discount;
-        const cardName = b.cardName || b.card;
-        return {
-          card: cardName,
-          cardName,
-          benefit: b.benefit,
-          discount: rate,
-          rate,
-        };
-      });
+      // 3. 카드 혜택 - 공통 유틸리티 사용
+      const rawCardBenefits = Benefits.extractCardBenefits(doc);
+      const normalizedBenefits = normalizeAndSortCardBenefits(rawCardBenefits, amount);
+      const cardBenefits = deduplicateCardBenefits(normalizedBenefits);
 
       const giftCardDiscount = Benefits.extractGiftCardDiscount(doc);
       const cashback = Benefits.extractCashback(doc);
@@ -78,7 +71,7 @@ export class CoupangParser extends BaseParser {
       const shippingInfo = Shipping.extractShippingInfo(doc);
       const variants = Variants.extractVariants(doc);
 
-      console.log(`[CoupangParser] ✅ Found: ${amount} KRW`);
+      console.log(`[CoupangParser] ✅ Found: ${amount} KRW, Cards: ${cardBenefits.length}`);
 
       return {
         price: amount,
