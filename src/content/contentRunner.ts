@@ -8,12 +8,15 @@ import { mountToggleBar, updateToggleBar, type ToggleProductData } from './ui/to
 import { detectSite } from './siteDetector';
 import { createParser, createFallbackParser } from './parserFactory';
 import { saveProductData, type MessageSource } from './backgroundMessaging';
-import { setupDynamicContentObserver } from './dynamicObserver';
+import { setupDynamicContentObserver, type CleanupFn } from './dynamicObserver';
 import { setupElevenStreetBenefitWatcher } from './elevenStreetBenefits';
 import { logger, LogDomain, ErrorCode } from '../shared/utils/logger';
 
 const isMainFrame = window.self === window.top;
 let hasRun = false;
+
+/** cleanup 함수들 모음 */
+const cleanupFns: CleanupFn[] = [];
 
 export interface ExtractionResult {
   paymentInfo: ParsedProductInfo;
@@ -78,14 +81,36 @@ function init(): void {
   saveProductData(result.paymentInfo, 'initial');
 }
 
+/**
+ * 모든 observer/watcher cleanup 실행
+ */
+function cleanupAll(): void {
+  cleanupFns.forEach((cleanup) => {
+    try {
+      cleanup();
+    } catch (e) {
+      logger.warn(LogDomain.BOOTSTRAP, 'Cleanup error', { error: e });
+    }
+  });
+  cleanupFns.length = 0;
+}
+
 export function runContentScript(): void {
   if (!isMainFrame || hasRun) return;
   hasRun = true;
 
   logger.info(LogDomain.BOOTSTRAP, 'Content script starting');
   init();
-  setupDynamicContentObserver((source) => reparseAndNotify(source as MessageSource));
-  setupElevenStreetBenefitWatcher((source) => {
+  
+  // Observer들 설정하고 cleanup 함수 저장
+  const dynamicCleanup = setupDynamicContentObserver((source) => reparseAndNotify(source as MessageSource));
+  cleanupFns.push(dynamicCleanup);
+
+  const benefitCleanup = setupElevenStreetBenefitWatcher((source) => {
     reparseAndNotify(source as MessageSource);
   });
+  cleanupFns.push(benefitCleanup);
+
+  // 페이지 언로드 시 전체 cleanup
+  window.addEventListener('beforeunload', cleanupAll, { once: true });
 }

@@ -1,5 +1,5 @@
 import { COUPANG_SELECTORS } from '../constants';
-import { extractNumber, normalizeCardName, extractPercentage } from '../../utils';
+import { extractNumber, normalizeCardName, extractPercentage, extractCardKeyword } from '../../utils';
 import { CARD_NAME_MAPPING } from '../../../../shared/types';
 import { parseLog } from '../../../../shared/utils/logger';
 
@@ -18,6 +18,36 @@ interface CardImageInfo {
   alt: string;
   cardName: string;
 }
+
+// 로컬 카드 아이콘 매핑 (웹 접근 가능 경로)
+const CARD_ICON_MAP: Record<string, string> = {
+  신한: 'assets/card/shinhanCard.svg',
+  우리: 'assets/card/wooriCard.svg',
+  BC: 'assets/card/bcCard.svg',
+  비씨: 'assets/card/bcCard.svg',
+  롯데: 'assets/card/lotteCard.svg',
+  KB: 'assets/card/kbCard.svg',
+  국민: 'assets/card/kbCard.svg',
+  NH: 'assets/card/nhCard',
+  농협: 'assets/card/hanaCard.svg',
+  삼성: 'assets/card/samsungCard.svg',
+  하나: 'assets/card/hanaCard.svg',
+  현대: 'assets/card/hyundaiCard.svg',
+  비자: 'assets/card/visaCard.svg',
+  마스터: 'assets/card/masterCard.svg',
+};
+
+const getCardIconUrl = (cardName: string): string | null => {
+  const key = extractCardKeyword(normalizeCardName(cardName));
+  const path = CARD_ICON_MAP[key];
+  if (!path) return null;
+  try {
+    return chrome.runtime.getURL(path);
+  } catch {
+    // 로더 컨텍스트에서 runtime 미노출 시 안전하게 null 처리
+    return null;
+  }
+};
 
 const extractCardNameFromUrl = (url: string): string | null => {
   for (const [key, value] of Object.entries(CARD_NAME_MAPPING)) {
@@ -348,6 +378,7 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
   benefits = benefits.map((benefit, index) => {
     if (!benefit.imageUrl) {
       const cardName = benefit.cardName || benefit.card || '';
+      const benefitKey = extractCardKeyword(normalizeCardName(cardName));
       
       // 1차: 정확한 카드명 매칭
       let matchedImage = cardImages.find((img) => {
@@ -364,11 +395,28 @@ export const extractCardBenefits = (doc: Document): CardBenefitDetail[] => {
           return imgBase.includes(benefitBase) || benefitBase.includes(imgBase);
         });
       }
+
+      // 3차: 카드 키워드 기반 매칭 (롯데 ↔ 롯데카드, 신한 ↔ 신한카드 등)
+      if (!matchedImage) {
+        matchedImage = cardImages.find((img) => {
+          const imgKey = extractCardKeyword(normalizeCardName(img.cardName));
+          return imgKey === benefitKey;
+        });
+      }
       
-      // 3차: 인덱스 기반 매칭 (배열 순서가 동일할 경우)
+      // 4차: 인덱스 기반 매칭 (배열 순서가 동일할 경우)
       if (!matchedImage && index < cardImages.length) {
         matchedImage = cardImages[index];
         parseLog.debug('인덱스 기반 매칭', { cardName, matchedCardName: matchedImage.cardName });
+      }
+
+      // 5차: 로컬 카드 아이콘으로 폴백
+      if (!matchedImage) {
+        const iconUrl = getCardIconUrl(cardName);
+        if (iconUrl) {
+          parseLog.debug('로컬 아이콘 폴백 사용', { cardName, benefitKey });
+          return { ...benefit, imageUrl: iconUrl };
+        }
       }
       
       if (matchedImage) {

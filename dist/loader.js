@@ -1,1 +1,1 @@
-import{b as o,E as e}from"./assets/index-CtnQ7lw9.js";(async()=>{const t=chrome.runtime.getURL("content.js");try{await import(t),o.info("Content script loaded via ESM")}catch(r){o.error(e.BST_E001,"Failed to load content script",{error:r instanceof Error?r:new Error(String(r))})}})();
+import(chrome.runtime.getURL("content.js")).then(()=>{console.warn("[PicSel] content.js loaded via dynamic import")}).catch(o=>{console.error("[PicSel] Failed to load content.js",o)});

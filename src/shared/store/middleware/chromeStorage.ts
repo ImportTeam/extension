@@ -21,22 +21,40 @@ export interface ChromeStorageAdapter {
 /**
  * Chrome Storage Local Adapter
  * chrome.storage.local을 Zustand persist storage로 사용
+ * 
+ * 주의: chrome.runtime.lastError 체크 포함
  */
 export const chromeStorageAdapter: ChromeStorageAdapter = {
   getItem: async (name: string): Promise<string | null> => new Promise((resolve) => {
       chrome.storage.local.get([name], (result) => {
+        if (chrome.runtime.lastError) {
+          // 에러가 있어도 null 반환 (graceful degradation)
+          console.warn('[chromeStorage] getItem error:', chrome.runtime.lastError.message);
+          resolve(null);
+          return;
+        }
         resolve((result[name] as string) ?? null);
       });
     }),
 
-  setItem: async (name: string, value: string): Promise<void> => new Promise((resolve) => {
+  setItem: async (name: string, value: string): Promise<void> => new Promise((resolve, reject) => {
       chrome.storage.local.set({ [name]: value }, () => {
+        if (chrome.runtime.lastError) {
+          console.error('[chromeStorage] setItem error:', chrome.runtime.lastError.message);
+          reject(new Error(chrome.runtime.lastError.message ?? 'Failed to save to storage'));
+          return;
+        }
         resolve();
       });
     }),
 
-  removeItem: async (name: string): Promise<void> => new Promise((resolve) => {
+  removeItem: async (name: string): Promise<void> => new Promise((resolve, reject) => {
       chrome.storage.local.remove([name], () => {
+        if (chrome.runtime.lastError) {
+          console.error('[chromeStorage] removeItem error:', chrome.runtime.lastError.message);
+          reject(new Error(chrome.runtime.lastError.message ?? 'Failed to remove from storage'));
+          return;
+        }
         resolve();
       });
     }),

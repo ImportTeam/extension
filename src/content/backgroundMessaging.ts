@@ -27,6 +27,16 @@ export function saveProductData(
       source,
     },
     (response: SaveResponse) => {
+      // chrome.runtime.lastError 체크 필수
+      if (chrome.runtime.lastError) {
+        networkLog.warn('Failed to send message to background', {
+          error: chrome.runtime.lastError.message,
+          messageType,
+          source,
+        });
+        return;
+      }
+
       if (response?.success) {
         networkLog.debug(`Product data saved`, { source, messageType });
       }

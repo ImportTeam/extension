@@ -1,20 +1,19 @@
 /**
  * Content Script Loader
- * 
- * Chrome Extension Manifest V3 doesn't support ES modules directly in content_scripts.
- * This loader dynamically imports the actual content script (built as ESM).
+ * - Manifest V3 content_scripts는 ESM을 직접 선언할 수 없으므로
+ *   dynamic import(chrome.runtime.getURL('content.js'))로 ESM을 로드한다.
+ * - 이 파일은 Classic Script 형태를 유지해야 하므로 static import 금지.
  */
 
-import { bootstrapLog, ErrorCode } from '../shared/utils/logger';
-
-(async (): Promise<void> => {
+((): void => {
   const src = chrome.runtime.getURL('content.js');
-  try {
-    await import(src);
-    bootstrapLog.info('Content script loaded via ESM');
-  } catch (e) {
-    bootstrapLog.error(ErrorCode.BST_E001, 'Failed to load content script', {
-      error: e instanceof Error ? e : new Error(String(e)),
+
+  // dynamic import는 classic 스크립트에서도 동작하며, content-script 컨텍스트를 유지함
+  import(src)
+    .then(() => {
+      console.warn('[PicSel] content.js loaded via dynamic import');
+    })
+    .catch((e) => {
+      console.error('[PicSel] Failed to load content.js', e);
     });
-  }
 })();

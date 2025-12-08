@@ -123,6 +123,18 @@ chrome.runtime.onMessage.addListener(
             lastUpdated: timestamp,
           },
           () => {
+            // chrome.runtime.lastError 체크
+            if (chrome.runtime.lastError) {
+              storeLog.error(ErrorCode.STO_E001, 'Failed to save to chrome.storage.local', {
+                error: new Error(chrome.runtime.lastError.message || 'Storage error'),
+              });
+              sendResponse({
+                success: false,
+                error: chrome.runtime.lastError.message,
+              });
+              return;
+            }
+
             storeLog.info('✅ Data saved to chrome.storage.local');
             storeLog.debug('📊 Stored product', {
               amount: productData.amount,
@@ -151,6 +163,19 @@ chrome.runtime.onMessage.addListener(
       if (message.type === 'GET_PRODUCT_DATA') {
         storeLog.debug('🔍 GET_PRODUCT_DATA request');
         chrome.storage.local.get(['currentProduct'], (result) => {
+          // chrome.runtime.lastError 체크
+          if (chrome.runtime.lastError) {
+            storeLog.error(ErrorCode.STO_E001, 'Failed to get from chrome.storage.local', {
+              error: new Error(chrome.runtime.lastError.message || 'Storage error'),
+            });
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+              data: null,
+            });
+            return;
+          }
+
           const currentProduct = result.currentProduct as StoredProductData | undefined;
           storeLog.debug('📦 Retrieved product data', {
             exists: !!currentProduct,
@@ -272,6 +297,18 @@ chrome.runtime.onMessage.addListener(
 
         // 기존 데이터 조회
         chrome.storage.local.get(['currentProduct'], (result) => {
+          // chrome.runtime.lastError 체크
+          if (chrome.runtime.lastError) {
+            storeLog.error(ErrorCode.STO_E001, 'Failed to get existing data', {
+              error: new Error(chrome.runtime.lastError.message || 'Storage error'),
+            });
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+            });
+            return;
+          }
+
           const existingData = (result.currentProduct || {}) as Partial<StoredProductData>;
 
           // 기존 데이터와 새로운 데이터 병합
@@ -290,6 +327,18 @@ chrome.runtime.onMessage.addListener(
               lastUpdated: timestamp,
             },
             () => {
+              // chrome.runtime.lastError 체크
+              if (chrome.runtime.lastError) {
+                storeLog.error(ErrorCode.STO_E001, 'Failed to update data', {
+                  error: new Error(chrome.runtime.lastError.message || 'Storage error'),
+                });
+                sendResponse({
+                  success: false,
+                  error: chrome.runtime.lastError.message,
+                });
+                return;
+              }
+
               storeLog.info('✅ Product data updated', {
                 amount: mergedData.amount,
                 cardBenefits: mergedData.cardBenefits?.length || 0,

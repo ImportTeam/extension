@@ -5,6 +5,7 @@
 
 import { ParsedProductInfo } from '../../../shared/types';
 import { parserLog, ErrorCode } from '../../../shared/utils/logger';
+import { extractNumber, extractCurrency, isValidPrice } from '../utils';
 
 export abstract class BaseParser {
   abstract readonly siteName: string;
@@ -16,18 +17,18 @@ export abstract class BaseParser {
 
   abstract parse(doc: Document): ParsedProductInfo | null;
 
+  /**
+   * 텍스트에서 숫자 추출 (utils.ts 위임)
+   */
   protected extractNumber(text: string): number | null {
-    const cleaned = text.replace(/[,₩$€£\s]/g, '').trim();
-    const match = cleaned.match(/(\d+)/);
-    return match ? parseInt(match[1], 10) : null;
+    return extractNumber(text);
   }
 
+  /**
+   * 텍스트에서 통화 추출 (utils.ts 위임)
+   */
   protected extractCurrency(text: string): string {
-    if (text.includes('원') || text.includes('KRW')) return 'KRW';
-    if (text.includes('$') || text.includes('USD')) return 'USD';
-    if (text.includes('€') || text.includes('EUR')) return 'EUR';
-    if (text.includes('¥') || text.includes('JPY')) return 'JPY';
-    return 'KRW';
+    return extractCurrency(text);
   }
 
   protected getTextBySelector(doc: Document, selector: string): string | null {
@@ -50,8 +51,11 @@ export abstract class BaseParser {
     return null;
   }
 
+  /**
+   * 가격 유효성 검증 (utils.ts 위임)
+   */
   protected isValidPrice(price: number): boolean {
-    return price > 100 && price < 100_000_000;
+    return isValidPrice(price);
   }
 
   protected searchPriceInDOM(doc: Document, pattern: RegExp): string | null {
