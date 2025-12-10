@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
-import { useSubPopupActions } from '../../shared/store';
-import type { CustomPaymentMethod } from '../../shared/types';
+import { z } from 'zod';
+import { useSubPopupActions } from '@/shared/store';
+import type { CustomPaymentMethod } from '@/shared/types';
 
 /**
  * AddPaymentForm Component
  * 새로운 결제 수단 추가 폼
  */
+
+// Zod 스키마로 런타임 검증
+const PaymentMethodSchema = z.object({
+  id: z.string().trim().min(1, '결제 수단 ID를 입력해주세요').max(50, 'ID는 50자 이하여야 합니다'),
+  name: z.string().trim().min(1, '결제 수단 이름을 입력해주세요').max(100, '이름은 100자 이하여야 합니다'),
+  savingAmount: z.number().min(0, '절약 금액은 0 이상이어야 합니다').max(1000000000, '금액이 너무 큽니다'),
+  fee: z.number().min(0, '수수료는 0 이상이어야 합니다').max(100, '수수료는 100 이하여야 합니다'),
+  baseFee: z.number().min(0, '기본 수수료는 0 이상이어야 합니다').max(100, '기본 수수료는 100 이하여야 합니다'),
+  confidence: z.number().min(0, '신뢰도는 0 이상이어야 합니다').max(1, '신뢰도는 1 이하여야 합니다'),
+  hasInstallment: z.boolean(),
+  installmentInfo: z.string().max(500, '할부 정보는 500자 이하여야 합니다'),
+});
 export const AddPaymentForm: React.FC = () => {
   const { addPaymentMethod } = useSubPopupActions();
   const [isLoading, setIsLoading] = useState(false);
@@ -40,28 +53,13 @@ export const AddPaymentForm: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    if (!formData.id.trim()) {
-      setError('결제 수단 ID를 입력해주세요.');
-      return false;
-    }
-
-    if (!formData.name.trim()) {
-      setError('결제 수단 이름을 입력해주세요.');
-      return false;
-    }
-
-    if (formData.savingAmount < 0) {
-      setError('절약 금액은 0 이상이어야 합니다.');
-      return false;
-    }
-
-    if (formData.fee < 0 || formData.fee > 100) {
-      setError('수수료는 0 ~ 100 사이여야 합니다.');
-      return false;
-    }
-
-    if (formData.confidence < 0 || formData.confidence > 1) {
-      setError('신뢰도는 0 ~ 1 사이여야 합니다.');
+    // Zod로 런타임 검증
+    const result = PaymentMethodSchema.safeParse(formData);
+    
+    if (!result.success) {
+      // 첫 번째 에러 메시지 표시
+      const firstError = result.error.issues[0];
+      setError(firstError?.message || '입력값이 올바르지 않습니다.');
       return false;
     }
 

@@ -8,12 +8,22 @@
 ((): void => {
   const src = chrome.runtime.getURL('content.js');
 
-  // dynamic import는 classic 스크립트에서도 동작하며, content-script 컨텍스트를 유지함
-  import(src)
-    .then(() => {
-      console.warn('[PicSel] content.js loaded via dynamic import');
-    })
-    .catch((e) => {
-      console.error('[PicSel] Failed to load content.js', e);
-    });
+  const script = document.createElement('script');
+  script.type = 'module';
+  script.src = src;
+
+  script.onload = () => {
+    console.warn('[PicSel] content.js loaded via injected module script');
+  };
+
+  script.onerror = (e) => {
+    console.error('[PicSel] Failed to load content.js', e);
+  };
+
+  const target = document.documentElement || document.head || document.body;
+  if (target) {
+    target.appendChild(script);
+  } else {
+    console.error('[PicSel] No DOM available to inject content.js');
+  }
 })();

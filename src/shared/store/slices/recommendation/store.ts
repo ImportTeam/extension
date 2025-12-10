@@ -70,16 +70,23 @@ export const useRecommendationStore = create<RecommendationStore>()(
       }),
 
       // onRehydrateStorage: stale data 처리
-      onRehydrateStorage: (): ((state: PersistedRecommendationState | undefined) => void) => (state): void => {
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('[Store] Rehydration failed:', error);
+          return;
+        }
+
         if (state && state.timestamp) {
           const age = Date.now() - state.timestamp;
 
           if (age > MAX_CACHE_AGE) {
-            // Stale data - reset data fields
-            state.recommendation = null;
-            state.alternatives = [];
-            state.discounts = null;
-            state.cardBenefits = null;
+            // Stale data - Zustand set()을 사용하여 안전하게 리셋
+            useRecommendationStore.setState({
+              recommendation: null,
+              alternatives: [],
+              discounts: null,
+              cardBenefits: null,
+            });
           }
         }
       },

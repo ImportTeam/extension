@@ -53,6 +53,8 @@
     {
       "resources": [
         "assets/*",
+        "assets/**",
+        "icons/*",
         "src/subpopup/index.html",
         "content.js"
       ],

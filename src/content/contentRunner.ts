@@ -3,14 +3,14 @@
  * 책임: 파싱 실행 및 UI 마운트 조율
  */
 
-import { ParsedProductInfo } from '../shared/types';
+import { ParsedProductInfo } from '@/shared/types';
 import { mountToggleBar, updateToggleBar, type ToggleProductData } from './ui/toggleBar';
 import { detectSite } from './siteDetector';
 import { createParser, createFallbackParser } from './parserFactory';
 import { saveProductData, type MessageSource } from './backgroundMessaging';
 import { setupDynamicContentObserver, type CleanupFn } from './dynamicObserver';
 import { setupElevenStreetBenefitWatcher } from './elevenStreetBenefits';
-import { logger, LogDomain, ErrorCode } from '../shared/utils/logger';
+import { logger, LogDomain, ErrorCode } from '@/shared/utils/logger';
 
 const isMainFrame = window.self === window.top;
 let hasRun = false;

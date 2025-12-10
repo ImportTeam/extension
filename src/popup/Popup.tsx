@@ -5,12 +5,12 @@ import {
   useRecommendationError,
   useIsIdle,
   useIsRecommended,
-} from '../shared/store';
-import { IdleView } from '../content/ui/components/IdleView';
-import { RecommendedView } from '../content/ui/components/RecommendedView';
-import { FooterButtons } from '../content/ui/components/FooterButtons';
+} from '@/shared/store';
+import { IdleView } from '@/content/ui/components/IdleView';
+import { RecommendedView } from '@/content/ui/components/RecommendedView';
+import { FooterButtons } from '@/content/ui/components/FooterButtons';
 import { popupStyles as styles } from './styles/popup/popupStyles';
-import { WINDOW_CONFIG } from '../shared/types/constants';
+import { WINDOW_CONFIG } from '@/shared/types/constants';
 
 export const Popup: React.FC = () => {
   const isLoading = useIsLoading();

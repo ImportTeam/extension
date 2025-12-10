@@ -9,8 +9,8 @@
  * 5. 가격 비교 API 호출
  */
 
-import { extLog, networkLog, storeLog, ErrorCode } from '../shared/utils/logger';
-import type { StoredProductData } from '../shared/types';
+import { extLog, networkLog, storeLog, ErrorCode } from '@/shared/utils/logger';
+import type { StoredProductData } from '@/shared/types';
 
 extLog.info('🟢 Service Worker initialized');
 
@@ -62,25 +62,41 @@ interface PriceComparisonMessage {
 
 /**
  * 가격 비교 API 호출
+ * @param query - 검색 쿼리
+ * @param providers - 검색 제공자 목록 (선택)
+ * @throws {Error} 타임아웃(10초) 또는 네트워크 오류
  */
 async function fetchPriceComparison(query: string, providers?: string[]): Promise<ComparisonResponse> {
-  const response = await fetch(`${COMPARISON_SERVER_URL}/api/compare`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      providers,
-      maxResults: 5,
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 timeout
 
-  if (!response.ok) {
-    throw new Error(`API 요청 실패: ${response.status}`);
+  try {
+    const response = await fetch(`${COMPARISON_SERVER_URL}/api/compare`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        providers,
+        maxResults: 5,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 요청 실패: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('요청 시간 초과 (10초)');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json();
 }
 
 chrome.runtime.onMessage.addListener(
@@ -262,9 +278,13 @@ chrome.runtime.onMessage.addListener(
       if (message.type === 'CHECK_COMPARISON_SERVER') {
         networkLog.debug('🔍 Checking comparison server status');
         
-        fetch(`${COMPARISON_SERVER_URL}/api/health`)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5초 timeout
+        
+        fetch(`${COMPARISON_SERVER_URL}/api/health`, { signal: controller.signal })
           .then((response) => response.json())
           .then((data) => {
+            clearTimeout(timeoutId);
             networkLog.info('✅ Comparison server is healthy', data);
             sendResponse({
               success: true,
@@ -272,12 +292,16 @@ chrome.runtime.onMessage.addListener(
             });
           })
           .catch((error) => {
+            clearTimeout(timeoutId);
+            const errorMessage = error instanceof Error && error.name === 'AbortError'
+              ? '서버 응답 시간 초과'
+              : '가격 비교 서버에 연결할 수 없습니다';
             networkLog.error(ErrorCode.NET_E001, 'Comparison server is down', {
               error: error instanceof Error ? error : new Error(String(error)),
             });
             sendResponse({
               success: false,
-              error: '가격 비교 서버에 연결할 수 없습니다',
+              error: errorMessage,
             });
           });
 
