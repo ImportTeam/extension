@@ -7,6 +7,7 @@
  */
 
 import type { PersistStorage } from 'zustand/middleware';
+import { storeLog, ErrorCode } from '@/shared/utils/logger';
 
 /**
  * StateStorage 인터페이스 구현
@@ -29,7 +30,10 @@ export const chromeStorageAdapter: ChromeStorageAdapter = {
       chrome.storage.local.get([name], (result) => {
         if (chrome.runtime.lastError) {
           // 에러가 있어도 null 반환 (graceful degradation)
-          console.warn('[chromeStorage] getItem error:', chrome.runtime.lastError.message);
+          storeLog.warn('chromeStorage getItem failed', {
+            key: name,
+            error: chrome.runtime.lastError.message,
+          });
           resolve(null);
           return;
         }
@@ -40,7 +44,11 @@ export const chromeStorageAdapter: ChromeStorageAdapter = {
   setItem: async (name: string, value: string): Promise<void> => new Promise((resolve, reject) => {
       chrome.storage.local.set({ [name]: value }, () => {
         if (chrome.runtime.lastError) {
-          console.error('[chromeStorage] setItem error:', chrome.runtime.lastError.message);
+          const err = new Error(`chromeStorage setItem failed: ${chrome.runtime.lastError.message}`);
+          storeLog.error(ErrorCode.STO_E001, 'chromeStorage setItem failed', {
+            data: { key: name },
+            error: err,
+          });
           reject(new Error(chrome.runtime.lastError.message ?? 'Failed to save to storage'));
           return;
         }
@@ -51,7 +59,11 @@ export const chromeStorageAdapter: ChromeStorageAdapter = {
   removeItem: async (name: string): Promise<void> => new Promise((resolve, reject) => {
       chrome.storage.local.remove([name], () => {
         if (chrome.runtime.lastError) {
-          console.error('[chromeStorage] removeItem error:', chrome.runtime.lastError.message);
+          const err = new Error(`chromeStorage removeItem failed: ${chrome.runtime.lastError.message}`);
+          storeLog.error(ErrorCode.STO_E001, 'chromeStorage removeItem failed', {
+            data: { key: name },
+            error: err,
+          });
           reject(new Error(chrome.runtime.lastError.message ?? 'Failed to remove from storage'));
           return;
         }

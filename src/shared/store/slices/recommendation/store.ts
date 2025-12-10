@@ -21,6 +21,7 @@ import {
   STORAGE_KEYS,
   MAX_CACHE_AGE,
 } from '../../middleware/chromeStorage';
+import { storeLog, ErrorCode } from '@/shared/utils/logger';
 
 import type {
   RecommendationStore,
@@ -72,7 +73,9 @@ export const useRecommendationStore = create<RecommendationStore>()(
       // onRehydrateStorage: stale data 처리
       onRehydrateStorage: () => (state, error) => {
         if (error) {
-          console.error('[Store] Rehydration failed:', error);
+          storeLog.error(ErrorCode.STO_E003, 'Store rehydration failed', {
+            error: error instanceof Error ? error : new Error(String(error)),
+          });
           return;
         }
 
@@ -81,6 +84,10 @@ export const useRecommendationStore = create<RecommendationStore>()(
 
           if (age > MAX_CACHE_AGE) {
             // Stale data - Zustand set()을 사용하여 안전하게 리셋
+            storeLog.info('🔄 Cache expired, resetting recommendation store', {
+              age: `${Math.floor(age / 1000)}s`,
+              maxAge: `${MAX_CACHE_AGE / 1000}s`,
+            });
             useRecommendationStore.setState({
               recommendation: null,
               alternatives: [],

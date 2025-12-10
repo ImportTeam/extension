@@ -5,6 +5,8 @@
  * - 이 파일은 Classic Script 형태를 유지해야 하므로 static import 금지.
  */
 
+import { extLog, ErrorCode } from '@/shared/utils/logger';
+
 ((): void => {
   const src = chrome.runtime.getURL('content.js');
 
@@ -13,17 +15,19 @@
   script.src = src;
 
   script.onload = () => {
-    console.warn('[PicSel] content.js loaded via injected module script');
+    extLog.info('📦 content.js loaded via injected module script');
   };
 
   script.onerror = (e) => {
-    console.error('[PicSel] Failed to load content.js', e);
+    extLog.error(ErrorCode.EXT_E001, 'Failed to load content.js', {
+      error: e instanceof Error ? e : new Error(String(e)),
+    });
   };
 
   const target = document.documentElement || document.head || document.body;
   if (target) {
     target.appendChild(script);
   } else {
-    console.error('[PicSel] No DOM available to inject content.js');
+    extLog.error(ErrorCode.EXT_E001, 'No DOM available to inject content.js');
   }
 })();
