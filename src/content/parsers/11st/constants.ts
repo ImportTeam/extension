@@ -14,6 +14,8 @@ export const ELEVEN_ST_SELECTORS = {
     // 할인가 (현재 판매가)
     salePrice: '.price_info .price .value',
     salePriceAlt: '#finalDscPrcArea .price .value',
+    salePriceAlt2: '.c_product_price .price .value',
+    salePriceAlt3: '[class*="price"] .value',
     // 할인율
     discountRate: '.price_info .rate .value',
     // 최대할인가
@@ -24,6 +26,9 @@ export const ELEVEN_ST_SELECTORS = {
     maxDiscountItems: '#arMaximumDiscount .discount_prices .field',
     // 즉시할인, 쿠폰할인 금액
     discountDetail: '#arMaximumDiscount .discount_prices.list_type .price',
+    // 특수 페이지 fallback
+    dealPrice: '.deal_price .value, [class*="deal"] .price',
+    specialPrice: '.special_price .value',
   },
 
   // ===== 상품 정보 =====
@@ -31,6 +36,8 @@ export const ELEVEN_ST_SELECTORS = {
     // 상품명
     title: '.c_product_info_title h1.title',
     titleAlt: '.c_product_info_title_coupon h1.title',
+    titleAlt2: 'h1[class*="title"]',
+    titleAlt3: 'h1.product_name',
     // 부제목
     subtitle: '.c_product_info_title .title_sub',
   },

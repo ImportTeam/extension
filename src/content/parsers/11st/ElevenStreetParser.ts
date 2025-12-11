@@ -5,7 +5,7 @@
 
 import { BaseParser } from '../base/index';
 import { ParsedProductInfo } from '../../../shared/types';
-import { ELEVEN_ST_SELECTORS, ELEVEN_ST_URL_PATTERNS, ELEVEN_ST_CONSTANTS } from './constants';
+import { ELEVEN_ST_SELECTORS, ELEVEN_ST_CONSTANTS } from './constants';
 import * as Product from './modules/product';
 import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
@@ -33,9 +33,31 @@ export class ElevenStreetParser extends BaseParser {
 
   /**
    * 11번가 상품 페이지인지 확인
+   * 전략: 도메인 기반 - 명확히 상품이 아닌 페이지만 제외
    */
   static isProductPage(url: string): boolean {
-    const isProduct = ELEVEN_ST_URL_PATTERNS.some(pattern => pattern.test(url));
+    // 1. 11번가 도메인 체크 (PC + 모바일)
+    if (!/11st\.co\.kr/.test(url)) {
+      return false;
+    }
+
+    // 2. 제외 패턴 (상품 페이지가 아닌 것)
+    const excludePatterns = [
+      /11st\.co\.kr\/?$/,                    // 홈페이지
+      /11st\.co\.kr\/category/,              // 카테고리 목록
+      /11st\.co\.kr\/search/,                // 검색 결과
+      /11st\.co\.kr\/browsing/,              // 브라우징
+      /11st\.co\.kr\/best/,                  // 베스트 상품 목록
+      /11st\.co\.kr\/event$/,                // 이벤트 목록
+      /11st\.co\.kr\/cart/,                  // 장바구니
+      /11st\.co\.kr\/order/,                 // 주문
+      /11st\.co\.kr\/my11st/,                // 마이페이지
+      /11st\.co\.kr\/login/,                 // 로그인
+      /11st\.co\.kr\/member/,                // 회원 관련
+    ];
+
+    const isExcluded = excludePatterns.some(pattern => pattern.test(url));
+    const isProduct = !isExcluded;
     parseLog.debug(`isProductPage("${url}") = ${isProduct}`);
     return isProduct;
   }

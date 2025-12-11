@@ -23,9 +23,29 @@ export class CoupangParser extends BaseParser {
 
   /**
    * 쿠팡 상품 페이지인지 확인
+   * 전략: 도메인 기반 - 명확히 상품이 아닌 페이지만 제외
    */
   static isCheckoutPage(url: string): boolean {
-    const isCheckout = /coupang\.com\/vp\//.test(url) || /coupang\.com\/n\//.test(url) || /coupang\.com\/products\//.test(url);
+    // 1. 쿠팡 도메인 체크
+    if (!/coupang\.com/.test(url)) {
+      return false;
+    }
+
+    // 2. 제외 패턴 (상품 페이지가 아닌 것)
+    const excludePatterns = [
+      /coupang\.com\/?$/,                    // 홈페이지
+      /coupang\.com\/np\/categories/,        // 카테고리 목록
+      /coupang\.com\/np\/search/,            // 검색 결과
+      /coupang\.com\/np\/campaigns/,         // 캠페인 목록
+      /coupang\.com\/np\/cart/,              // 장바구니
+      /coupang\.com\/np\/checkout/,          // 체크아웃
+      /coupang\.com\/my\//,                  // 마이페이지
+      /coupang\.com\/np\/login/,             // 로그인
+      /coupang\.com\/np\/register/,          // 회원가입
+    ];
+
+    const isExcluded = excludePatterns.some(pattern => pattern.test(url));
+    const isCheckout = !isExcluded;
     parseLog.debug(`isCheckoutPage("${url}") = ${isCheckout}`);
     return isCheckout;
   }

@@ -7,8 +7,12 @@ export const GMARKET_SELECTORS = {
   // 상품 기본 정보
   product: {
     title: 'h1.itemtit',
+    titleAlt: 'h1[class*="title"]',
+    titleAlt2: '.box__item-title h1',
+    titleAlt3: 'h1',
     image: 'img[src*="gdimg.gmarket.co.kr"]',
     mainImage: '.box__item-main-image img',
+    mainImageAlt: 'img[class*="main"]',
   },
 
   // 가격 정보
@@ -16,13 +20,21 @@ export const GMARKET_SELECTORS = {
     // 결제할인가 (최종가)
     discountPrice: '.box__payment-discount .text__price strong',
     discountPriceAlt: '#paymentDiscountDetail-title .text__price',
+    discountPriceAlt2: '[class*="discount"] strong',
     // 판매가
     salePrice: '.price_real',
     salePriceAlt: 'strong.price_real',
+    salePriceAlt2: '.box__price strong',
+    salePriceAlt3: '[class*="price"] strong',
     // 정가 (원가)
     originalPrice: '.text__price-original .text__price',
+    originalPriceAlt: '.box__original-price .text__price',
     // 할인율
     discountRate: '.text__discount-rate',
+    discountRateAlt: '[class*="discount"][class*="rate"]',
+    // 특수 페이지 fallback
+    dealPrice: '.deal-price strong, [class*="deal"] strong',
+    specialPrice: '.special-price strong',
   },
 
   // G마켓 제휴카드

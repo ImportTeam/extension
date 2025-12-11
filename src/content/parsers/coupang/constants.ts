@@ -21,6 +21,14 @@ export const COUPANG_SELECTORS = {
     '.prod_price',
     'strong.price',
     'span.price',
+    // 특수 페이지 (딜, 기획전 등)
+    '.deal-price',
+    '.special-price',
+    '.discount-price strong',
+    '[class*="sale"] strong',
+    '[class*="discount"] strong',
+    'div[class*="price"] > strong',
+    'span[class*="price"] > strong',
     // 더 넓은 범위 (최후 수단)
     '[class*="price"]',
   ],
@@ -29,6 +37,12 @@ export const COUPANG_SELECTORS = {
     'h1.product-name',
     'h2[class*="title"]',
     '[data-testid="product-title"]',
+    // 특수 페이지
+    '.deal-title',
+    '.special-title',
+    'h1[class*="product"]',
+    'h1[class*="title"]',
+    'h1',
   ],
   mainImage: 'img.twc-w-full.twc-max-h-\\[546px\\]',
   thumbnailContainer: 'div.twc-w-\\[70px\\]',

@@ -39,7 +39,7 @@ function generateIcons(): { name: string; closeBundle: () => void } {
             console.warn(`⚠️ Missing icon source file: ${src}`);
           }
         });
-
+        // eslint-disable-next-line no-console
         console.log('✅ Icons & manifest copied successfully (cross-platform).');
       } catch (error) {
         console.error('❌ Failed to copy icons/manifest:', error);
@@ -66,7 +66,7 @@ export default defineConfig({
       input: {
         background: resolve(__dirname, 'src/background/index.ts'),
         content: resolve(__dirname, 'src/content/index.ts'),
-        loader: resolve(__dirname, 'src/content/loader.ts'), // Add loader entry
+        loader: resolve(__dirname, 'src/content/loader.ts'),
         popup: resolve(__dirname, 'src/popup/index.html'),
         options: resolve(__dirname, 'src/options/index.html'),
         subpopup: resolve(__dirname, 'src/subpopup/index.html'),
@@ -75,13 +75,12 @@ export default defineConfig({
         entryFileNames: (chunkInfo): string => {
           if (chunkInfo.name === 'background') return 'background.js';
           if (chunkInfo.name === 'content') return 'content.js';
-          if (chunkInfo.name === 'loader') return 'loader.js'; // Output loader.js
+          if (chunkInfo.name === 'loader') return 'loader.js';
           return 'assets/[name]-[hash].js';
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        // Use default 'es' format (ESM)
-        inlineDynamicImports: false,
+        format: 'es',
       },
     },
     outDir: 'dist',

@@ -16,7 +16,7 @@ export const FooterButtons: React.FC = () => {
   const handleNavigateToPicsel = (): void => {
     // Navigate to PicSel dashboard in a new browser tab
     chrome.tabs.create({
-      url: 'https://picsel.io/dashboard',
+      url: 'https://picsel.kr/dashboard',
       active: false,
     });
   };

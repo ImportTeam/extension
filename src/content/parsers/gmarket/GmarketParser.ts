@@ -5,7 +5,7 @@
 
 import { BaseParser } from '../base';
 import { ParsedProductInfo } from '../../../shared/types';
-import { GMARKET_SELECTORS, GMARKET_URL_PATTERNS } from './constants';
+import { GMARKET_SELECTORS } from './constants';
 import * as Product from './modules/product';
 import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
@@ -27,14 +27,31 @@ export class GmarketParser extends BaseParser {
 
   /**
    * G마켓 상품 페이지인지 확인
+   * 전략: 도메인 기반 - 명확히 상품이 아닌 페이지만 제외
    */
   static isCheckoutPage(url: string): boolean {
-    const patterns = GMARKET_URL_PATTERNS;
-    const isCheckout =
-      patterns.productPage.test(url) ||
-      patterns.vipPage.test(url) ||
-      patterns.generalProduct.test(url);
+    // 1. G마켓 도메인 체크
+    if (!/gmarket\.co\.kr/.test(url)) {
+      return false;
+    }
 
+    // 2. 제외 패턴 (상품 페이지가 아닌 것)
+    const excludePatterns = [
+      /gmarket\.co\.kr\/?$/,                 // 홈페이지
+      /gmarket\.co\.kr\/n\/category/,        // 카테고리 목록
+      /gmarket\.co\.kr\/n\/search/,          // 검색 결과
+      /gmarket\.co\.kr\/n\/best$/,           // 베스트 목록
+      /gmarket\.co\.kr\/n\/deals$/,          // 딜 목록
+      /gmarket\.co\.kr\/n\/event$/,          // 이벤트 목록
+      /gmarket\.co\.kr\/cart/,               // 장바구니
+      /gmarket\.co\.kr\/order/,              // 주문
+      /gmarket\.co\.kr\/my/,                 // 마이페이지
+      /gmarket\.co\.kr\/login/,              // 로그인
+      /gmarket\.co\.kr\/join/,               // 회원가입
+    ];
+
+    const isExcluded = excludePatterns.some(pattern => pattern.test(url));
+    const isCheckout = !isExcluded;
     parserLog.debug(`isCheckoutPage check`, { url, isCheckout });
     return isCheckout;
   }

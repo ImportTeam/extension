@@ -112,7 +112,12 @@ const getCardSvgPath = (cardName: string): string | null => {
 	for (const { keywords, svg } of cardSvgMapping) {
 		for (const keyword of keywords) {
 			if (normalizedName.includes(keyword.toUpperCase())) {
-				return chrome.runtime.getURL(`assets/card/${svg}`);
+				try {
+					// chrome.runtime이 없는 컨텍스트에서도 안전하게 처리
+					return chrome?.runtime?.getURL(`assets/card/${svg}`) ?? null;
+				} catch {
+					return null;
+				}
 			}
 		}
 	}
@@ -251,9 +256,11 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 	const benefits = Array.isArray(data.cardBenefits) ? data.cardBenefits : [];
 	
 	if (benefits.length === 0) {
-		// 카드 혜택이 없으면 안내 메시지 표시
+		// 카드 혜택이 없으면 안내 메시지 표시 (hidden 처리)
 		const emptySection = document.createElement('section');
-		emptySection.className = 'picsel-section picsel-card-section';
+		emptySection.className = 'picsel-section picsel-card-section picsel-hidden';
+		emptySection.setAttribute('data-empty', 'true');
+		emptySection.style.display = 'none'; // CSS 클래스와 별개로 display:none 추가
 
 		const title = document.createElement('h4');
 		title.className = 'picsel-section-title';
@@ -262,7 +269,7 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 
 		const emptyMsg = document.createElement('div');
 		emptyMsg.className = 'picsel-empty-benefits';
-		emptyMsg.textContent = '카드 혜택 정보를 불러오는 중...';
+		emptyMsg.textContent = '이 상품에는 카드 혜택이 없어요';
 		emptySection.appendChild(emptyMsg);
 
 		return emptySection;
