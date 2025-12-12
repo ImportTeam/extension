@@ -34,6 +34,7 @@ export class CoupangParser extends BaseParser {
     // 2. 제외 패턴 (상품 페이지가 아닌 것)
     const excludePatterns = [
       /coupang\.com\/?$/,                    // 홈페이지
+      /shop\.coupang\.com/,                  // 쇼핑 홈 (기업 페이지)
       /coupang\.com\/np\/categories/,        // 카테고리 목록
       /coupang\.com\/np\/search/,            // 검색 결과
       /coupang\.com\/np\/campaigns/,         // 캠페인 목록

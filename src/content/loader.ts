@@ -14,7 +14,7 @@
   script.src = src;
 
   script.onload = () => {
-    console.log('[PicSel] content.js loaded via injected module script');
+    console.warn('[PicSel] content.js loaded via injected module script');
   };
 
   script.onerror = (e) => {

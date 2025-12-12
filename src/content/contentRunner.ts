@@ -11,6 +11,7 @@ import { saveProductData, type MessageSource } from './backgroundMessaging';
 import { setupDynamicContentObserver, type CleanupFn } from './dynamicObserver';
 import { setupElevenStreetBenefitWatcher } from './elevenStreetBenefits';
 import { logger, LogDomain, ErrorCode } from '@/shared/utils/logger';
+import { useSettingsStore } from '@/shared/store/slices/settings';
 
 const isMainFrame = window.self === window.top;
 let hasRun = false;
@@ -21,6 +22,41 @@ const cleanupFns: CleanupFn[] = [];
 export interface ExtractionResult {
   paymentInfo: ParsedProductInfo;
   site: string;
+}
+
+/**
+ * 최저가 비교 요청 전송
+ */
+async function sendPriceComparisonRequest(
+  productUrl: string,
+  productName: string
+): Promise<void> {
+  try {
+    logger.info(LogDomain.NETWORK, 'Sending price comparison request', {
+      url: productUrl,
+      product: productName,
+    });
+
+    const response = await chrome.runtime.sendMessage({
+      type: 'COMPARE_PRICES',
+      query: productName,
+      providers: ['coupang', '11st', 'gmarket'],
+    });
+
+    if (response?.success) {
+      logger.info(LogDomain.NETWORK, 'Price comparison completed', {
+        resultCount: response.data?.results?.length || 0,
+      });
+    } else {
+      logger.warn(LogDomain.NETWORK, 'Price comparison failed', {
+        error: response?.error,
+      });
+    }
+  } catch (error) {
+    logger.error(LogDomain.NETWORK, ErrorCode.NET_E002, 'Price comparison request error', {
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
+  }
 }
 
 export function extractPaymentInfo(): ExtractionResult | null {
@@ -79,6 +115,20 @@ function init(): void {
 
   mountToggleBar(toToggleData(result.paymentInfo, result.site));
   saveProductData(result.paymentInfo, 'initial');
+
+  // Settings store에서 자동 최저가 검색 설정 확인
+  const settings = useSettingsStore.getState();
+  if (settings.autoFetchLowestPrice && result.paymentInfo.title) {
+    logger.info(LogDomain.BOOTSTRAP, 'Auto fetch lowest price enabled', {
+      displayMode: settings.displayMode,
+    });
+    
+    // BE에 가격 비교 요청 전송
+    sendPriceComparisonRequest(
+      window.location.href,
+      result.paymentInfo.title
+    );
+  }
 }
 
 /**

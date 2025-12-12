@@ -87,6 +87,7 @@ export function asPersistStorage<T>(): PersistStorage<T> {
 export const STORAGE_KEYS = {
   RECOMMENDATION: 'picsel-recommendation',
   SUBPOPUP: 'subpopup-store',
+  SETTINGS: 'picsel-settings',
 } as const;
 
 /**

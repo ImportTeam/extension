@@ -7,6 +7,7 @@ import type { ToggleProductData } from './types';
 import { formatCurrency } from './utils';
 import { state } from './state';
 import { createHeroSection, createCardBenefitsSection, createFooterSection } from './components';
+import { useSettingsStore } from '@/shared/store/slices/settings';
 
 /**
  * 버튼 배지 업데이트
@@ -78,14 +79,36 @@ export const renderContent = (): void => {
 
 	const data = cachedData;
 
+	// Settings에서 표시 모드 가져오기
+	const { displayMode } = useSettingsStore.getState();
+
 	// 1. Hero Section (상품 정보)
 	const heroSection = createHeroSection(data);
 	contentEl.appendChild(heroSection);
 
-	// 2. Card Benefits Section (메인 콘텐츠 - 카드별 혜택 비교)
-	const cardSection = createCardBenefitsSection(data);
-	if (cardSection) {
-		contentEl.appendChild(cardSection);
+	// 2. 표시 모드에 따라 분기
+	if (displayMode === 'lowest-price') {
+		// TODO: 최저가 비교 UI 구현
+		const lowestPriceSection = document.createElement('section');
+		lowestPriceSection.className = 'picsel-section picsel-lowest-price-section';
+		
+		const title = document.createElement('h4');
+		title.className = 'picsel-section-title';
+		title.textContent = '💰 최저가 비교';
+		lowestPriceSection.appendChild(title);
+
+		const placeholder = document.createElement('div');
+		placeholder.className = 'picsel-empty-state';
+		placeholder.textContent = '최저가 비교 기능은 개발 중입니다. 카드 혜택 모드로 전환하거나 수동으로 가격 비교를 시도해보세요.';
+		lowestPriceSection.appendChild(placeholder);
+
+		contentEl.appendChild(lowestPriceSection);
+	} else {
+		// 기존: 카드 혜택 우선
+		const cardSection = createCardBenefitsSection(data);
+		if (cardSection) {
+			contentEl.appendChild(cardSection);
+		}
 	}
 
 	// 3. Footer Section (추가 혜택)

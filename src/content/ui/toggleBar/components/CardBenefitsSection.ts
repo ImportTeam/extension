@@ -96,7 +96,7 @@ const getCardSvgPath = (cardName: string): string | null => {
 		// NH/농협
 		{ keywords: ['NH', '농협', 'NH농협'], svg: 'nhCard.svg' },
 		// 나머지 카드사 (긴 이름 우선)
-		{ keywords: ['삼성', 'SAMSUNG', '삼성카드'], svg: 'samsungCard.svg' },
+		{ keywords: ['삼성', 'SAMSUNG', '삼성카드', 'SAMSUNG CARD'], svg: 'samsungCard.svg' },
 		{ keywords: ['현대', 'HYUNDAI', '현대카드'], svg: 'hyundaiCard.svg' },
 		{ keywords: ['신한', 'SHINHAN', '신한카드'], svg: 'shinhanCard.svg' },
 		{ keywords: ['롯데', 'LOTTE', '롯데카드'], svg: 'lotteCard.svg' },

@@ -36,7 +36,7 @@ export const extractShippingInfo = (doc: Document): ShippingInfo | null => {
     if (feeMatch) {
       fee = `${feeMatch[1]}원`;
     } else if (text.includes('무료')) {
-      fee = '무료';
+      fee = '무료배송';
       isFree = true;
     }
 
