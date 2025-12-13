@@ -8,30 +8,9 @@
  * Tabs: tab, active state
  */
 
+@layer components {
+
 /* ========== BUTTONS ========== */
-
-button {
-  all: unset;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: inherit;
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-base);
-  position: relative;
-  user-select: none;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
 
 /* Button sizes */
 button.btn-sm {
@@ -106,11 +85,7 @@ button.btn-ghost:active:not(:disabled) {
 }
 
 /* Loading state */
-button:disabled {
-  opacity: 0.6;
-}
-
-button.loading::after {
+button.btn-primary.loading::after {
   content: '';
   position: absolute;
   width: 16px;
@@ -416,6 +391,8 @@ textarea {
   font-size: var(--text-xs);
   opacity: 0;
   transition: opacity var(--transition-fast);
+}
+
 }
 
 .tooltip-text::after {

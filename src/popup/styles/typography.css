@@ -15,6 +15,8 @@
  * label: 12px / 500 (form labels)
  */
 
+@layer base {
+
 /* ========== HEADING SCALES ========== */
 
 h1 {
@@ -214,4 +216,6 @@ label {
 
 .tracking-wide {
   letter-spacing: 0.02em;
+}
+
 }

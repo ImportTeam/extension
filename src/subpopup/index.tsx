@@ -19,7 +19,7 @@ const isAutoMode = params.get('auto') === 'true';
 
 extLog.info(`🎪 SubPopup Mode: ${isAutoMode ? 'Auto' : 'Manual'}`);
 
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById('subpopup-root');
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>

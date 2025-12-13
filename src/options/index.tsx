@@ -70,7 +70,7 @@ export const Options: React.FC = () => {
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-semibold">설정</h1>
+          <h1 className="m-0 text-xl font-semibold">설정</h1>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setForceTheme(forceTheme === 'auto' ? 'light' : forceTheme === 'light' ? 'dark' : 'auto')}
@@ -90,7 +90,7 @@ export const Options: React.FC = () => {
 
         {/* Display Mode */}
         <section className="mb-2">
-          <h2 className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <h2 className="m-0 px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             표시 모드
           </h2>
           <div className="bg-gray-50 dark:bg-[#0f1723] divide-y divide-gray-100 dark:divide-gray-800 px-3 py-3">
@@ -113,7 +113,7 @@ export const Options: React.FC = () => {
 
         {/* Auto Search */}
         <section className="mb-2">
-          <h2 className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <h2 className="m-0 px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             자동화
           </h2>
           <div className="bg-gray-50 dark:bg-[#0f1723] p-3">
