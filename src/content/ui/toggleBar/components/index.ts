@@ -1,8 +1,10 @@
 /**
- * Toggle Bar 컴포넌트 모듈 진입점
+ * Legacy facade (SRP): moved to ../view/components
  */
 
-export { createHeroSection } from './HeroSection';
-export { createCardBenefitsSection } from './CardBenefitsSection';
-export { createFooterSection } from './FooterSection';
-export { createLowestPriceSection } from './LowestPriceSection';
+export {
+	createHeroSection,
+	createCardBenefitsSection,
+	createFooterSection,
+	createLowestPriceSection,
+} from '../view/components';

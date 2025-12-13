@@ -3,7 +3,7 @@
  * index.ts는 오직 import/export 및 bootstrap만 담당
  */
 
-import { bootstrap } from './bootstrap';
-import { runContentScript } from './contentRunner';
+import { bootstrap } from './runtime/bootstrap';
+import { runContentScript } from './runtime/runContentScript';
 
 bootstrap(runContentScript);
