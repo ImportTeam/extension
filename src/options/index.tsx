@@ -1,207 +1,215 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { useSettingsStore } from '../shared/store/slices/settings';
-import type { DisplayMode } from '../shared/store/slices/settings';
+import React, { useEffect, useState } from 'react';
 import '../popup/styles/globals.css';
-
-/**
- * Options Page
- * 사용자 설정 관리
- */
+import './options.css';
+import ReactDOM from 'react-dom/client';
+import { useSettingsStore } from '@/shared/store/slices/settings';
+import { CreditCard, ShoppingCart, Search, ChevronLeft, X, RotateCcw, Check } from 'lucide-react';
 
 export const Options: React.FC = () => {
   const {
     displayMode,
     autoFetchLowestPrice,
-    comparisonServerUrl,
     setDisplayMode,
     setAutoFetchLowestPrice,
-    setComparisonServerUrl,
     reset,
   } = useSettingsStore();
 
-  const handleDisplayModeChange = (mode: DisplayMode): void => {
-    setDisplayMode(mode);
-  };
-
-  const handleAutoFetchToggle = (): void => {
-    setAutoFetchLowestPrice(!autoFetchLowestPrice);
-  };
-
-  const handleServerUrlChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setComparisonServerUrl(e.target.value);
-  };
-
   const handleReset = (): void => {
-    if (confirm('모든 설정을 초기화하시겠습니까?')) {
+    if (confirm('설정을 초기화할까요?')) {
       reset();
     }
   };
 
+  const handleClose = (): void => {
+    window.close();
+  };
+
+  useEffect(() => {
+    try {
+      // Helpful debug logs to verify CSS load and count on Options page
+      // eslint-disable-next-line no-console
+      console.info('[Options] mounted, stylesheets=', document.styleSheets.length);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.info('[Options] mount log fail', e);
+    }
+  }, []);
+
+  // Temp helper to preview light/dark theme locally
+  const [forceTheme, setForceTheme] = useState<'auto' | 'light' | 'dark'>(() => {
+    try {
+      return (localStorage.getItem('options.forceTheme') as 'auto' | 'light' | 'dark') || 'auto';
+    } catch {
+      return 'auto';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (forceTheme === 'auto') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', forceTheme);
+      }
+      localStorage.setItem('options.forceTheme', forceTheme);
+    } catch {
+      // ignore
+    }
+  }, [forceTheme]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">PicSel 설정</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            결제 최적화 확장 프로그램 설정을 관리합니다.
-          </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-gray-100 transition-colors">
+          <div className="max-w-xl mx-auto p-6">
+            <div className="bg-white dark:bg-[#121212] rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800">
+          {/* Header */}
+            
+        <header className="flex items-center justify-between px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800">
+          <button 
+            onClick={handleClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-xl font-semibold">설정</h1>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setForceTheme(forceTheme === 'auto' ? 'light' : forceTheme === 'light' ? 'dark' : 'auto')}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              title={`Theme: ${forceTheme}`}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v2"></path></svg>
+            </button>
+            <button 
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </header>
 
-        {/* Settings Sections */}
-        <div className="space-y-6">
-          {/* Display Mode Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              📊 표시 모드
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              상품 페이지에서 어떤 정보를 우선적으로 표시할지 선택하세요.
-            </p>
+        {/* Display Mode */}
+        <section className="mb-2">
+          <h2 className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            표시 모드
+          </h2>
+          <div className="bg-gray-50 dark:bg-[#0f1723] divide-y divide-gray-100 dark:divide-gray-800 px-3 py-3">
+            <ListItem
+              icon={<CreditCard className="w-5 h-5" />}
+              title="카드 혜택"
+              desc="최대 혜택 카드 추천"
+              selected={displayMode === 'card-benefits'}
+              onClick={() => setDisplayMode('card-benefits')}
+            />
+            <ListItem
+              icon={<ShoppingCart className="w-5 h-5" />}
+              title="최저가 비교"
+              desc="쇼핑몰 가격 실시간 비교"
+              selected={displayMode === 'lowest-price'}
+              onClick={() => setDisplayMode('lowest-price')}
+            />
+          </div>
+        </section>
 
-            <div className="space-y-3">
-              {/* 카드 혜택 우선 */}
-              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700"
-                style={{
-                  borderColor: displayMode === 'card-benefits' ? 'oklch(0.65 0.15 270)' : 'oklch(0.85 0 0)',
-                  backgroundColor: displayMode === 'card-benefits' ? 'oklch(0.95 0.05 270)' : 'transparent',
-                }}
-              >
-                <input
-                  type="radio"
-                  name="displayMode"
-                  value="card-benefits"
-                  checked={displayMode === 'card-benefits'}
-                  onChange={() => handleDisplayModeChange('card-benefits')}
-                  className="mt-1 mr-3"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900 dark:text-gray-100">
-                    💳 카드 혜택 우선
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    현재 페이지의 카드별 할인율과 혜택을 분석하여 표시합니다. (기존 방식)
-                  </div>
+        {/* Auto Search */}
+        <section className="mb-2">
+          <h2 className="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            자동화
+          </h2>
+          <div className="bg-gray-50 dark:bg-[#0f1723] p-3">
+            <div className="flex items-center px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <Search className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </div>
-              </label>
-
-              {/* 최저가 비교 우선 */}
-              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700"
-                style={{
-                  borderColor: displayMode === 'lowest-price' ? 'oklch(0.65 0.15 270)' : 'oklch(0.85 0 0)',
-                  backgroundColor: displayMode === 'lowest-price' ? 'oklch(0.95 0.05 270)' : 'transparent',
-                }}
-              >
-                <input
-                  type="radio"
-                  name="displayMode"
-                  value="lowest-price"
-                  checked={displayMode === 'lowest-price'}
-                  onChange={() => handleDisplayModeChange('lowest-price')}
-                  className="mt-1 mr-3"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900 dark:text-gray-100">
-                    💰 최저가 비교 우선
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    여러 쇼핑몰의 가격을 비교하여 최저가 정보를 표시합니다.
-                  </div>
+                <div>
+                  <div className="font-medium text-sm">자동 검색</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">페이지 접속 시 자동 실행</div>
                 </div>
-              </label>
-            </div>
-          </section>
-
-          {/* Auto Fetch Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              🚀 자동 검색
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              페이지 로드 시 자동으로 최저가를 검색합니다.
-            </p>
-
-            <label className="flex items-center cursor-pointer">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={autoFetchLowestPrice}
-                  onChange={handleAutoFetchToggle}
-                  className="sr-only"
-                />
-                <div
-                  className="w-14 h-8 rounded-full transition-colors"
-                  style={{
-                    backgroundColor: autoFetchLowestPrice ? 'oklch(0.65 0.15 270)' : 'oklch(0.75 0 0)',
-                  }}
-                ></div>
-                <div
-                  className="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"
-                  style={{
-                    transform: autoFetchLowestPrice ? 'translateX(24px)' : 'translateX(0)',
-                  }}
-                ></div>
               </div>
-              <span className="ml-3 text-gray-900 dark:text-gray-100 font-medium">
-                {autoFetchLowestPrice ? '활성화' : '비활성화'}
-              </span>
-            </label>
-
-            {autoFetchLowestPrice && (
-              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  ℹ️ 상품 페이지 접속 시 자동으로 백엔드 서버에 요청하여 최저가 정보를 가져옵니다.
-                </p>
-              </div>
-            )}
-          </section>
-
-          {/* Server URL Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              🌐 서버 설정
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              가격 비교 백엔드 서버 URL을 설정합니다.
-            </p>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                서버 URL
-              </label>
-              <input
-                type="text"
-                value={comparisonServerUrl}
-                onChange={handleServerUrlChange}
-                placeholder="http://localhost:8000"
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+              <Toggle
+                checked={autoFetchLowestPrice}
+                onChange={setAutoFetchLowestPrice}
               />
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                개발 환경: http://localhost:8000 | 프로덕션: https://api.picsel.kr
-              </p>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Reset Button */}
-          <section className="flex justify-end">
-            <button
-              onClick={handleReset}
-              className="px-6 py-2 text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            >
-              ⚠️ 설정 초기화
-            </button>
-          </section>
-        </div>
+        {/* Reset */}
+        <div className="px-6 py-8">
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mx-auto"
+          >
+            <RotateCcw className="w-4 h-4" />
+            설정 초기화
+          </button>
+            </div>
+          </div>
+          </div>
+      </div>
+    );
+};
 
-        {/* Footer */}
-        <footer className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>PicSel v1.0.0 | 설정은 자동으로 저장됩니다.</p>
-        </footer>
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Components
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+interface ListItemProps {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  selected: boolean;
+  onClick: () => void;
+}
+
+const ListItem: React.FC<ListItemProps> = ({ icon, title, desc, selected, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center gap-4 px-4 py-3 transition-colors rounded-2xl ${selected ? 'bg-white dark:bg-gray-900 border-2 border-gray-900 dark:border-white shadow-sm' : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-600'} hover:bg-gray-50 dark:hover:bg-gray-900/50`}
+  >
+    <div className={`p-3 rounded-full flex items-center justify-center border ${selected ? 'bg-white dark:bg-gray-900 border-transparent dark:border-transparent' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600'}`}>
+      <div className={selected ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}>
+        {icon}
       </div>
     </div>
-  );
-};
+    <div className="flex-1 text-left">
+      <div className="font-medium text-sm">{title}</div>
+      <div className="text-xs text-gray-500 dark:text-gray-400">{desc}</div>
+    </div>
+    {selected && (
+      <Check className="w-5 h-5 text-gray-900 dark:text-white shrink-0" />
+    )}
+  </button>
+);
+
+interface ToggleProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}
+
+const Toggle: React.FC<ToggleProps> = ({ checked, onChange }) => (
+  <button
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange(!checked)}
+    className={`relative w-14 h-7 rounded-full transition-all duration-200 flex items-center focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-[#121212] ${
+      checked 
+        ? 'bg-violet-500 shadow-sm shadow-violet-500/30 dark:shadow-violet-500/20' 
+        : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+    }`}
+  >
+    <span
+      className={`absolute left-1 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+        checked ? 'translate-x-6' : 'translate-x-0'
+      }`}
+    />
+  </button>
+);
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Mount
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 const root = document.getElementById('root');
 if (root) {

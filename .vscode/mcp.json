@@ -1,0 +1,33 @@
+{
+	"servers": {
+		"io.github.ChromeDevTools/chrome-devtools-mcp": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"chrome-devtools-mcp@0.12.1"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.12.1"
+		},
+		"cognitionai/deepwiki": {
+			"type": "http",
+			"url": "https://mcp.deepwiki.com/sse",
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
+		},
+	},
+	"inputs": [
+		{
+			"id": "es_url",
+			"type": "promptString",
+			"description": "your elasticsearch url",
+			"password": false
+		},
+		{
+			"id": "es_api_key",
+			"type": "promptString",
+			"description": "your api key",
+			"password": true
+		}
+	]
+}

@@ -26,13 +26,41 @@ export const Popup: React.FC = () => {
   const popupHeight = isIdle ? WINDOW_CONFIG.POPUP.idleHeight : WINDOW_CONFIG.POPUP.expandedHeight;
 
   const handleOpenSettings = (): void => {
-    // Open SubPopup in a new window/dialog
-    chrome.windows.create({
-      url: chrome.runtime.getURL('src/subpopup/index.html'),
-      type: 'popup',
-      width: WINDOW_CONFIG.SUBPOPUP.width,
-      height: WINDOW_CONFIG.SUBPOPUP.height,
-    });
+    const optionsUrl = chrome.runtime.getURL('src/options/index.html');
+
+    try {
+      // Open Options page as popup window
+      chrome.windows.create(
+        {
+          url: optionsUrl,
+          type: 'popup',
+          width: WINDOW_CONFIG.SUBPOPUP.width,
+          height: WINDOW_CONFIG.SUBPOPUP.height,
+        },
+        () => {
+          const err = chrome.runtime.lastError;
+          if (err) {
+            // eslint-disable-next-line no-console
+            console.warn('[Popup] Failed to open options popup window:', err.message);
+
+            // Fallback: open the options page in a normal tab
+            if (typeof chrome.runtime.openOptionsPage === 'function') {
+              chrome.runtime.openOptionsPage();
+            } else {
+              window.open(optionsUrl, '_blank');
+            }
+          }
+        }
+      );
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[Popup] Exception while opening options:', e);
+      if (typeof chrome.runtime.openOptionsPage === 'function') {
+        chrome.runtime.openOptionsPage();
+      } else {
+        window.open(optionsUrl, '_blank');
+      }
+    }
   };
 
   return (

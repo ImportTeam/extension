@@ -2,20 +2,25 @@
  * PicSel - Global Styles
  * Entry point for all CSS
  * 
- * Import order:
- * 1. Tailwind CSS (base, components, utilities)
- * 2. CSS Variables (colors, spacing, typography)
- * 3. Reset & Base styles
- * 4. Typography system
- * 5. Component styles
+ * Import order (CRITICAL: reset/variables BEFORE Tailwind so utilities win):
+ * 1. CSS Variables (colors, spacing, typography)
+ * 2. Reset & Base styles (normalize browser defaults)
+ * 3. Tailwind CSS (base, components, utilities) - LAST so utilities override reset
+ * 4. Typography system (uses @layer base)
+ * 5. Component styles (uses @layer components)
  * 6. Dark mode overrides
  */
 
-/* Tailwind CSS v4 - required for @tailwindcss/vite plugin */
+/* 1. Variables first - defines CSS custom properties */
+@import './variables.css';
+
+/* 2. Reset BEFORE Tailwind - so Tailwind utilities can override */
+@import './reset.css';
+
+/* 3. Tailwind CSS v4 - AFTER reset so .px-6, .py-4 etc override reset's margin:0/padding:0 */
 @import "tailwindcss";
 
-@import './variables.css';
-@import './reset.css';
+/* 4-6. These use @layer so they integrate properly with Tailwind's layer system */
 @import './typography.css';
 @import './components.css';
 @import './dark-mode.css';
