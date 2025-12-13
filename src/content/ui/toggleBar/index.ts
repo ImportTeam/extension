@@ -14,5 +14,5 @@
 
 export type { ToggleProductData } from './types';
 export { mountToggleBar, updateToggleBar, setPanelOpen } from './mount';
-export { renderContent, updateBadge } from './render';
+export { renderContent, updateBadge, startLowestPriceComparisonAndRender } from './render';
 export { state, getPlatformDisplayName } from './state';

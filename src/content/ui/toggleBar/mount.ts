@@ -5,8 +5,9 @@
 
 import type { ToggleProductData } from './types';
 import { toggleBarStyles } from './styles';
-import { renderContent } from './render';
+import { renderContent, startLowestPriceComparisonAndRender } from './render';
 import { HOST_ID, PANEL_ID, state, getPlatformDisplayName } from './state';
+import { useSettingsStore } from '@/shared/store/slices/settings';
 
 /**
  * 패널 열기/닫기 제어
@@ -23,6 +24,14 @@ export const setPanelOpen = (open: boolean): void => {
 		panelEl.setAttribute('aria-hidden', 'false');
 		toggleButton.setAttribute('aria-expanded', 'true');
 		buttonLabelEl.textContent = 'PicSel 혜택 닫기';
+
+		// 패널이 열릴 때 최저가 비교 시작 (lowest-price 모드일 때만)
+		const { displayMode } = useSettingsStore.getState();
+		if (displayMode === 'lowest-price' && state.cachedData?.title) {
+			startLowestPriceComparisonAndRender(state.cachedData.title);
+		} else {
+			renderContent();
+		}
 	} else {
 		panelEl.classList.remove('open');
 		panelEl.setAttribute('aria-hidden', 'true');

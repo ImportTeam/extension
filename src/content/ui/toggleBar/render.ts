@@ -27,6 +27,12 @@ interface ComparisonResponse {
 	query: string;
 	results: ComparisonProviderResult[];
 	fromCache?: boolean;
+	// 새 API 스펙에서 추가된 필드
+	is_cheaper?: boolean;
+	price_diff?: number;
+	lowest_price?: number;
+	mall?: string;
+	link?: string;
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -39,11 +45,13 @@ const PROVIDER_LABELS: Record<string, string> = {
 
 const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 	if (!query) return;
+	// 이미 로딩 중이거나 성공한 쿼리면 스킵
 	if (state.comparison.status === 'loading') return;
 	if (state.comparison.status === 'success' && state.comparison.query === query) return;
+	if (state.comparison.status === 'error' && state.comparison.query === query) return;
 
+	// 상태를 loading으로 설정 (리렌더는 호출자가 이미 수행)
 	state.comparison = { status: 'loading', query, error: null, data: null };
-	renderContent();
 
 	try {
 		if (!chrome?.runtime?.sendMessage) {
@@ -53,7 +61,6 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 				error: 'Chrome extension API를 사용할 수 없습니다.',
 				data: null,
 			};
-			renderContent();
 			return;
 		}
 
@@ -64,10 +71,9 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 				query,
 				error:
 					serverCheck?.error ||
-					'가격 비교 서버가 실행 중이 아닙니다. pnpm run server 실행이 필요합니다.',
+					'가격 비교 서버가 실행 중이 아닙니다.',
 				data: null,
 			};
-			renderContent();
 			return;
 		}
 
@@ -93,9 +99,29 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 			error: e instanceof Error ? e.message : '알 수 없는 오류',
 			data: null,
 		};
-	} finally {
-		renderContent();
 	}
+};
+
+// 패널 열림 시 가격 비교 시작 + 리렌더
+export const startLowestPriceComparisonAndRender = (query: string): void => {
+	if (!query) return;
+	if (state.comparison.status === 'loading') {
+		// 이미 로딩중이면 스킵
+		return;
+	}
+	if ((state.comparison.status === 'success' || state.comparison.status === 'error') && state.comparison.query === query) {
+		// 동일 쿼리로 이미 완료됨
+		return;
+	}
+
+	// 상태를 loading으로 먼저 설정하고 리렌더
+	state.comparison = { status: 'loading', query, error: null, data: null };
+	renderContent();
+
+	// 비동기로 요청 후 리렌더
+	ensureLowestPriceComparison(query).finally(() => {
+		renderContent();
+	});
 };
 
 /**
@@ -186,11 +212,10 @@ export const renderContent = (): void => {
 		title.textContent = '💰 최저가 비교';
 		lowestPriceSection.appendChild(title);
 
-		const query = data.title ?? '';
 		const panelIsOpen = !!state.panelEl?.classList.contains('open');
-		if (panelIsOpen && query) {
-			void ensureLowestPriceComparison(query);
-		}
+		
+		// 패널이 열릴 때만 비교 시작 (mount.ts의 setPanelOpen에서 호출)
+		// renderContent 내부에서 직접 호출하지 않음 (recursive 방지)
 
 		const status = state.comparison.status;
 		const comparisonData = state.comparison.data as ComparisonResponse | null;
@@ -210,7 +235,27 @@ export const renderContent = (): void => {
 			error.className = 'picsel-empty-state';
 			error.textContent = state.comparison.error || '가격 비교 중 오류가 발생했습니다.';
 			lowestPriceSection.appendChild(error);
-		} else if (status === 'success' && comparisonData?.results?.length) {
+		} else if (status === 'success' && comparisonData) {
+			// 가격 차이 표시
+			if (comparisonData.is_cheaper !== undefined && comparisonData.price_diff !== undefined) {
+				const priceInfo = document.createElement('div');
+				priceInfo.style.padding = '12px';
+				priceInfo.style.marginBottom = '12px';
+				priceInfo.style.background = comparisonData.is_cheaper ? '#f0fdf4' : '#fef2f2';
+				priceInfo.style.border = `1px solid ${comparisonData.is_cheaper ? '#86efac' : '#fecaca'}`;
+				priceInfo.style.borderRadius = '8px';
+				priceInfo.style.fontSize = '13px';
+				priceInfo.style.fontWeight = '600';
+				priceInfo.style.color = comparisonData.is_cheaper ? '#166534' : '#991b1b';
+				
+				if (comparisonData.is_cheaper) {
+					priceInfo.textContent = `✅ 다나와가 ${formatCurrency(comparisonData.price_diff, 'KRW')} 더 저렴합니다!`;
+				} else {
+					priceInfo.textContent = `❌ 현재 가격이 더 저렴하거나 비슷합니다.`;
+				}
+				lowestPriceSection.appendChild(priceInfo);
+			}
+
 			const results = Array.isArray(comparisonData.results) ? comparisonData.results : [];
 			const cheapest = results
 				.filter((r) => r && r.success && Array.isArray(r.products))
@@ -308,16 +353,20 @@ export const renderContent = (): void => {
 		if (cardSection) {
 			contentEl.appendChild(cardSection);
 		}
-	}
 
-	// 3. Footer Section (추가 혜택)
-	const footerSection = createFooterSection(data);
-	if (footerSection) {
-		contentEl.appendChild(footerSection);
+		// 3. Footer Section (추가 혜택)
+		const footerSection = createFooterSection(data);
+		if (footerSection) {
+			contentEl.appendChild(footerSection);
+		}
 	}
 
 	// Note: "다른 구성" 섹션은 PRD에 따라 삭제됨
 	// 사용자 관점: "다른 구성을 알려줘서 뭘 하자는거지?"
 
-	updateBadge(data);
+	if (displayMode === 'lowest-price') {
+		updateBadge(null);
+	} else {
+		updateBadge(data);
+	}
 };

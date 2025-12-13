@@ -44,6 +44,8 @@ interface PriceComparisonMessage {
   type: 'COMPARE_PRICES';
   query: string;
   providers?: string[];
+  currentPrice?: number;
+  currentUrl?: string;
 }
 
 type MessageType =
@@ -201,15 +203,17 @@ export function handleComparePrices(
   message: PriceComparisonMessage,
   sendResponse: (response: unknown) => void
 ): boolean {
-  const { query, providers } = message;
+  const { query, providers, currentPrice, currentUrl } = message;
 
   networkLog.info('💰 [BACKEND] Price comparison request received', {
     query,
     providers: providers || 'all',
+    currentPrice,
+    currentUrl,
     timestamp: new Date().toISOString(),
   });
 
-  fetchPriceComparison(query, providers)
+  fetchPriceComparison(query, providers, currentPrice, currentUrl)
     .then((result) => {
       networkLog.info('✅ [BACKEND] Price comparison completed', {
         success: result.success,
@@ -226,7 +230,7 @@ export function handleComparePrices(
     .catch((error) => {
       networkLog.error(ErrorCode.NET_E002, '[BACKEND] Price comparison failed', {
         error: error instanceof Error ? error : new Error(String(error)),
-        query,
+        data: { query },
       });
       sendResponse({
         success: false,
