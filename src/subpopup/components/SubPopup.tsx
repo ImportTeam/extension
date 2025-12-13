@@ -29,7 +29,25 @@ export const SubPopup: React.FC = () => {
         </div>
         <button
           className="subpopup-header-close-btn"
-          onClick={() => window.close()}
+          onClick={() => {
+            // 완전한 닫힘을 위해 상태 초기화 후 강제 종료
+            try {
+              if (window.opener && !window.opener.closed) {
+                window.opener.focus();
+              }
+            } catch (e) {
+              // Ignore cross-origin errors
+            }
+            window.close();
+            // 브라우저가 window.close()를 무시하는 경우 대비
+            setTimeout(() => {
+              if (typeof chrome !== 'undefined' && chrome.windows) {
+                chrome.windows.getCurrent((w) => {
+                  if (w.id) chrome.windows.remove(w.id);
+                });
+              }
+            }, 100);
+          }}
           title="닫기"
           aria-label="창 닫기"
         >

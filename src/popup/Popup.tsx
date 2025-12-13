@@ -40,7 +40,6 @@ export const Popup: React.FC = () => {
         () => {
           const err = chrome.runtime.lastError;
           if (err) {
-            // eslint-disable-next-line no-console
             console.warn('[Popup] Failed to open options popup window:', err.message);
 
             // Fallback: open the options page in a normal tab
@@ -53,7 +52,6 @@ export const Popup: React.FC = () => {
         }
       );
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.warn('[Popup] Exception while opening options:', e);
       if (typeof chrome.runtime.openOptionsPage === 'function') {
         chrome.runtime.openOptionsPage();
