@@ -40,6 +40,12 @@ interface ToggleBarState {
 	panelTitleEl: HTMLDivElement | null;
 	mounted: boolean;
 	cachedData: ToggleProductData | null;
+	comparison: {
+		status: 'idle' | 'loading' | 'success' | 'error';
+		query: string | null;
+		error: string | null;
+		data: unknown | null;
+	};
 }
 
 export const state: ToggleBarState = {
@@ -54,5 +60,11 @@ export const state: ToggleBarState = {
 	panelTitleEl: null,
 	mounted: false,
 	cachedData: null,
+	comparison: {
+		status: 'idle',
+		query: null,
+		error: null,
+		data: null,
+	},
 };
 

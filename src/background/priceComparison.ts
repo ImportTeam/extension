@@ -7,8 +7,8 @@
  * - 응답 포맷팅
  */
 
-// 가격 비교 서버 URL
-const COMPARISON_SERVER_URL = 'http://localhost:8000';
+// 가격 비교 서버 URL (환경변수에서 읽기, 없으면 기본값)
+const COMPARISON_SERVER_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 export interface ComparisonResponse {
   success: boolean;
@@ -49,6 +49,13 @@ export async function fetchPriceComparison(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 timeout
 
+  // eslint-disable-next-line no-console
+  console.info('🔗 [BACKEND] Fetching price comparison:', {
+    url: `${COMPARISON_SERVER_URL}/api/compare`,
+    query,
+    providers: providers || 'all',
+  });
+
   try {
     const response = await fetch(`${COMPARISON_SERVER_URL}/api/compare`, {
       method: 'POST',
@@ -63,12 +70,19 @@ export async function fetchPriceComparison(
       signal: controller.signal,
     });
 
+    // eslint-disable-next-line no-console
+    console.info('📡 [BACKEND] Response status:', response.status);
+
     if (!response.ok) {
       throw new Error(`API 요청 실패: ${response.status}`);
     }
 
-    return response.json();
+    const result = await response.json();
+    // eslint-disable-next-line no-console
+    console.info('✅ [BACKEND] Response data:', result);
+    return result;
   } catch (error) {
+    console.error('❌ [BACKEND] Fetch error:', error);
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('요청 시간 초과 (10초)');
     }

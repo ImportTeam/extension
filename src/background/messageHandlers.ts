@@ -203,18 +203,20 @@ export function handleComparePrices(
 ): boolean {
   const { query, providers } = message;
 
-  networkLog.info('💰 Price comparison request', {
+  networkLog.info('💰 [BACKEND] Price comparison request received', {
     query,
     providers: providers || 'all',
+    timestamp: new Date().toISOString(),
   });
 
   fetchPriceComparison(query, providers)
     .then((result) => {
-      networkLog.info('✅ Price comparison completed', {
+      networkLog.info('✅ [BACKEND] Price comparison completed', {
         success: result.success,
         resultCount: result.results.length,
         totalDuration: result.totalDuration,
         fromCache: result.fromCache,
+        query,
       });
       sendResponse({
         success: true,
@@ -222,8 +224,9 @@ export function handleComparePrices(
       });
     })
     .catch((error) => {
-      networkLog.error(ErrorCode.NET_E002, 'Price comparison failed', {
+      networkLog.error(ErrorCode.NET_E002, '[BACKEND] Price comparison failed', {
         error: error instanceof Error ? error : new Error(String(error)),
+        query,
       });
       sendResponse({
         success: false,
@@ -238,11 +241,11 @@ export function handleComparePrices(
  * CHECK_COMPARISON_SERVER 핸들러
  */
 export function handleCheckComparisonServer(sendResponse: (response: unknown) => void): boolean {
-  networkLog.debug('🔍 Checking comparison server status');
+  networkLog.debug('🔍 [BACKEND] Checking comparison server status');
 
   checkComparisonServerHealth()
     .then((data) => {
-      networkLog.info('✅ Comparison server is healthy', data);
+      networkLog.info('✅ [BACKEND] Comparison server is healthy', data);
       sendResponse({
         success: true,
         data,
@@ -251,7 +254,7 @@ export function handleCheckComparisonServer(sendResponse: (response: unknown) =>
     .catch((error) => {
       const errorMessage =
         error instanceof Error ? error.message : '가격 비교 서버에 연결할 수 없습니다';
-      networkLog.error(ErrorCode.NET_E001, 'Comparison server is down', {
+      networkLog.error(ErrorCode.NET_E001, '❌ [BACKEND] Comparison server is down', {
         error: error instanceof Error ? error : new Error(String(error)),
       });
       sendResponse({

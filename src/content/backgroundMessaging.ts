@@ -18,6 +18,12 @@ export function saveProductData(
 ): void {
   const messageType = source === 'initial' ? 'SAVE_PRODUCT_DATA' : 'UPDATE_PRODUCT_DATA';
 
+  // Chrome API 체크
+  if (!chrome?.runtime?.sendMessage) {
+    networkLog.warn('Chrome extension API not available', { messageType, source });
+    return;
+  }
+
   chrome.runtime.sendMessage(
     {
       type: messageType,
