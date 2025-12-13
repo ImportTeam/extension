@@ -35,7 +35,7 @@ export const SubPopup: React.FC = () => {
               if (window.opener && !window.opener.closed) {
                 window.opener.focus();
               }
-            } catch (e) {
+            } catch {
               // Ignore cross-origin errors
             }
             window.close();
