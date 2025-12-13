@@ -883,4 +883,249 @@ export const toggleBarStyles = `
 			color: #1976d2;
 			border-radius: 4px;
 		}
+
+		/* ========== 새 최저가 비교 UI 스타일 ========== */
+		
+		/* 절약 배너 */
+		.picsel-savings-banner {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 12px 16px;
+			background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+			border-radius: 8px;
+			margin: 0 0 16px 0;
+		}
+
+		.picsel-savings-icon {
+			width: 20px;
+			height: 20px;
+			background: #4caf50;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+		}
+
+		.picsel-savings-icon svg {
+			width: 12px;
+			height: 12px;
+			color: white;
+		}
+
+		.picsel-savings-text {
+			font-size: 14px;
+			font-weight: 600;
+			color: #2e7d32;
+			margin: 0;
+		}
+
+		.picsel-no-savings-banner {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 12px 16px;
+			background: #f5f5f5;
+			border-radius: 8px;
+			margin: 0 0 16px 0;
+		}
+
+		.picsel-no-savings-banner .picsel-savings-icon {
+			background: #9e9e9e;
+		}
+
+		.picsel-no-savings-banner .picsel-savings-text {
+			color: #616161;
+			font-weight: 500;
+		}
+
+		/* 섹션 헤더 */
+		.picsel-section-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 12px;
+		}
+
+		.picsel-section-title {
+			font-size: 14px;
+			font-weight: 600;
+			color: #333;
+			margin: 0;
+		}
+
+		.picsel-section-note {
+			font-size: 11px;
+			color: #888;
+			margin: 0;
+		}
+
+		/* 가격 리스트 */
+		.picsel-price-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			margin-bottom: 16px;
+		}
+
+		.picsel-price-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 12px 14px;
+			background: #fafafa;
+			border-radius: 8px;
+			border: 1px solid #eee;
+			transition: all 0.15s ease;
+			cursor: pointer;
+			text-decoration: none;
+		}
+
+		.picsel-price-item:hover {
+			background: #f5f5f5;
+			border-color: #ddd;
+		}
+
+		.picsel-price-item-top {
+			background: #f8fbff;
+			border: 2px solid #2196f3;
+		}
+
+		.picsel-price-item-top:hover {
+			background: #f0f7ff;
+			border-color: #1976d2;
+		}
+
+		.picsel-price-item-left {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		.picsel-price-item-right {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.picsel-mall-row {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.picsel-mall-name {
+			font-size: 14px;
+			font-weight: 600;
+			color: #333;
+			margin: 0;
+		}
+
+		.picsel-lowest-badge {
+			display: inline-flex;
+			align-items: center;
+			padding: 2px 8px;
+			background: #2196f3;
+			color: white;
+			font-size: 10px;
+			font-weight: 600;
+			border-radius: 4px;
+		}
+
+		.picsel-price-subtext {
+			font-size: 11px;
+			color: #999;
+			margin: 0;
+		}
+
+		.picsel-price-value {
+			font-size: 16px;
+			font-weight: 700;
+			color: #333;
+			margin: 0;
+		}
+
+		.picsel-price-item-top .picsel-price-value {
+			color: #1976d2;
+		}
+
+		.picsel-price-arrow {
+			width: 16px;
+			height: 16px;
+			color: #bbb;
+			flex-shrink: 0;
+		}
+
+		.picsel-price-item:hover .picsel-price-arrow {
+			color: #888;
+		}
+
+		/* 하단 링크 */
+		.picsel-footer-link {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 4px;
+			padding: 10px;
+			font-size: 12px;
+			color: #666;
+			text-decoration: none;
+			border-top: 1px solid #eee;
+			margin: 0 -16px -16px -16px;
+			transition: all 0.15s ease;
+		}
+
+		.picsel-footer-link:hover {
+			background: #f5f5f5;
+			color: #333;
+		}
+
+		.picsel-footer-link svg {
+			width: 14px;
+			height: 14px;
+		}
+
+		/* 히어로 섹션 (현재 사이트 가격) */
+		.picsel-hero-section {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			padding: 12px 16px;
+			background: #fff;
+			border: 1px solid #eee;
+			border-radius: 8px;
+			margin-bottom: 16px;
+		}
+
+		.picsel-hero-left {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		.picsel-hero-label {
+			font-size: 11px;
+			color: #888;
+			margin: 0;
+		}
+
+		.picsel-hero-price {
+			font-size: 20px;
+			font-weight: 700;
+			color: #333;
+			margin: 0;
+		}
+
+		.picsel-hero-tag {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 10px;
+			background: #f5f5f5;
+			color: #666;
+			font-size: 12px;
+			font-weight: 500;
+			border-radius: 6px;
+			align-self: flex-start;
+		}
 `;

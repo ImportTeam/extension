@@ -1,5 +1,5 @@
 /**
- * Toggle Bar 컴포넌트 모듈 진입점
+ * Toggle Bar View Components (barrel)
  */
 
 export { createHeroSection } from './HeroSection';

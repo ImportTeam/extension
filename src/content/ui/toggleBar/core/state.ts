@@ -1,15 +1,13 @@
 /**
- * Toggle Bar 상태 관리 모듈
+ * Toggle Bar Core State
  * 전역 상태와 DOM 참조를 중앙 관리
  */
 
 import type { ToggleProductData, ComparisonState } from './types';
 
-// Constants
 export const HOST_ID = 'picsel-toggle-host';
 export const PANEL_ID = 'picsel-toggle-panel';
 
-// Platform name mapping
 export const PLATFORM_NAMES: Record<string, string> = {
 	coupang: '쿠팡',
 	amazon: '아마존',
@@ -27,7 +25,6 @@ export const getPlatformDisplayName = (site: string | undefined | null): string 
 	return PLATFORM_NAMES[siteKey] || String(site);
 };
 
-// State 객체로 통합 관리
 interface ToggleBarState {
 	hostElement: HTMLDivElement | null;
 	shadowRoot: ShadowRoot | null;
@@ -62,4 +59,3 @@ export const state: ToggleBarState = {
 		data: null,
 	},
 };
-

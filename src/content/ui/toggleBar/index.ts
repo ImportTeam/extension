@@ -2,17 +2,16 @@
  * Toggle Bar 모듈 진입점
  * 
  * 모듈 구조:
- * - state.ts: 전역 상태 관리
- * - mount.ts: DOM 마운트/언마운트
- * - render.ts: UI 렌더링
+ * - core/: 타입/상태/유틸
+ * - dom/: DOM 생성/바인딩
+ * - services/: 데이터 요청/상태 갱신
+ * - view/: DOM 렌더링/컴포넌트
+ * - controller/: 조율(오케스트레이션)
+ * - mount.ts/render.ts: 외부 API facade
  * - styles.ts: CSS 스타일
- * - components/: UI 컴포넌트
- *   - HeroSection.ts: 상품 정보
- *   - CardBenefitsSection.ts: 카드별 혜택 비교 (메인)
- *   - FooterSection.ts: 추가 혜택
  */
 
-export type { ToggleProductData } from './types';
+export type { ToggleProductData } from './core/types';
 export { mountToggleBar, updateToggleBar, setPanelOpen } from './mount';
 export { renderContent, updateBadge, startLowestPriceComparisonAndRender } from './render';
-export { state, getPlatformDisplayName } from './state';
+export { state, getPlatformDisplayName } from './core/state';

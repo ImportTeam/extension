@@ -1,4 +1,4 @@
-import type { ParsedProductInfo, ElevenStreetExtendedInfo } from '../../../shared/types';
+import type { ParsedProductInfo, ElevenStreetExtendedInfo } from '../../../../shared/types';
 
 type Optional<T> = {
 	[K in keyof T]?: T[K] | null;
@@ -12,12 +12,12 @@ export type ToggleProductData = (ParsedProductInfo & Record<string, unknown>) &
 		originalPrice: number;
 		discountPrice: number;
 		cardBenefits: Array<{
-			card: string;        // 카드사명
-			cardName?: string;   // 카드사명 (별칭)
-			benefit: string;     // 혜택 설명
-			discount?: number;   // 할인율 (%)
-			rate?: number;       // 할인율 (별칭)
-			imageUrl?: string;   // 카드 이미지 URL
+			card: string; // 카드사명
+			cardName?: string; // 카드사명 (별칭)
+			benefit: string; // 혜택 설명
+			discount?: number; // 할인율 (%)
+			rate?: number; // 할인율 (별칭)
+			imageUrl?: string; // 카드 이미지 URL
 		}>;
 		giftCardDiscount: {
 			rate: number;
