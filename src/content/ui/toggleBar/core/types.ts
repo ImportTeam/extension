@@ -61,6 +61,22 @@ export interface ComparisonResponse {
 	lowest_price?: number;
 	mall?: string;
 	link?: string;
+	// BE 응답 구조
+	product_name?: string;
+	source?: string;
+	free_shipping?: boolean;
+	top_prices?: Array<{
+		rank?: number;
+		mall: string;
+		price: number;
+		free_shipping?: boolean;
+		delivery?: string;
+		link?: string;
+	}>;
+	price_trend?: Array<Record<string, unknown>>;
+	updated_at?: string;
+	current_price?: number;
+	_path?: string;
 }
 
 export interface ComparisonState {

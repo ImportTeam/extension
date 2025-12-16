@@ -9,10 +9,29 @@ import { ensureMounted } from '../dom/ensureMounted';
 import { updatePanelTitle } from './panelTitle';
 import { renderContent } from '../view/contentRenderer';
 import { setPanelOpen } from './panelController';
+import { startLowestPriceComparison } from '../services/comparison';
 
 export const mountToggleBar = (data: ToggleProductData): void => {
 	state.cachedData = { ...data };
-	ensureMounted({ setPanelOpen });
+	
+	// 최저가 모드: 패널 안 열고 비교 시작 후 완료 시 패널 오픈
+	const startLowestPriceComparisonNoPanel = (): void => {
+		if (!state.cachedData?.title) return;
+		
+		startLowestPriceComparison(
+			state.cachedData.title,
+			renderContent,
+			() => {
+				// 비교 완료 시 패널 자동 오픈
+				setPanelOpen(true);
+			}
+		);
+	};
+
+	ensureMounted({ 
+		setPanelOpen,
+		startLowestPriceComparisonNoPanel,
+	});
 	updatePanelTitle();
 	renderContent();
 	setPanelOpen(false);

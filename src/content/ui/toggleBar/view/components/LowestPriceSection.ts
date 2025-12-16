@@ -12,6 +12,8 @@ interface CheapestItem {
 	price: number;
 	currency?: string;
 	url?: string;
+	free_shipping?: boolean;
+	delivery?: string;
 }
 
 const formatPriceText = (value: number, currency?: string): string => {
@@ -24,7 +26,25 @@ const formatSavingsText = (value: number): string => {
 	return formatted ?? `${value.toLocaleString()}원`;
 };
 
+// BE 응답 구조에서 최저가 상품 추출 (상위 3개)
 const extractCheapest = (data: ComparisonResponse): CheapestItem[] => {
+	// top_prices 배열이 있으면 사용
+	if (Array.isArray(data.top_prices) && data.top_prices.length > 0) {
+		return data.top_prices
+			.map((p) => ({
+				provider: p.mall || 'Unknown',
+				name: p.mall || 'Unknown',
+				price: p.price,
+				currency: 'KRW',
+				url: p.link,
+				free_shipping: p.free_shipping,
+				delivery: p.delivery,
+			}))
+			.filter((p) => typeof p.price === 'number' && p.price > 0)
+			.slice(0, 3);
+	}
+
+	// 이전 구조 호환성 유지 (results 배열 방식)
 	const results = Array.isArray(data.results) ? data.results : [];
 
 	return results
@@ -86,7 +106,16 @@ export const createLowestPriceSection = (params: { panelIsOpen: boolean; compari
 
 	const comparisonData = comparison.data;
 
-	if (comparisonData.is_cheaper && typeof comparisonData.price_diff === 'number' && comparisonData.price_diff > 0) {
+	// 최저가 상품 추출
+	const cheapest = extractCheapest(comparisonData);
+
+	// 가격 절감액 계산 (현재 가격 vs 최저가)
+	const lowestPrice = cheapest.length > 0 ? cheapest[0].price : null;
+	const currentPrice = typeof comparisonData.current_price === 'number' ? comparisonData.current_price : null;
+	const savings = lowestPrice && currentPrice && currentPrice > lowestPrice ? currentPrice - lowestPrice : null;
+
+	// 절감 배너 표시
+	if (savings && savings > 0) {
 		const savingsBanner = document.createElement('div');
 		savingsBanner.className = 'picsel-savings-banner';
 
@@ -96,12 +125,12 @@ export const createLowestPriceSection = (params: { panelIsOpen: boolean; compari
 
 		const text = document.createElement('span');
 		text.className = 'picsel-savings-text';
-		text.textContent = `지금 ${formatSavingsText(comparisonData.price_diff)} 더 아낄 수 있어요!`;
+		text.textContent = `지금 ${formatSavingsText(savings)} 더 아낄 수 있어요!`;
 
 		savingsBanner.appendChild(icon);
 		savingsBanner.appendChild(text);
 		section.appendChild(savingsBanner);
-	} else if (comparisonData.is_cheaper === false) {
+	} else if (lowestPrice && currentPrice && currentPrice <= lowestPrice) {
 		const noBetterBanner = document.createElement('div');
 		noBetterBanner.className = 'picsel-no-savings-banner';
 
@@ -118,7 +147,6 @@ export const createLowestPriceSection = (params: { panelIsOpen: boolean; compari
 		section.appendChild(noBetterBanner);
 	}
 
-	const cheapest = extractCheapest(comparisonData);
 	if (cheapest.length === 0) {
 		const empty = document.createElement('div');
 		empty.className = 'picsel-empty-state';

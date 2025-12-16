@@ -12,8 +12,9 @@ export async function sendPriceComparisonRequest(params: {
 	productName: string;
 	currentPrice?: number;
 	site?: string;
+	onComplete?: () => void;
 }): Promise<void> {
-	const { productUrl, productName, currentPrice, site } = params;
+	const { productUrl, productName, currentPrice, site, onComplete } = params;
 
 	try {
 		logger.info(LogDomain.NETWORK, '💰 [LOWEST_PRICE] Initiating price comparison', {
@@ -85,9 +86,13 @@ export async function sendPriceComparisonRequest(params: {
 				status: 'success',
 				query: productName,
 				error: null,
-				data: response.data,
+				data: {
+					...response.data,
+					current_price: currentPrice,
+				},
 			};
 			renderContent();
+			onComplete?.();
 		} else {
 			logger.warn(LogDomain.NETWORK, '[LOWEST_PRICE] Price comparison failed', {
 				error: response?.error,
@@ -100,6 +105,7 @@ export async function sendPriceComparisonRequest(params: {
 				data: null,
 			};
 			renderContent();
+			onComplete?.();
 		}
 	} catch (error) {
 		logger.error(LogDomain.NETWORK, ErrorCode.NET_E002, '[LOWEST_PRICE] Request error', {

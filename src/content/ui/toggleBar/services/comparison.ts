@@ -6,7 +6,7 @@
 import type { ComparisonResponse } from '../core/types';
 import { state } from '../core/state';
 
-const ensureLowestPriceComparison = async (query: string): Promise<void> => {
+const ensureLowestPriceComparison = async (query: string, onComplete?: () => void): Promise<void> => {
 	if (!query) return;
 
 	if (state.comparison.status === 'loading') return;
@@ -24,6 +24,7 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 				error: 'Chrome extension API를 사용할 수 없습니다.',
 				data: null,
 			};
+			onComplete?.();
 			return;
 		}
 
@@ -35,6 +36,7 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 				error: serverCheck?.error || '가격 비교 서버가 실행 중이 아닙니다.',
 				data: null,
 			};
+			onComplete?.();
 			return;
 		}
 
@@ -48,8 +50,12 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 				status: 'success',
 				query,
 				error: null,
-				data: result.data as ComparisonResponse,
+				data: {
+					...result.data,
+					current_price: state.cachedData?.amount,
+				} as ComparisonResponse,
 			};
+			onComplete?.();
 			return;
 		}
 
@@ -59,6 +65,7 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 			error: result?.error || '가격 비교 검색 실패',
 			data: null,
 		};
+		onComplete?.();
 	} catch (e) {
 		state.comparison = {
 			status: 'error',
@@ -66,24 +73,27 @@ const ensureLowestPriceComparison = async (query: string): Promise<void> => {
 			error: e instanceof Error ? e.message : '알 수 없는 오류',
 			data: null,
 		};
+		onComplete?.();
 	}
 };
 
-export const startLowestPriceComparison = (query: string, render: () => void): void => {
+export const startLowestPriceComparison = (query: string, render: () => void, onComplete?: () => void): void => {
 	if (!query) return;
 
 	if (state.comparison.status === 'loading') {
 		return;
 	}
 
+	// 이미 같은 쿼리로 비교가 완료된 경우: 즉시 콜백만 호출
 	if (state.comparison.query === query && (state.comparison.status === 'success' || state.comparison.status === 'error')) {
+		onComplete?.();
 		return;
 	}
 
 	state.comparison = { status: 'loading', query, error: null, data: null };
 	render();
 
-	ensureLowestPriceComparison(query).finally(() => {
+	ensureLowestPriceComparison(query, onComplete).finally(() => {
 		render();
 	});
 };

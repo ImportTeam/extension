@@ -11,6 +11,7 @@ import { STORAGE_KEYS } from '@/shared/store/middleware';
 import {
 	mountToggleBar,
 	updateToggleBar,
+	setPanelOpen,
 	type ToggleProductData,
 } from '@/content/ui/toggleBar';
 
@@ -83,6 +84,10 @@ function init(): void {
 					productName: result.paymentInfo.title,
 					currentPrice: result.paymentInfo.amount,
 					site: result.site,
+					onComplete: () => {
+						// 비교 완료 시 패널 자동 오픈
+						setPanelOpen(true);
+					},
 				});
 			} else {
 				logger.info(LogDomain.BOOTSTRAP, '⏸️ [LOWEST_PRICE] Manual mode (will fetch when panel opens)', {
@@ -136,6 +141,10 @@ export function runContentScript(): void {
 						productName: lastExtractionResult.paymentInfo.title,
 						currentPrice: lastExtractionResult.paymentInfo.amount,
 						site: lastExtractionResult.site,
+						onComplete: () => {
+							// 비교 완료 시 패널 자동 오픈
+							setPanelOpen(true);
+						},
 					});
 				}
 			})();

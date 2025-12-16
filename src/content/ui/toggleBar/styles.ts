@@ -1128,4 +1128,34 @@ export const toggleBarStyles = `
 			border-radius: 6px;
 			align-self: flex-start;
 		}
+
+		/* Loading Spinner */
+		@keyframes spin {
+			from {
+				transform: rotate(0deg);
+			}
+			to {
+				transform: rotate(360deg);
+			}
+		}
+
+		.picsel-loading-spinner {
+			display: inline-block;
+			width: 16px;
+			height: 16px;
+			border: 2px solid #e5e7eb;
+			border-top-color: #4f46e5;
+			border-radius: 50%;
+			animation: spin 0.6s linear infinite;
+		}
+
+		/* Loading State Message */
+		.picsel-loading-message {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			font-weight: 500;
+			color: #ffffff;
+		}
 `;

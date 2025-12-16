@@ -5,9 +5,12 @@
 
 import { toggleBarStyles } from '../styles';
 import { HOST_ID, PANEL_ID, state } from '../core/state';
+import { updateIdleLoadingIndicator, stopMessageRotation } from '../core/loadingIndicator';
+import { useSettingsStore } from '@/shared/store/slices/settings';
 
 interface Handlers {
 	setPanelOpen: (open: boolean) => void;
+	startLowestPriceComparisonNoPanel?: () => void;
 }
 
 export const ensureMounted = (handlers: Handlers): void => {
@@ -58,7 +61,6 @@ export const ensureMounted = (handlers: Handlers): void => {
 
 	state.buttonLabelEl = document.createElement('span');
 	state.buttonLabelEl.className = 'picsel-toggle-label';
-	state.buttonLabelEl.textContent = 'PicSel 혜택 보기';
 	state.toggleButton.appendChild(state.buttonLabelEl);
 
 	state.buttonBadgeEl = document.createElement('span');
@@ -66,6 +68,9 @@ export const ensureMounted = (handlers: Handlers): void => {
 	state.toggleButton.appendChild(state.buttonBadgeEl);
 
 	containerEl.appendChild(state.toggleButton);
+
+	// Idle 상태에서 circle + 메시지 표시
+	updateIdleLoadingIndicator();
 
 	// 패널
 	state.panelEl = document.createElement('div');
@@ -102,7 +107,18 @@ export const ensureMounted = (handlers: Handlers): void => {
 	const hostElement = state.hostElement;
 
 	state.toggleButton.addEventListener('click', () => {
-		const willOpen = !panelEl.classList.contains('open');
+		const isOpen = panelEl.classList.contains('open');
+		const { displayMode } = useSettingsStore.getState();
+		
+		// 패널이 닫혀있고 최저가 모드일 때: 비교 시작
+		if (!isOpen && displayMode === 'lowest-price' && handlers.startLowestPriceComparisonNoPanel) {
+			stopMessageRotation();
+			handlers.startLowestPriceComparisonNoPanel();
+			return;
+		}
+
+		// 그 외: 패널 토글
+		const willOpen = !isOpen;
 		handlers.setPanelOpen(willOpen);
 	});
 
