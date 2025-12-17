@@ -85,8 +85,9 @@ function init(): void {
 					currentPrice: result.paymentInfo.amount,
 					site: result.site,
 					onComplete: () => {
-						// 비교 완료 시 패널 자동 오픈
+						// 비교 완료 시 패널 자동 오픈 후 콘텐츠 다시 렌더링
 						setPanelOpen(true);
+						updateToggleBar(toToggleData(result.paymentInfo, result.site));
 					},
 				});
 			} else {
@@ -142,8 +143,11 @@ export function runContentScript(): void {
 						currentPrice: lastExtractionResult.paymentInfo.amount,
 						site: lastExtractionResult.site,
 						onComplete: () => {
-							// 비교 완료 시 패널 자동 오픈
+							// 비교 완료 시 패널 자동 오픈 후 콘텐츠 다시 렌더링
 							setPanelOpen(true);
+							if (lastExtractionResult) {
+								updateToggleBar(toToggleData(lastExtractionResult.paymentInfo, lastExtractionResult.site));
+							}
 						},
 					});
 				}

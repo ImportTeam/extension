@@ -22,8 +22,9 @@ export const mountToggleBar = (data: ToggleProductData): void => {
 			state.cachedData.title,
 			renderContent,
 			() => {
-				// 비교 완료 시 패널 자동 오픈
+				// 비교 완료 시 패널 자동 오픈 후 콘텐츠 다시 렌더링
 				setPanelOpen(true);
+				renderContent();
 			}
 		);
 	};
