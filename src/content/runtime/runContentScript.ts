@@ -79,6 +79,10 @@ function init(): void {
 					productTitle: result.paymentInfo.title.substring(0, 50),
 				});
 
+				// 로딩 indicator 먼저 표시
+				const { updateIdleLoadingIndicator } = await import('../ui/toggleBar/core/loadingIndicator');
+				updateIdleLoadingIndicator();
+
 				void sendPriceComparisonRequest({
 					productUrl: window.location.href,
 					productName: result.paymentInfo.title,
@@ -138,6 +142,10 @@ export function runContentScript(): void {
 					settings.autoFetchLowestPrice &&
 					lastExtractionResult?.paymentInfo?.title
 				) {
+					// 로딩 indicator 먼저 표시
+					const { updateIdleLoadingIndicator } = await import('../ui/toggleBar/core/loadingIndicator');
+					updateIdleLoadingIndicator();
+
 					void sendPriceComparisonRequest({
 						productUrl: window.location.href,
 						productName: lastExtractionResult.paymentInfo.title,

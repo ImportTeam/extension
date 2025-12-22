@@ -48,16 +48,14 @@ export const renderContent = (): void => {
 			// 로딩 중에는 badge 숨김 (loadingIndicator가 표시)
 			updateBadge(null);
 		} else if (state.comparison.status === 'success' && state.comparison.data) {
-			const lowestPrice = state.comparison.data.lowest_price;
-			const currentPrice = state.comparison.data.current_price;
+			// top_prices 배열에서 최저가 플랫폼 추출
+			const topPrices = state.comparison.data.top_prices;
+			const lowestItem = Array.isArray(topPrices) && topPrices.length > 0 ? topPrices[0] : null;
 			
 			// 최저가 정보가 있으면 badge에 표시
-			if (typeof lowestPrice === 'number' && lowestPrice > 0) {
-				// 절감액 계산
-				const savings = currentPrice && currentPrice > lowestPrice ? currentPrice - lowestPrice : null;
-				const displayText = savings && savings > 0 
-					? `${formatCurrency(savings, data.currency ?? 'KRW')} 절감`
-					: `${formatCurrency(lowestPrice, data.currency ?? 'KRW')} 최저가`;
+			if (lowestItem && typeof lowestItem.price === 'number' && lowestItem.price > 0) {
+				const platform = lowestItem.mall || '최저가';
+				const displayText = `${formatCurrency(lowestItem.price, 'KRW')} (${platform})`;
 				
 				updateBadge({
 					price: data.amount || 0,

@@ -22,7 +22,7 @@ export const updateBadge = (data: ToggleProductData | null): void => {
 	const rates = Array.isArray(data.cardBenefits)
 		? data.cardBenefits
 				.map((benefit) => {
-					const b = benefit as { rate?: number; discount?: number };
+					const b = benefit as { rate?: number; discount?: number; benefit?: string };
 					const r = b.rate ?? b.discount;
 					return typeof r === 'number' ? r : 0;
 				})
@@ -31,7 +31,13 @@ export const updateBadge = (data: ToggleProductData | null): void => {
 
 	if (rates.length > 0) {
 		const bestRate = Math.max(...rates);
-		buttonBadgeEl.textContent = `최대 ${bestRate}%`;
+		// 최저가 모드인 경우 benefit 텍스트가 있으면 그대로 사용하고 "이 최저가입니다" 추가
+		const firstBenefit = data.cardBenefits?.[0] as any;
+		if (firstBenefit?.benefit && firstBenefit.card === '최저가') {
+			buttonBadgeEl.textContent = `${firstBenefit.benefit} 이 최저가입니다`;
+		} else {
+			buttonBadgeEl.textContent = `최대 ${bestRate}%`;
+		}
 		buttonBadgeEl.style.display = 'inline-flex';
 		return;
 	}
