@@ -46,6 +46,10 @@ interface PriceComparisonMessage {
   providers?: string[];
   currentPrice?: number;
   currentUrl?: string;
+  selectedOptions?: Array<{
+    name: string;
+    value: string;
+  }>;
 }
 
 type MessageType =
@@ -203,17 +207,18 @@ export function handleComparePrices(
   message: PriceComparisonMessage,
   sendResponse: (response: unknown) => void
 ): boolean {
-  const { query, providers, currentPrice, currentUrl } = message;
+  const { query, providers, currentPrice, currentUrl, selectedOptions } = message;
 
   networkLog.info('💰 [BACKEND] Price comparison request received', {
     query,
     providers: providers || 'all',
     currentPrice,
     currentUrl,
+    selectedOptionsCount: selectedOptions?.length || 0,
     timestamp: new Date().toISOString(),
   });
 
-  fetchPriceComparison(query, providers, currentPrice, currentUrl)
+  fetchPriceComparison(query, providers, currentPrice, currentUrl, selectedOptions)
     .then((result) => {
       networkLog.info('✅ [BACKEND] Price comparison completed', {
         success: result.success,

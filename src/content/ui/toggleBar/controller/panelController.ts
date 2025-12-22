@@ -15,19 +15,25 @@ export const setPanelOpen = (open: boolean): void => {
 		return;
 	}
 
+	const { displayMode } = useSettingsStore.getState();
+	const isLowestPriceMode = displayMode === 'lowest-price';
+
 	if (open) {
 		panelEl.classList.add('open');
 		panelEl.setAttribute('aria-hidden', 'false');
 		toggleButton.setAttribute('aria-expanded', 'true');
-		buttonLabelEl.textContent = 'PicSel 혜택 닫기';
 
-		const { displayMode } = useSettingsStore.getState();
-		if (displayMode === 'lowest-price' && state.cachedData?.title) {
+		if (isLowestPriceMode && state.cachedData?.title) {
 			// 최저가 모드: 비교 요청 (이미 완료된 비교면 콜백만 호출, 아니면 새로 시작)
-			startLowestPriceComparison(state.cachedData.title, renderContent);
+			startLowestPriceComparison(state.cachedData.title, renderContent, undefined, state.cachedData.selectedOptions);
 			// startLowestPriceComparison 내부에서 renderContent 호출됨
 		} else {
 			renderContent();
+		}
+		
+		// 최저가 모드에서만 indicator 업데이트
+		if (isLowestPriceMode) {
+			updateIdleLoadingIndicator();
 		}
 		return;
 	}
@@ -35,8 +41,12 @@ export const setPanelOpen = (open: boolean): void => {
 	panelEl.classList.remove('open');
 	panelEl.setAttribute('aria-hidden', 'true');
 	toggleButton.setAttribute('aria-expanded', 'false');
-	buttonLabelEl.textContent = 'PicSel 혜택 보기';
 	
-	// Idle 상태: circle + 고정 메시지 표시
-	updateIdleLoadingIndicator();
+	// 최저가 모드에서만 loading indicator 표시
+	if (isLowestPriceMode) {
+		updateIdleLoadingIndicator();
+	} else {
+		// card-benefits 모드: "PicSel 혜택 보기" 텍스트로 복원
+		renderContent();
+	}
 };

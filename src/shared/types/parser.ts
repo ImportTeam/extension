@@ -133,6 +133,12 @@ export interface ParsedProductInfo {
   // 할부 정보
   installmentInfo?: string;
   
+  // 선택된 옵션 정보 (사용자가 선택한 옵션)
+  selectedOptions?: Array<{
+    name: string;   // "CPU", "색상", "RAM", "SSD", "키보드" 등
+    value: string;  // "M4 Pro 14코어", "실버", "24GB", "512GB", "한글" 등
+  }>;
+  
   // 11번가 전용 필드
   elevenst?: ElevenStreetExtendedInfo;
 }

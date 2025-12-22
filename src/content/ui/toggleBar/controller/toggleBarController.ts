@@ -10,6 +10,8 @@ import { updatePanelTitle } from './panelTitle';
 import { renderContent } from '../view/contentRenderer';
 import { setPanelOpen } from './panelController';
 import { startLowestPriceComparison } from '../services/comparison';
+import { updateIdleLoadingIndicator } from '../core/loadingIndicator';
+import { useSettingsStore } from '@/shared/store/slices/settings';
 
 export const mountToggleBar = (data: ToggleProductData): void => {
 	state.cachedData = { ...data };
@@ -25,7 +27,8 @@ export const mountToggleBar = (data: ToggleProductData): void => {
 				// 비교 완료 시 패널 자동 오픈 후 콘텐츠 다시 렌더링
 				setPanelOpen(true);
 				renderContent();
-			}
+			},
+			state.cachedData.selectedOptions
 		);
 	};
 
@@ -36,6 +39,12 @@ export const mountToggleBar = (data: ToggleProductData): void => {
 	updatePanelTitle();
 	renderContent();
 	setPanelOpen(false);
+	
+	// 최저가 모드에서만 초기 loading indicator 표시
+	const { displayMode } = useSettingsStore.getState();
+	if (displayMode === 'lowest-price') {
+		updateIdleLoadingIndicator();
+	}
 };
 
 export const updateToggleBar = (data: ToggleProductData): void => {

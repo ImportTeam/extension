@@ -15,6 +15,10 @@ interface PriceSearchRequest {
   product_name: string;
   current_price?: number;
   current_url?: string;
+  selected_options?: Array<{
+    name: string;   // "CPU", "색상", "RAM" 등
+    value: string;  // "M4 Pro 14코어", "실버", "24GB" 등
+  }>;
   product_code?: string;
 }
 
@@ -80,13 +84,17 @@ export interface ComparisonResponse {
  * 가격 비교 API 호출
  * @param query - 검색 쿼리
  * @param providers - 검색 제공자 목록 (선택)
+ * @param currentPrice - 현재 상품 가격 (선택)
+ * @param currentUrl - 현재 상품 URL (선택)
+ * @param selectedOptions - 사용자가 선택한 옵션 정보 (선택)
  * @throws {Error} 타임아웃(10초) 또는 네트워크 오류
  */
 export async function fetchPriceComparison(
   query: string,
   providers?: string[],
   currentPrice?: number,
-  currentUrl?: string
+  currentUrl?: string,
+  selectedOptions?: Array<{ name: string; value: string }>
 ): Promise<ComparisonResponse> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000); // 권장 15초 timeout
@@ -103,6 +111,9 @@ export async function fetchPriceComparison(
   }
   if (currentUrl) {
     requestBody.current_url = currentUrl;
+  }
+  if (selectedOptions && selectedOptions.length > 0) {
+    requestBody.selected_options = selectedOptions;
   }
 
   const startedAt = Date.now();

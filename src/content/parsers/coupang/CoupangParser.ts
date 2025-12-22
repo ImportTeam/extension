@@ -11,6 +11,7 @@ import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
 import * as Variants from './modules/variants';
 import * as Shipping from './modules/shipping';
+import * as SelectedOptions from './modules/selectedOptions';
 import { normalizeAndSortCardBenefits, deduplicateCardBenefits } from '../cardBenefitCalculator';
 import { parseLog, ErrorCode } from '../../../shared/utils/logger';
 
@@ -92,6 +93,7 @@ export class CoupangParser extends BaseParser {
       // 4. 배송 & 옵션
       const shippingInfo = Shipping.extractShippingInfo(doc);
       const variants = Variants.extractVariants(doc);
+      const selectedOptions = SelectedOptions.extractSelectedOptions(doc);
 
       parseLog.info(`✅ Found: ${amount} KRW, Cards: ${cardBenefits.length}`);
 
@@ -109,6 +111,7 @@ export class CoupangParser extends BaseParser {
         giftCardDiscount: giftCardDiscount || undefined,
         cashback: cashback || undefined,
         shippingInfo: shippingInfo || undefined,
+        selectedOptions: selectedOptions.length > 0 ? selectedOptions : undefined,
         discounts: [],
       };
     } catch (error) {

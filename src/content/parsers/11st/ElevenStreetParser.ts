@@ -9,6 +9,7 @@ import { ELEVEN_ST_SELECTORS, ELEVEN_ST_CONSTANTS } from './constants';
 import * as Product from './modules/product';
 import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
+import * as SelectedOptions from './modules/selectedOptions';
 import { formatCardBenefits } from './helpers/formatCardBenefits';
 import { parseLog, ErrorCode } from '../../../shared/utils/logger';
 
@@ -108,6 +109,9 @@ export class ElevenStreetParser extends BaseParser {
       // CardBenefits를 ParsedProductInfo 형식에 맞게 변환
       const formattedCardBenefits = formatCardBenefits(cardBenefits, installments);
 
+      // 4. 선택된 옵션
+      const selectedOptions = SelectedOptions.extractSelectedOptions(doc);
+
       // Discounts 배열 생성
       const discounts: Array<{ rate: number; type: string; description?: string }> = [];
       
@@ -134,6 +138,7 @@ export class ElevenStreetParser extends BaseParser {
         cardBenefitsCount: cardBenefits.length,
         installmentsCount: installments.length,
         maxInstallmentMonths,
+        selectedOptionsCount: selectedOptions.length,
       });
 
       return {
@@ -147,6 +152,7 @@ export class ElevenStreetParser extends BaseParser {
         discountPrice: discountPrice || maxDiscountPrice || undefined,
         discountRate: discountRate || undefined,
         cardBenefits: formattedCardBenefits,
+        selectedOptions: selectedOptions.length > 0 ? selectedOptions : undefined,
         discounts,
         elevenst: {
           maxDiscountPrice,

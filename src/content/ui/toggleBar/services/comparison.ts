@@ -6,7 +6,11 @@
 import type { ComparisonResponse } from '../core/types';
 import { state } from '../core/state';
 
-const ensureLowestPriceComparison = async (query: string, onComplete?: () => void): Promise<void> => {
+const ensureLowestPriceComparison = async (
+	query: string,
+	onComplete?: () => void,
+	selectedOptions?: Array<{ name: string; value: string }>
+): Promise<void> => {
 	if (!query) return;
 
 	if (state.comparison.status === 'loading') return;
@@ -43,6 +47,7 @@ const ensureLowestPriceComparison = async (query: string, onComplete?: () => voi
 		const result = await chrome.runtime.sendMessage({
 			type: 'COMPARE_PRICES',
 			query,
+			selectedOptions: selectedOptions && selectedOptions.length > 0 ? selectedOptions : undefined,
 		});
 
 		if (result?.success) {
@@ -77,7 +82,12 @@ const ensureLowestPriceComparison = async (query: string, onComplete?: () => voi
 	}
 };
 
-export const startLowestPriceComparison = (query: string, render: () => void, onComplete?: () => void): void => {
+export const startLowestPriceComparison = (
+	query: string,
+	render: () => void,
+	onComplete?: () => void,
+	selectedOptions?: Array<{ name: string; value: string }>
+): void => {
 	if (!query) return;
 
 	if (state.comparison.status === 'loading') {
@@ -93,7 +103,7 @@ export const startLowestPriceComparison = (query: string, render: () => void, on
 	state.comparison = { status: 'loading', query, error: null, data: null };
 	render();
 
-	ensureLowestPriceComparison(query, onComplete).finally(() => {
+	ensureLowestPriceComparison(query, onComplete, selectedOptions).finally(() => {
 		render();
 	});
 };

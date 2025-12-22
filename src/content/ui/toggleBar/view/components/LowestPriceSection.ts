@@ -120,7 +120,7 @@ export const createLowestPriceSection = (params: { panelIsOpen: boolean; compari
 		savingsBanner.className = 'picsel-savings-banner';
 
 		const icon = document.createElement('span');
-		icon.className = 'picsel-savings-icon';
+		icon.className = 'picsel-savings-icon picsel-savings-icon-green';
 		icon.innerHTML = checkIconSvg;
 
 		const text = document.createElement('span');
@@ -132,15 +132,15 @@ export const createLowestPriceSection = (params: { panelIsOpen: boolean; compari
 		section.appendChild(savingsBanner);
 	} else if (lowestPrice && currentPrice && currentPrice <= lowestPrice) {
 		const noBetterBanner = document.createElement('div');
-		noBetterBanner.className = 'picsel-no-savings-banner';
+		noBetterBanner.className = 'picsel-no-savings-banner picsel-no-savings-banner-green';
 
 		const icon = document.createElement('span');
-		icon.className = 'picsel-savings-icon';
+		icon.className = 'picsel-savings-icon picsel-savings-icon-green';
 		icon.innerHTML = checkIconSvg;
 
 		const text = document.createElement('span');
 		text.className = 'picsel-savings-text';
-		text.textContent = '현재 가격이 가장 저렴합니다.';
+		text.textContent = `${formatPriceText(currentPrice, 'KRW')}이 최저가입니다.`;
 
 		noBetterBanner.appendChild(icon);
 		noBetterBanner.appendChild(text);

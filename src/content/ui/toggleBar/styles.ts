@@ -961,6 +961,29 @@ export const toggleBarStyles = `
 			font-weight: 500;
 		}
 
+		/* 최저가 배너 - 초록색 */
+		.picsel-no-savings-banner-green {
+			background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+		}
+
+		.picsel-no-savings-banner-green .picsel-savings-icon-green {
+			background: #4caf50;
+		}
+
+		.picsel-no-savings-banner-green .picsel-savings-text {
+			color: #2e7d32;
+			font-weight: 600;
+		}
+
+		/* 절약 아이콘 초록색 */
+		.picsel-savings-icon-green {
+			background: #4caf50;
+		}
+
+		.picsel-savings-icon-green svg {
+			color: white;
+		}
+
 		/* 섹션 헤더 */
 		.picsel-section-header {
 			display: flex;

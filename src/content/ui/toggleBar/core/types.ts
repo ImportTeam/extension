@@ -76,6 +76,11 @@ export interface ComparisonResponse {
 	price_trend?: Array<Record<string, unknown>>;
 	updated_at?: string;
 	current_price?: number;
+	// 선택된 옵션 정보
+	selected_options?: Array<{
+		name: string;
+		value: string;
+	}>;
 	_path?: string;
 }
 

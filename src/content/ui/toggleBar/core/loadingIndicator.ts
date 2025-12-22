@@ -1,6 +1,8 @@
 /**
  * Idle Loading Indicator Manager
  * Idle 상태(패널 닫힘)에서만 circle + 메시지 표시 (lowest-price 모드에서만)
+ * 
+ * 주의: 이 함수는 lowest-price 모드에서만 호출되어야 함
  */
 
 import { state } from '../core/state';
@@ -10,20 +12,26 @@ import { useSettingsStore } from '@/shared/store/slices/settings';
 let messageUpdateInterval: NodeJS.Timeout | null = null;
 
 export const updateIdleLoadingIndicator = (): void => {
-	const { toggleButton, buttonLabelEl } = state;
-	if (!toggleButton || !buttonLabelEl) return;
+	const { toggleButton, buttonLabelEl, panelEl } = state;
+	if (!toggleButton || !buttonLabelEl || !panelEl) return;
 
-	// card-benefits 모드에서는 loading 표시하지 않음
 	const { displayMode } = useSettingsStore.getState();
-	if (displayMode === 'card-benefits') {
-		if (buttonLabelEl.textContent !== 'PicSel 혜택 보기') {
-			buttonLabelEl.textContent = 'PicSel 혜택 보기';
-		}
+	
+	// card-benefits 모드에서는 아무것도 하지 않음
+	if (displayMode !== 'lowest-price') {
 		return;
 	}
 
-	// lowest-price 모드: Idle 상태일 때만 circle + 메시지 표시
-	if (buttonLabelEl.textContent === 'PicSel 혜택 보기') {
+	// lowest-price 모드: 패널이 닫혀있으면 loading indicator 표시
+	const panelIsOpen = panelEl.classList.contains('open');
+	
+	if (!panelIsOpen) {
+		// 이미 loading message가 표시되어 있으면 스킵
+		const existingMessage = buttonLabelEl.querySelector('[data-loading-message="true"]');
+		if (existingMessage) {
+			return;
+		}
+
 		buttonLabelEl.innerHTML = '';
 
 		const messageEl = document.createElement('div');
@@ -46,6 +54,11 @@ export const updateIdleLoadingIndicator = (): void => {
 
 		// 메시지 업데이트 시작 (2초마다)
 		startMessageRotation(text);
+	} else {
+		// 패널이 열려있으면 loading message 제거
+		stopMessageRotation();
+		buttonLabelEl.innerHTML = '';
+		buttonLabelEl.textContent = 'PicSel 혜택 닫기';
 	}
 };
 

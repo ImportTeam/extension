@@ -11,6 +11,7 @@ import * as Price from './modules/price';
 import * as Benefits from './modules/benefits';
 import * as AdditionalBenefits from './modules/additionalBenefits';
 import * as Shipping from './modules/shipping';
+import * as SelectedOptions from './modules/selectedOptions';
 import { normalizeAndSortCardBenefits, deduplicateCardBenefits } from '../cardBenefitCalculator';
 import { parserLog, ErrorCode } from '../../../shared/utils/logger';
 
@@ -94,7 +95,10 @@ export class GmarketParser extends BaseParser {
       // 5. 배송 정보
       const shippingInfo = Shipping.extractShippingInfo(doc);
 
-      parserLog.info('Parse successful', { amount, cardCount: cardBenefits.length });
+      // 6. 선택된 옵션
+      const selectedOptions = SelectedOptions.extractSelectedOptions(doc);
+
+      parserLog.info('Parse successful', { amount, cardCount: cardBenefits.length, selectedOptionsCount: selectedOptions.length });
 
       return {
         price: amount,
@@ -111,6 +115,7 @@ export class GmarketParser extends BaseParser {
         cashback: cashback || undefined,
         shippingInfo: shippingInfo || undefined,
         sellerInfo: sellerInfo || undefined,
+        selectedOptions: selectedOptions.length > 0 ? selectedOptions : undefined,
         discounts: [],
       };
     } catch (error) {
