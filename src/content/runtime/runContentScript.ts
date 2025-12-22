@@ -84,6 +84,7 @@ function init(): void {
 					productName: result.paymentInfo.title,
 					currentPrice: result.paymentInfo.amount,
 					site: result.site,
+					selectedOptions: result.paymentInfo.selectedOptions,
 					onComplete: () => {
 						// 비교 완료 시 패널 자동 오픈 후 콘텐츠 다시 렌더링
 						setPanelOpen(true);
@@ -142,6 +143,7 @@ export function runContentScript(): void {
 						productName: lastExtractionResult.paymentInfo.title,
 						currentPrice: lastExtractionResult.paymentInfo.amount,
 						site: lastExtractionResult.site,
+						selectedOptions: lastExtractionResult.paymentInfo.selectedOptions,
 						onComplete: () => {
 							// 비교 완료 시 패널 자동 오픈 후 콘텐츠 다시 렌더링
 							setPanelOpen(true);

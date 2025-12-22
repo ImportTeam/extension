@@ -12,9 +12,10 @@ export async function sendPriceComparisonRequest(params: {
 	productName: string;
 	currentPrice?: number;
 	site?: string;
+	selectedOptions?: Array<{ name: string; value: string }>;
 	onComplete?: () => void;
 }): Promise<void> {
-	const { productUrl, productName, currentPrice, site, onComplete } = params;
+	const { productUrl, productName, currentPrice, site, selectedOptions, onComplete } = params;
 
 	try {
 		logger.info(LogDomain.NETWORK, '💰 [LOWEST_PRICE] Initiating price comparison', {
@@ -22,6 +23,7 @@ export async function sendPriceComparisonRequest(params: {
 			product: productName,
 			currentPrice,
 			site,
+			selectedOptionsCount: selectedOptions?.length ?? 0,
 			timestamp: new Date().toISOString(),
 		});
 
@@ -73,6 +75,7 @@ export async function sendPriceComparisonRequest(params: {
 			query: productName,
 			currentPrice,
 			currentUrl: productUrl,
+			selectedOptions,
 		});
 
 		if (response?.success) {
