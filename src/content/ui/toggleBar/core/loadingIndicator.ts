@@ -1,10 +1,11 @@
 /**
  * Idle Loading Indicator Manager
- * Idle 상태(패널 닫힘)에서만 circle + 메시지 표시
+ * Idle 상태(패널 닫힘)에서만 circle + 메시지 표시 (lowest-price 모드에서만)
  */
 
 import { state } from '../core/state';
 import { getIdleLoadingMessage, resetMessageIndex } from './loadingMessages';
+import { useSettingsStore } from '@/shared/store/slices/settings';
 
 let messageUpdateInterval: NodeJS.Timeout | null = null;
 
@@ -12,7 +13,16 @@ export const updateIdleLoadingIndicator = (): void => {
 	const { toggleButton, buttonLabelEl } = state;
 	if (!toggleButton || !buttonLabelEl) return;
 
-	// Idle 상태일 때만 circle + 메시지 표시
+	// card-benefits 모드에서는 loading 표시하지 않음
+	const { displayMode } = useSettingsStore.getState();
+	if (displayMode === 'card-benefits') {
+		if (buttonLabelEl.textContent !== 'PicSel 혜택 보기') {
+			buttonLabelEl.textContent = 'PicSel 혜택 보기';
+		}
+		return;
+	}
+
+	// lowest-price 모드: Idle 상태일 때만 circle + 메시지 표시
 	if (buttonLabelEl.textContent === 'PicSel 혜택 보기') {
 		buttonLabelEl.innerHTML = '';
 

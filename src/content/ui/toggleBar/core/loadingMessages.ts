@@ -1,6 +1,7 @@
 /**
  * Idle Loading Messages for Lowest Price Mode
- * Idle 상태(패널 닫힘)에서 표시할 메시지들
+ * lowest-price 모드의 Idle 상태(패널 닫힘)에서만 표시할 메시지들
+ * card-benefits 모드에서는 사용되지 않음
  */
 
 const LOADING_MESSAGES = [

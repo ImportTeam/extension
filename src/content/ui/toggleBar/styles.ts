@@ -243,6 +243,10 @@ export const toggleBarStyles = `
 			font-size: 13px;
 			font-weight: 600;
 			color: #1f2937;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 200px;
 		}
 
 		.picsel-benefit-desc {
@@ -271,8 +275,13 @@ export const toggleBarStyles = `
 		}
 
 		/* Card Benefits Section - 메인 콘텐츠 (8pt 그리드) */
+		/* 은은한 중립 톤으로 정리 (과한 색상 제거) */
 		.picsel-card-section {
 			margin-top: 8px;
+			padding: 12px;
+			background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+			border-radius: 12px;
+			border: 1px solid #e5e7eb;
 		}
 
 		.picsel-card-benefit-list {
@@ -285,10 +294,11 @@ export const toggleBarStyles = `
 			display: flex;
 			align-items: center;
 			gap: 12px;
-			padding: 12px;
-			border-radius: 8px;
+			padding: 14px;
+			border-radius: 10px;
 			background: #ffffff;
 			border: 1px solid #e5e7eb;
+			box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 		}
 
 		.picsel-card-benefit-item:hover {
@@ -355,10 +365,11 @@ export const toggleBarStyles = `
 			flex-shrink: 0;
 		}
 
-		/* 1위 스타일 - 가장 진한 강조 */
+		/* 1위 스타일 - 가장 진한 강조 (과한 대비 제거) */
 		.picsel-card-benefit-item.recommended {
-			border-left: 3px solid #4f46e5;
-			background: #f8fafc;
+			border-left: 4px solid #4f46e5;
+			background: #f5f7ff;
+			box-shadow: 0 2px 4px 0 rgba(79, 70, 229, 0.12);
 		}
 
 		/* 2위 스타일 - 중간 강조 */
@@ -399,19 +410,24 @@ export const toggleBarStyles = `
 			color: #1f2937;
 		}
 
-		/* 혜택 설명 - 여러 줄 허용 */
+		/* 혜택 설명 - 최대 2줄, 길면 말줄임 */
 		.picsel-card-benefit-desc {
 			font-size: 12px;
 			color: #6b7280;
 			margin-top: 2px;
 			line-height: 1.4;
 			word-break: keep-all;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
 		}
 
 		.picsel-card-discount {
-			font-size: 12px;
-			font-weight: 500;
+			font-size: 13px;
+			font-weight: 600;
 			color: #dc2626;
+			line-height: 1.2;
 		}
 
 		/* 모든 순위에서 할인 금액은 빨간색 유지 (할인 = 빨강 직관적) */
@@ -421,11 +437,12 @@ export const toggleBarStyles = `
 			color: #dc2626;
 		}
 
-		/* 최종 가격 (위에 크게 표시) */
+		/* 최종 가격 (위에 크게 표시) - 위계 강화 */
 		.picsel-card-final-price {
-			font-size: 15px;
+			font-size: 17px;
 			font-weight: 700;
-			color: #1f2937;
+			color: #0f172a;
+			letter-spacing: -0.4px;
 		}
 
 		.picsel-card-final {
@@ -477,24 +494,28 @@ export const toggleBarStyles = `
 			background: #3730a3;
 		}
 
-		/* Sub Benefits - 중립적 회색 배경 (보조 정보) */
-		.picsel-sub-benefits {
-			margin-top: 12px;
-			padding: 12px 16px;
-			background: #f8fafc;
-			border-radius: 8px;
-			border: 1px solid #e2e8f0;
-		}
-
+		/* Sub Benefits - 중립 톤, 과한 색상 제거 */
 		.picsel-sub-benefit-item {
 			font-size: 13px;
-			color: #475569;
+			color: #1f2937;
 			padding: 4px 0;
-			font-weight: 500;
+			font-weight: 600;
 			display: flex;
 			align-items: center;
-			gap: 8px;
+			gap: 6px;
 			line-height: 1.4;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.picsel-sub-benefit-item::before {
+			content: '•';
+			color: #4f46e5;
+			font-weight: 700;
+			flex-shrink: 0;
+		}
+			line-height: 1.5;
 		}
 
 		.picsel-sub-benefit-item::before {

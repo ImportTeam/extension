@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "PicSel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "결제를 좀 더 효율적으로 해보세요.",
 
   "permissions": [
     "storage",
-    "scripting",
     "activeTab",
     "offscreen"
   ],

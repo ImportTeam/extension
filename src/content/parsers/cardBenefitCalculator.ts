@@ -196,29 +196,39 @@ export const deduplicateCardBenefits = (
 /**
  * 카드명에서 비교용 키 추출
  * "11번가 신한 신용카드" → "신한"
- * "KB국민카드" → "국민"
+ * "KB국민카드" → "KB"
+ * "NH농협카드" → "NH"
+ * 
+ * 우선순위: 영문 약자(KB, NH, BC) > 한글 카드사명
  */
 const extractCardKey = (cardName: string): string => {
+  const normalized = cardName.toUpperCase();
+  
+  // 1순위: 영문 약자 먼저 체크 (더 구체적임)
+  const abbreviations = ['KB', 'NH', 'BC'];
+  for (const abbr of abbreviations) {
+    if (normalized.includes(abbr)) {
+      return abbr;
+    }
+  }
+  
+  // 2순위: 한글 카드사명 체크
   const keywords = [
     '삼성',
     '현대',
     '신한',
-    'KB',
     '국민',
     '롯데',
     '하나',
     '우리',
     '농협',
-    'NH',
-    'BC',
     '비씨',
+    '씨티',
     '스마일',
   ];
-
-  const normalized = cardName.toLowerCase();
   
   for (const keyword of keywords) {
-    if (normalized.includes(keyword.toLowerCase())) {
+    if (cardName.includes(keyword)) {
       return keyword;
     }
   }

@@ -36,17 +36,32 @@ const calculateFinalPrice = (price: number | undefined, discountAmount: number |
 };
 
 const getCardInitial = (cardName: string): string => {
+	const normalized = cardName.toUpperCase();
+	
+	// 1순위: 영문 약자 확인
+	const abbreviations: Record<string, string> = {
+		'KB': 'KB',
+		'NH': 'NH',
+		'BC': 'BC',
+	};
+	
+	for (const [abbr, initial] of Object.entries(abbreviations)) {
+		if (normalized.includes(abbr)) {
+			return initial;
+		}
+	}
+	
+	// 2순위: 한글 카드사명 확인
 	const cardInitials: Record<string, string> = {
 		삼성: 'SS',
 		현대: 'HD',
 		신한: 'SH',
 		국민: 'KB',
-		KB: 'KB',
 		롯데: 'LT',
 		하나: 'HN',
 		우리: 'WR',
 		농협: 'NH',
-		BC: 'BC',
+		비씨: 'BC',
 		씨티: 'CT',
 	};
 
@@ -313,7 +328,22 @@ export const createCardBenefitsSection = (data: ToggleProductData): HTMLElement 
 		extras.forEach((text) => {
 			const item = document.createElement('div');
 			item.className = 'picsel-sub-benefit-item';
-			item.textContent = text;
+			
+			// 금액 부분을 강조하기 위해 HTML로 처리
+			const amountMatch = text.match(/(\d{1,3}(,\d{3})*)/);
+			if (amountMatch) {
+				const beforeAmount = text.substring(0, amountMatch.index);
+				const amount = amountMatch[0];
+				const afterAmount = text.substring((amountMatch.index ?? 0) + amount.length);
+				
+				item.innerHTML = DOMPurify.sanitize(
+					`${beforeAmount}<strong style="color: #1d4ed8; font-weight: 700;">${amount}</strong>${afterAmount}`,
+					{ ALLOWED_TAGS: ['strong'], ALLOWED_ATTR: ['style'] }
+				);
+			} else {
+				item.textContent = text;
+			}
+			
 			subBenefits.appendChild(item);
 		});
 		section.appendChild(subBenefits);
