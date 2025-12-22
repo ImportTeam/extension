@@ -3,6 +3,8 @@
  * 책임: eBay 상품 페이지 파싱
  */
 
+// TODO : Ebay 옵션 파싱 모듈 구현 필요
+
 import { BaseParser } from '../base/index';
 import { ParsedProductInfo } from '../../../shared/types';
 import { EBAY_SELECTORS } from './constants';
