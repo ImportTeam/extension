@@ -16,39 +16,55 @@ export const extractSelectedOptions = (
   try {
     const options: Array<{ name: string; value: string }> = [];
 
-    // 11번가의 선택 옵션 컨테이너
-    // 예: <div class="option_selected"><dl class="option"><dt>색상</dt><dd>실버</dd></dl></div>
-    const optionElements = doc.querySelectorAll(
-      '.option_selected .option, [class*="option_selected"] dl'
+    // 11번가의 선택 옵션 컨테이너 (새 구조)
+    // 구조: <div class="option_selected">
+    //        <dl class="option">
+    //          <dt>옵션명</dt>
+    //          <dd>선택값</dd>
+    //        </dl>
+    //       </div>
+    // 각 옵션이 dd > div 안에 있는 경우도 있음
+    
+    const optionSelectedDivs = doc.querySelectorAll(
+      '.c_product_option .option_selected'
     );
 
-    for (const optionEl of optionElements) {
+    if (optionSelectedDivs.length === 0) {
+      parseLog.debug('[11st] No .option_selected divs found');
+      return [];
+    }
+
+    for (const optionDiv of optionSelectedDivs) {
       try {
-        const dtEl = optionEl.querySelector('dt');
-        const ddEl = optionEl.querySelector('dd');
+        // 각 option_selected 아래의 dl.option 찾기
+        const dlElement = optionDiv.querySelector('dl.option');
+        if (!dlElement) continue;
+
+        const dtEl = dlElement.querySelector('dt');
+        const ddEl = dlElement.querySelector('dd');
 
         if (!dtEl || !ddEl) continue;
 
         const name = dtEl.textContent?.trim();
-        const value = ddEl.textContent?.trim();
+        let value = ddEl.textContent?.trim();
 
         if (!name || !value) continue;
 
         // 공백 정규화
-        const normalizedName = name.replace(/\s+/g, ' ');
-        const normalizedValue = value.replace(/\s+/g, ' ');
+        const normalizedName = name.replace(/\s+/g, ' ').trim();
+        const normalizedValue = value.replace(/\s+/g, ' ').trim();
 
         options.push({
           name: normalizedName,
           value: normalizedValue,
         });
 
-        parseLog.debug('🔍 [11st] Found option', {
+        parseLog.debug('✅ [11st] Found option', {
           name: normalizedName,
           value: normalizedValue,
         });
       } catch (err) {
-        parseLog.warn('Error parsing option element', { error: err });
+        parseLog.debug('[11st] Error parsing option element', { error: err });
         continue;
       }
     }
@@ -56,6 +72,7 @@ export const extractSelectedOptions = (
     parseLog.info('✅ [11st] Extracted selected options', {
       count: options.length,
       options: options.map(o => `${o.name}: ${o.value}`).join(', '),
+      isEmpty: options.length === 0 ? '⚠️ NO OPTIONS FOUND' : 'OK',
     });
 
     return options;

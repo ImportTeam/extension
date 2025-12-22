@@ -95,7 +95,7 @@ export class CoupangParser extends BaseParser {
       const variants = Variants.extractVariants(doc);
       const selectedOptions = SelectedOptions.extractSelectedOptions(doc);
 
-      parseLog.info(`✅ Found: ${amount} KRW, Cards: ${cardBenefits.length}`);
+      parseLog.info(`✅ Found: ${amount} KRW, Cards: ${cardBenefits.length}, SelectedOptions: ${selectedOptions.length}`);
 
       return {
         price: amount,

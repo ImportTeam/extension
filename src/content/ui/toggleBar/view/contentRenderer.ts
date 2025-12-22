@@ -7,6 +7,7 @@ import { state } from '../core/state';
 import { createCardBenefitsSection, createFooterSection, createHeroSection, createLowestPriceSection } from './components';
 import { updateBadge } from '../services/badge';
 import { useSettingsStore } from '@/shared/store/slices/settings';
+import { formatCurrency } from '../core/utils';
 
 export const renderContent = (): void => {
 	const { contentEl, cachedData, panelEl, buttonLabelEl } = state;
@@ -40,20 +41,36 @@ export const renderContent = (): void => {
 			})
 		);
 		
-		// 최저가 모드: 비교 완료 시 badge에 최저가 정보 표시
-		if (state.comparison.status === 'success' && state.comparison.data) {
+		// 최저가 모드: badge 상태 관리
+		// 1. 로딩 중 → null (loading indicator가 badge 영역을 담당)
+		// 2. 완료됨 → 최저가 정보 표시
+		if (state.comparison.status === 'loading') {
+			// 로딩 중에는 badge 숨김 (loadingIndicator가 표시)
+			updateBadge(null);
+		} else if (state.comparison.status === 'success' && state.comparison.data) {
 			const lowestPrice = state.comparison.data.lowest_price;
+			const currentPrice = state.comparison.data.current_price;
+			
+			// 최저가 정보가 있으면 badge에 표시
 			if (typeof lowestPrice === 'number' && lowestPrice > 0) {
+				// 절감액 계산
+				const savings = currentPrice && currentPrice > lowestPrice ? currentPrice - lowestPrice : null;
+				const displayText = savings && savings > 0 
+					? `${formatCurrency(savings, data.currency ?? 'KRW')} 절감`
+					: `${formatCurrency(lowestPrice, data.currency ?? 'KRW')} 최저가`;
+				
 				updateBadge({
-					...data,
-					cardBenefits: [
-						{
-							card: '최저가',
-							benefit: `${lowestPrice.toLocaleString()}원`,
-							discount: 0,
-						},
-					],
-				});
+					price: data.amount || 0,
+					amount: data.amount,
+					currency: data.currency,
+					title: data.title,
+					// badge 표시를 위해 dummy cardBenefit 추가
+					cardBenefits: [{
+						card: '최저가',
+						benefit: displayText,
+						discount: 0,
+					}],
+				} as any);
 			} else {
 				updateBadge(null);
 			}

@@ -16,39 +16,47 @@ export const extractSelectedOptions = (
   try {
     const options: Array<{ name: string; value: string }> = [];
     
-    // 쿠팡의 선택 옵션 컨테이너
-    // 예: <div class="option_selected"><dl class="option"><dt>CPU</dt><dd>M4 Pro 14코어</dd></dl></div>
-    const optionElements = doc.querySelectorAll(
-      '.c_product_option .option_selected .option, [class*="option_selected"] dl.option'
-    );
+    // 쿠팡의 새로운 Tailwind CSS 기반 옵션 선택자
+    // 구조: <div class="option-picker-select">
+    //        <div class="twc-text-[12px]">라벨</div>
+    //        <div class="twc-font-bold">선택된값</div>
+    //       </div>
+    
+    const pickerElements = doc.querySelectorAll('.option-picker-select');
+    
+    if (pickerElements.length === 0) {
+      parseLog.debug('No .option-picker-select elements found');
+      return [];
+    }
 
-    for (const optionEl of optionElements) {
+    for (const picker of pickerElements) {
       try {
-        const dtEl = optionEl.querySelector('dt');
-        const ddEl = optionEl.querySelector('dd');
-
-        if (!dtEl || !ddEl) continue;
-
-        const name = dtEl.textContent?.trim();
-        const value = ddEl.textContent?.trim();
-
-        if (!name || !value) continue;
-
-        // 공백 정규화
-        const normalizedName = name.replace(/\s+/g, ' ');
-        const normalizedValue = value.replace(/\s+/g, ' ');
-
-        options.push({
-          name: normalizedName,
-          value: normalizedValue,
-        });
-
-        parseLog.debug('🔍 [Coupang] Found option', {
-          name: normalizedName,
-          value: normalizedValue,
-        });
+        // 직접 자식 div 요소들 가져오기
+        const divs = picker.querySelectorAll(':scope > div');
+        
+        if (divs.length < 2) continue;
+        
+        // 첫 번째 div: 라벨
+        const name = divs[0]?.textContent?.trim();
+        // 두 번째 div: 선택된 값 (twc-font-bold 가 있을 것)
+        const value = divs[1]?.textContent?.trim();
+        
+        if (name && value) {
+          const normalizedName = name.replace(/\s+/g, ' ').trim();
+          const normalizedValue = value.replace(/\s+/g, ' ').trim();
+          
+          options.push({
+            name: normalizedName,
+            value: normalizedValue,
+          });
+          
+          parseLog.debug('✅ [Coupang] Extracted option from picker', {
+            name: normalizedName,
+            value: normalizedValue,
+          });
+        }
       } catch (err) {
-        parseLog.warn('Error parsing option element', { error: err });
+        parseLog.debug('Error parsing option picker', { error: err });
         continue;
       }
     }
@@ -56,6 +64,7 @@ export const extractSelectedOptions = (
     parseLog.info('✅ [Coupang] Extracted selected options', {
       count: options.length,
       options: options.map(o => `${o.name}: ${o.value}`).join(', '),
+      isEmpty: options.length === 0 ? '⚠️ NO OPTIONS FOUND' : 'OK',
     });
 
     return options;
