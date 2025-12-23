@@ -46,7 +46,7 @@ export const extractSelectedOptions = (
         if (!dtEl || !ddEl) continue;
 
         const name = dtEl.textContent?.trim();
-        let value = ddEl.textContent?.trim();
+        const value = ddEl.textContent?.trim();
 
         if (!name || !value) continue;
 

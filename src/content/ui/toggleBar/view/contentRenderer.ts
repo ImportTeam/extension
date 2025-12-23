@@ -68,7 +68,7 @@ export const renderContent = (): void => {
 						benefit: displayText,
 						discount: 0,
 					}],
-				} as any);
+				});
 			} else {
 				updateBadge(null);
 			}

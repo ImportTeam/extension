@@ -32,7 +32,7 @@ export const updateBadge = (data: ToggleProductData | null): void => {
 	if (rates.length > 0) {
 		const bestRate = Math.max(...rates);
 		// 최저가 모드인 경우 benefit 텍스트가 있으면 그대로 사용하고 "이 최저가입니다" 추가
-		const firstBenefit = data.cardBenefits?.[0] as any;
+		const firstBenefit = data.cardBenefits?.[0] as { card?: string; benefit?: string; discount?: number };
 		if (firstBenefit?.benefit && firstBenefit.card === '최저가') {
 			buttonBadgeEl.textContent = `${firstBenefit.benefit} 이 최저가입니다`;
 		} else {

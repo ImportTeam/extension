@@ -40,19 +40,33 @@ export const Options: React.FC = () => {
     window.close();
   };
 
+  const handleLogin = (): void => {
+    chrome.tabs.create({
+      url: 'https://picsel.kr/login',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <div className="w-full max-h-screen flex flex-col overflow-hidden">
         <header className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-gray-200 dark:border-gray-800">
           <h1 className="m-0 text-base font-bold text-gray-900 dark:text-gray-100">설정</h1>
-          <button
-            onClick={handleClose}
-            className="p-1.5 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
-            aria-label="닫기"
-            title="닫기"
-          >
-            <X className="w-4 h-4" strokeWidth={2} />
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              onClick={handleLogin}
+              className="px-3 py-1.5 text-xs font-600 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+            >
+              로그인
+            </button>
+            <button
+              onClick={handleClose}
+              className="p-1.5 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+              aria-label="닫기"
+              title="닫기"
+            >
+              <X className="w-4 h-4" strokeWidth={2} />
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-2.5">

@@ -44,9 +44,15 @@ function reparseAndNotify(source: MessageSource): boolean {
 }
 
 function init(): void {
+	// PicSel 자체 페이지는 파싱 스킵
+	if (window.location.hostname === 'picsel.kr' || window.location.hostname === 'www.picsel.kr') {
+		logger.debug(LogDomain.BOOTSTRAP, 'Skipping PicSel own domain');
+		return;
+	}
+
 	const result = extractPaymentInfo();
 	if (!result) {
-		logger.warn(LogDomain.BOOTSTRAP, 'Failed to extract payment info on init');
+		logger.debug(LogDomain.BOOTSTRAP, 'No product found on this page');
 		return;
 	}
 
